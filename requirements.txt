@@ -11,4 +11,4 @@ setuptools >= 21.0.0
 Flask == 2.1.1
 
 sqlalchemy >= 2.0.0
-
+country_converter >= 1.3

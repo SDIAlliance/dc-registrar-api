@@ -16,10 +16,15 @@ from nadiki_registrar import util
 from nadiki_registrar.models.facility_time_series_config import FacilityTimeSeriesConfig  # noqa: E501
 
 import json
+import urllib3
+import urllib.parse
+import country_converter as coco
+
 from uuid import uuid4
 from sqlalchemy import create_engine, text, MetaData, Table, select, delete, insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
+
 #
 # Initialize SQLAlchemy
 #
@@ -33,7 +38,6 @@ facilities_timeseries_configs = Table("facilities_timeseries_configs", meta, aut
 #
 # Defaults
 #
-
 PROMETHEUS_ENDPOINT_URL = "https://pro.me/theus"
 REQUESTED_METRICS = [
     { "name": "heatpump_power_consumption_joules",      "unit": "Energy" },
@@ -56,6 +60,13 @@ REQUESTED_METRICS = [
 GRANULARITY_IN_SECONDS = 30
 ADDITIONAL_LABELS = {} # this will not work right now because the OpenAPI spec only allows two fixed labels
 
+#
+# urllib3
+#
+http = urllib3.PoolManager()
+
+BASE_URL_FOR_NOMINATIM = "https://nominatim.openstreetmap.org/reverse?"
+
 #def create_facility(body, facility_create):  # noqa: E501
 def create_facility(facility_create=None):  # noqa: E501
     """Register a new facility
@@ -71,7 +82,15 @@ def create_facility(facility_create=None):  # noqa: E501
         facility_create = FacilityCreate.from_dict(connexion.request.get_json())  # noqa: E501
         resp = FacilityResponse()
         resp.id = uuid4()
-        resp.country_code = "DEU" # FIXME: get this from the geo location
+        # resolve location to three letter countrycode
+        # (TODO: exceptions here are likely for various reasons, maybe we should give the caller a hint on whether it was his fault or not)
+        response = http.request("GET", BASE_URL_FOR_NOMINATIM+urllib.parse.urlencode({
+            "lat": facility_create.location.latitude,
+            "lon": facility_create.location.longitude,
+            "format": "json"
+        }))
+        resp.country_code = coco.convert(names=json.loads(response.data)["address"]["country_code"], to="ISO3")
+
         # FIXME: this does not work, because all other attributes will be gone afterwards:
         #resp.__dict__.update(facility_create.__dict__)
         resp.time_series_config = FacilityTimeSeriesConfig.from_dict({

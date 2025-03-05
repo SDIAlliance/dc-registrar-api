@@ -9,8 +9,8 @@ DROP TABLE IF EXISTS facilities_timeseries_configs;
 DROP TABLE IF EXISTS facilities;
 CREATE TABLE facilities (
     f_id                                VARCHAR(36) NOT NULL PRIMARY KEY,
-    f_geo_lon                           DECIMAL(6,5) NOT NULL,
-    f_geo_lat                           DECIMAL(6,5) NOT NULL,
+    f_geo_lon                           DECIMAL(8,5) NOT NULL,
+    f_geo_lat                           DECIMAL(8,5) NOT NULL,
     f_embedded_ghg_emissions_facility   DECIMAL(20,9),
     f_lifetime_facility                 INTEGER UNSIGNED,
     f_embedded_ghg_emissions_assets     DECIMAL(20,9),
@@ -47,4 +47,4 @@ CREATE TABLE facilities_timeseries_configs (
     ftc_granularity_seconds             INT NOT NULL,
     ftc_labels                          JSON,
     CONSTRAINT ftc_fk FOREIGN KEY fk (ftc_f_id) REFERENCES facilities (f_id) ON DELETE CASCADE
-)
+);
