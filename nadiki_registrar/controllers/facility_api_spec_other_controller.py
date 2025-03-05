@@ -14,6 +14,9 @@ from nadiki_registrar.models.list_facilities200_response import ListFacilities20
 from nadiki_registrar import util
 
 from nadiki_registrar.models.facility_time_series_config import FacilityTimeSeriesConfig  # noqa: E501
+from nadiki_registrar.models.facility_create_cooling_fluids_inner import FacilityCreateCoolingFluidsInner  # noqa: E501
+from nadiki_registrar.models.facility_time_series_data_point import FacilityTimeSeriesDataPoint  # noqa: E501
+from nadiki_registrar.models.location import Location  # noqa: E501
 
 import json
 import urllib3
@@ -88,7 +91,7 @@ def create_facility(facility_create=None):  # noqa: E501
             "lat": facility_create.location.latitude,
             "lon": facility_create.location.longitude,
             "format": "json"
-        }))
+        }), headers={"User-agent": "Nadiki Registrar https://github.com/SDIAlliance/nadiki-registrar"})
         resp.country_code = coco.convert(names=json.loads(response.data)["address"]["country_code"], to="ISO3")
 
         # FIXME: this does not work, because all other attributes will be gone afterwards:
@@ -167,7 +170,14 @@ def delete_facility(facility_id):  # noqa: E501
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
-    return 'do some magic!'
+
+    with engine.connect() as conn:
+        result = conn.execute(delete(facilities).where(facilities.c.f_id == facility_id))
+        conn.commit()
+        if result.rowcount == 1:
+            return "Facility deleted", 204
+        else:
+            return Error(code=404, message="Facility not found"), 404
 
 
 def get_facility(facility_id):  # noqa: E501
@@ -180,7 +190,46 @@ def get_facility(facility_id):  # noqa: E501
 
     :rtype: Union[FacilityResponse, Tuple[FacilityResponse, int], Tuple[FacilityResponse, int, Dict[str, str]]
     """
-    return 'do some magic!'
+    
+    with engine.connect() as conn:
+        facilities_result = conn.execute(select(facilities).where(facilities.c.f_id == facility_id))
+        facilities_cooling_fluids_result = conn.execute(select(facilities_cooling_fluids).where(facilities_cooling_fluids.c.fcf_f_id == facility_id))
+        facilities_timeseries_configs_result = conn.execute(select(facilities_timeseries_configs).where(facilities_timeseries_configs.c.ftc_f_id == facility_id))
+
+#        for row in facilities_cooling_fluids:
+
+        for row in facilities_result:
+            return _create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result), 200
+
+    return "Nothing to see here", 404
+
+def _create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result):
+    resp = FacilityResponse(
+        id                              = row.f_id,
+        country_code                    = row.f_country_code,
+        location                        = Location(latitude=row.f_geo_lat, longitude=row.f_geo_lon),
+        embedded_ghg_emissions_facility = row.f_embedded_ghg_emissions_facility,
+        lifetime_facility               = row.f_lifetime_facility,
+        embedded_ghg_emissions_assets   = row.f_embedded_ghg_emissions_assets,
+        lifetime_assets                 = row.f_lifetime_assets,
+        maintenance_hours_generator     = row.f_maintenance_hours_generator,
+        installed_capacity              = row.f_installed_capacity,
+        grid_power_feeds                = row.f_grid_power_feeds,
+        design_pue                      = row.f_design_pue,
+        tier_level                      = row.f_tier_level,
+        white_space_floors              = row.f_white_space_floors,
+        total_space                     = row.f_total_space,
+        white_space                     = row.f_white_space,
+        time_series_config              = FacilityTimeSeriesConfig(endpoint=row.f_prometheus_endpoint, data_points=[
+            FacilityTimeSeriesDataPoint(name=x.ftc_name, unit=x.ftc_unit, granularity_seconds=x.ftc_granularity_seconds, labels=json.loads(x.ftc_labels)) for x in facilities_timeseries_configs_result
+        ]),
+        cooling_fluids                  = [
+            FacilityCreateCoolingFluidsInner(type=x.fcf_type, amount=x.fcf_amount, gwp_factor=x.fcf_gwp_factor) for x in facilities_cooling_fluids_result
+        ],
+        created_at                      = row.f_created_at,
+        updated_at                      = row.f_updated_at
+    )
+    return resp
 
 
 def list_facilities(limit=None, offset=None):  # noqa: E501
@@ -195,7 +244,20 @@ def list_facilities(limit=None, offset=None):  # noqa: E501
 
     :rtype: Union[ListFacilities200Response, Tuple[ListFacilities200Response, int], Tuple[ListFacilities200Response, int, Dict[str, str]]
     """
-    return 'do some magic!'
+
+    with engine.connect() as conn:
+        facilities_result = conn.execute(select(facilities))
+
+#        for row in facilities_cooling_fluids:
+
+        results = []
+        for row in facilities_result:
+            facilities_cooling_fluids_result = conn.execute(select(facilities_cooling_fluids).where(facilities_cooling_fluids.c.fcf_f_id == row.f_id))
+            facilities_timeseries_configs_result = conn.execute(select(facilities_timeseries_configs).where(facilities_timeseries_configs.c.ftc_f_id == row.f_id))
+            results.append(_create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result))
+
+        resp = ListFacilities200Response(items=results, total=facilities_result.rowcount)
+        return resp, 200
 
 
 def query_facility_metrics(facility_id, facility_metrics_query):  # noqa: E501
