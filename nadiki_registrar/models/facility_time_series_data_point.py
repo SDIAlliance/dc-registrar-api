@@ -108,7 +108,7 @@ class FacilityTimeSeriesDataPoint(Model):
         :param unit: The unit of this FacilityTimeSeriesDataPoint.
         :type unit: str
         """
-        allowed_values = ["Time", "Temperature", "Length", "Bytes", "Percent", "Voltage", "Electric current", "Energy", "Power", "Mass"]  # noqa: E501
+        allowed_values = ["Time", "Temperature", "Length", "Bytes", "Percent", "Voltage", "Electric current", "Energy", "Power", "Mass", "Value"]  # noqa: E501
         if unit not in allowed_values:
             raise ValueError(
                 "Invalid value for `unit` ({0}), must be one of {1}"

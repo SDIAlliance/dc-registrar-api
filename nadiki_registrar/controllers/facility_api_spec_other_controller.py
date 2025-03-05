@@ -13,15 +13,48 @@ from nadiki_registrar.models.facility_update import FacilityUpdate  # noqa: E501
 from nadiki_registrar.models.list_facilities200_response import ListFacilities200Response  # noqa: E501
 from nadiki_registrar import util
 
+from nadiki_registrar.models.facility_time_series_config import FacilityTimeSeriesConfig  # noqa: E501
+
+import json
 from uuid import uuid4
 from sqlalchemy import create_engine, text, MetaData, Table, select, delete, insert
 from sqlalchemy.exc import IntegrityError
-
+from sqlalchemy import func
+#
+# Initialize SQLAlchemy
+#
 engine = create_engine("mysql+pymysql://root:toogood4u@localhost/nadiki_registrar?charset=utf8mb4")
 meta = MetaData()
 meta.reflect(engine)
 facilities = Table("facilities", meta, autoload_with=engine)
 facilities_cooling_fluids = Table("facilities_cooling_fluids", meta, autoload_with=engine)
+facilities_timeseries_configs = Table("facilities_timeseries_configs", meta, autoload_with=engine)
+
+#
+# Defaults
+#
+
+PROMETHEUS_ENDPOINT_URL = "https://pro.me/theus"
+REQUESTED_METRICS = [
+    { "name": "heatpump_power_consumption_joules",      "unit": "Energy" },
+    { "name": "office_energy_use_joules",               "unit": "Energy" },
+    { "name": "dc_water_usage_cubic_meters",            "unit": "Length" },
+    { "name": "office_water_usage_cubic_meters",        "unit": "Length" },
+    { "name": "total_generator_energy_joules",          "unit": "Energy" },
+    { "name": "generator_load_factor_ratio",            "unit": "Percent" },
+    { "name": "grid_transformers_energy_joules",        "unit": "Energy" },
+    { "name": "onsite_renewable_energy_joules",         "unit": "Energy" },
+    { "name": "it_power_usage_level1_joules",           "unit": "Energy" },
+    { "name": "it_power_usage_level2_joules",           "unit": "Energy" },
+    { "name": "renewable_energy_certificates_joules",   "unit": "Energy" },
+    { "name": "grid_emission_factor_grams",             "unit": "Mass" },
+    { "name": "backup_emission_factor_grams",           "unit": "Mass" },
+    { "name": "electricity_source",                     "unit": "Value" },
+    { "name": "pue_1_ratio",                            "unit": "Percent" },
+    { "name": "pue_2_ratio",                            "unit": "Percent" }
+]
+GRANULARITY_IN_SECONDS = 30
+ADDITIONAL_LABELS = {} # this will not work right now because the OpenAPI spec only allows two fixed labels
 
 #def create_facility(body, facility_create):  # noqa: E501
 def create_facility(facility_create=None):  # noqa: E501
@@ -39,63 +72,62 @@ def create_facility(facility_create=None):  # noqa: E501
         resp = FacilityResponse()
         resp.id = uuid4()
         resp.country_code = "DEU" # FIXME: get this from the geo location
-        resp.__dict__.update(facility_create.__dict__)
-        resp.time_series_config = {
-            "endpoint": "https://mdkdasdmkldsa",
+        # FIXME: this does not work, because all other attributes will be gone afterwards:
+        #resp.__dict__.update(facility_create.__dict__)
+        resp.time_series_config = FacilityTimeSeriesConfig.from_dict({
+            "endpoint": PROMETHEUS_ENDPOINT_URL,
             "dataPoints": [
                 {
                     "name": x["name"],
                     "unit": x["unit"],
-                    "granularitySeconds": 30,
-                    "labels": {
+                    "granularitySeconds": GRANULARITY_IN_SECONDS,
+                    "labels": ADDITIONAL_LABELS | {
                         "facility_id": resp.id,
                         "country_code": resp.country_code
                     }
                 }
-            for x in [
-                { "name": "heatpump_power_consumption_joules",      "unit": "Energy" },
-                { "name": "office_energy_use_joules",               "unit": "Energy" },
-                { "name": "dc_water_usage_cubic_meters",            "unit": "Volume" },
-                { "name": "office_water_usage_cubic_meters",        "unit": "Volume" },
-                { "name": "total_generator_energy_joules",          "unit": "Energy" },
-                { "name": "generator_load_factor_ratio",            "unit": "Percent" },
-                { "name": "grid_transformers_energy_joules",        "unit": "Energy" },
-                { "name": "onsite_renewable_energy_joules",         "unit": "Energy" },
-                { "name": "it_power_usage_level1_joules",           "unit": "Energy" },
-                { "name": "it_power_usage_level2_joules",           "unit": "Energy" },
-                { "name": "renewable_energy_certificates_joules",   "unit": "Energy" },
-                { "name": "grid_emission_factor_grams",             "unit": "Weight" },
-                { "name": "backup_emission_factor_grams",           "unit": "Weight" },
-                { "name": "electricity_source",                     "unit": "" },
-                { "name": "pue_1_ratio",                            "unit": "Percent" },
-                { "name": "pue_2_ratio",                            "unit": "Percent" },
-            ]]
-        }
+            for x in REQUESTED_METRICS]
+        })
         with engine.connect() as conn:
             try:
                 conn.execute(insert(facilities).values({
-                    "id": resp.id,
-                    "geo_lon": facility_create.location.latitude,
-                    "geo_lat": facility_create.location.longitude,
-                    "embedded_ghg_emissions_facility": facility_create.embedded_ghg_emissions_facility,
-                    "lifetime_facility": facility_create.lifetime_facility,
-                    "embedded_ghg_emissions_assets": facility_create.embedded_ghg_emissions_assets,
-                    "lifetime_assets": facility_create.lifetime_assets,
-                    "maintenance_hours_generator": facility_create.maintenance_hours_generator,
-                    "installed_capacity": facility_create.installed_capacity,
-                    "grid_power_feeds": facility_create.grid_power_feeds,
-                    "design_pue": facility_create.design_pue,
-                    "tier_level": str(facility_create.tier_level), # MariaDB expects a string here
-                    "white_space_floors": facility_create.white_space_floors,
-                    "total_space": facility_create.total_space,
-                    "white_space": facility_create.white_space
+                    "f_id": resp.id,
+                    "f_geo_lon": facility_create.location.latitude,
+                    "f_geo_lat": facility_create.location.longitude,
+                    "f_embedded_ghg_emissions_facility": facility_create.embedded_ghg_emissions_facility,
+                    "f_lifetime_facility": facility_create.lifetime_facility,
+                    "f_embedded_ghg_emissions_assets": facility_create.embedded_ghg_emissions_assets,
+                    "f_lifetime_assets": facility_create.lifetime_assets,
+                    "f_maintenance_hours_generator": facility_create.maintenance_hours_generator,
+                    "f_installed_capacity": facility_create.installed_capacity,
+                    "f_grid_power_feeds": facility_create.grid_power_feeds,
+                    "f_design_pue": facility_create.design_pue,
+                    "f_tier_level": str(facility_create.tier_level), # MariaDB expects a string here
+                    "f_white_space_floors": facility_create.white_space_floors,
+                    "f_total_space": facility_create.total_space,
+                    "f_white_space": facility_create.white_space,
+                    "f_country_code": resp.country_code,
+                    "f_prometheus_endpoint": PROMETHEUS_ENDPOINT_URL,
+                    "f_created_at": func.now(),
+                    "f_updated_at": func.now(),
                 }))
                 for x in facility_create.cooling_fluids:
                     conn.execute(insert(facilities_cooling_fluids).values({
-                        "facility_id": resp.id,
-                        "cf_type": x.type,
-                        "amount": x.amount,
-                        "gwp_factor": x.gwp_factor
+                        "fcf_f_id": resp.id,
+                        "fcf_type": x.type,
+                        "fcf_amount": x.amount,
+                        "fcf_gwp_factor": x.gwp_factor
+                    }))
+                for x in REQUESTED_METRICS:
+                    conn.execute(insert(facilities_timeseries_configs).values({
+                        "ftc_f_id": resp.id,
+                        "ftc_name": x["name"],
+                        "ftc_unit": x["unit"],
+                        "ftc_granularity_seconds": GRANULARITY_IN_SECONDS,
+                        "ftc_labels": json.dumps(ADDITIONAL_LABELS | {
+                            "country_code": resp.country_code,
+                            "facility_id": str(resp.id)
+                        })
                     }))
                 conn.commit()
             except IntegrityError as e:

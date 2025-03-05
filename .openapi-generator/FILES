@@ -1,6 +1,5 @@
 .dockerignore
 .gitignore
-.openapi-generator-ignore
 .travis.yml
 Dockerfile
 README.md
@@ -8,10 +7,7 @@ git_push.sh
 nadiki_registrar/__init__.py
 nadiki_registrar/__main__.py
 nadiki_registrar/controllers/__init__.py
-nadiki_registrar/controllers/facility_api_spec_other_controller.py
-nadiki_registrar/controllers/rack_api_spec_other_controller.py
 nadiki_registrar/controllers/security_controller_.py
-nadiki_registrar/controllers/server_api_spec_other_controller.py
 nadiki_registrar/encoder.py
 nadiki_registrar/models/__init__.py
 nadiki_registrar/models/base_model_.py
@@ -58,12 +54,8 @@ nadiki_registrar/models/server_update.py
 nadiki_registrar/models/supported_time_series_metric.py
 nadiki_registrar/openapi/openapi.yaml
 nadiki_registrar/test/__init__.py
-nadiki_registrar/test/test_facility_api_spec_other_controller.py
-nadiki_registrar/test/test_rack_api_spec_other_controller.py
-nadiki_registrar/test/test_server_api_spec_other_controller.py
 nadiki_registrar/typing_utils.py
 nadiki_registrar/util.py
-requirements.txt
 setup.py
 test-requirements.txt
 tox.ini
