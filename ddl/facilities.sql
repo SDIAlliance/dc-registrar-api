@@ -39,6 +39,7 @@ CREATE TABLE facilities_cooling_fluids (
     CONSTRAINT fcf_fk FOREIGN KEY fk (fcf_f_id) REFERENCES facilities (f_id) ON DELETE CASCADE
 );
 
+-- actually this is the structure of DataPoints in the spec ... rename this?
 CREATE TABLE facilities_timeseries_configs (
     ftc_id                              INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     ftc_f_id                            VARCHAR(36) NOT NULL,

@@ -24,24 +24,16 @@ import urllib.parse
 import country_converter as coco
 
 from uuid import uuid4
-from sqlalchemy import create_engine, text, MetaData, Table, select, delete, insert
+from sqlalchemy import create_engine, MetaData, Table, select, delete, insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 
-#
-# Initialize SQLAlchemy
-#
-engine = create_engine("mysql+pymysql://root:toogood4u@localhost/nadiki_registrar?charset=utf8mb4")
-meta = MetaData()
-meta.reflect(engine)
-facilities = Table("facilities", meta, autoload_with=engine)
-facilities_cooling_fluids = Table("facilities_cooling_fluids", meta, autoload_with=engine)
-facilities_timeseries_configs = Table("facilities_timeseries_configs", meta, autoload_with=engine)
+from nadiki_registrar.controllers.config import *
+from nadiki_registrar.controllers.database import *
 
 #
 # Defaults
 #
-PROMETHEUS_ENDPOINT_URL = "https://pro.me/theus"
 REQUESTED_METRICS = [
     { "name": "heatpump_power_consumption_joules",      "unit": "Energy" },
     { "name": "office_energy_use_joules",               "unit": "Energy" },
@@ -60,8 +52,6 @@ REQUESTED_METRICS = [
     { "name": "pue_1_ratio",                            "unit": "Percent" },
     { "name": "pue_2_ratio",                            "unit": "Percent" }
 ]
-GRANULARITY_IN_SECONDS = 30
-ADDITIONAL_LABELS = {} # this will not work right now because the OpenAPI spec only allows two fixed labels
 
 #
 # urllib3
