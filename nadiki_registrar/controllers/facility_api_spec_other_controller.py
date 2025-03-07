@@ -18,7 +18,6 @@ from nadiki_registrar.models.facility_create_cooling_fluids_inner import Facilit
 from nadiki_registrar.models.facility_time_series_data_point import FacilityTimeSeriesDataPoint  # noqa: E501
 from nadiki_registrar.models.location import Location  # noqa: E501
 
-import re
 import json
 import urllib3
 import urllib.parse
@@ -30,6 +29,7 @@ from sqlalchemy import func
 
 from nadiki_registrar.controllers.config import *
 from nadiki_registrar.controllers.database import *
+from nadiki_registrar.controllers.id_conversion import *
 
 #
 # Defaults
@@ -124,14 +124,14 @@ def create_facility(facility_create=None):  # noqa: E501
                         "ftc_granularity_seconds": GRANULARITY_IN_SECONDS,
                         "ftc_labels": json.dumps(ADDITIONAL_LABELS | {
                             "country_code": country_code,
-                            "facility_id": _numeric_to_human_readable_id(id, country_code)
+                            "facility_id": facility_numeric_to_human_readable_id(id, country_code)
                         })
                     }))
                 conn.commit()
             except IntegrityError as e:
                 return Error("A facility with this location already exists."), 400
 
-        return get_facility(_numeric_to_human_readable_id(id, country_code))
+        return get_facility(facility_numeric_to_human_readable_id(id, country_code))
 
 def delete_facility(facility_id):  # noqa: E501
     """Delete facility
@@ -144,7 +144,7 @@ def delete_facility(facility_id):  # noqa: E501
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
 
-    country_code, numeric_id = _human_readable_to_numeric_id(facility_id)
+    country_code, numeric_id = facility_human_readable_to_numeric_id(facility_id)
 
     with engine.connect() as conn:
         result = conn.execute(delete(facilities).where(facilities.c.f_id == numeric_id and facilities.c.f_country_code == country_code))
@@ -166,7 +166,7 @@ def get_facility(facility_id):  # noqa: E501
     :rtype: Union[FacilityResponse, Tuple[FacilityResponse, int], Tuple[FacilityResponse, int, Dict[str, str]]
     """
     
-    country_code, numeric_id = _human_readable_to_numeric_id(facility_id)
+    country_code, numeric_id = facility_human_readable_to_numeric_id(facility_id)
 
     print(f"country_code={country_code}, numeric_id={numeric_id}")
 
@@ -177,22 +177,12 @@ def get_facility(facility_id):  # noqa: E501
 
 #        for row in facilities_cooling_fluids:
 
-        for row in facilities_result:
-            return _create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result), 200
+        return _create_facility_response(next(row), facilities_cooling_fluids_result, facilities_timeseries_configs_result), 200
 
     return "Nothing to see here", 404
 
-def _numeric_to_human_readable_id(id, country_code):
-    return f"FACILITY-{country_code}-{'%03i' % id}"
-
-def _human_readable_to_numeric_id(id):
-    r = re.compile("FACILITY-([A-Z]{3})-([0-9]{3})")
-    m = r.match(id)
-    return m.groups()
-
-
 def _create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result):
-    human_readable_id = _numeric_to_human_readable_id(row.f_id, row.f_country_code)
+    human_readable_id = facility_numeric_to_human_readable_id(row.f_id, row.f_country_code)
     resp = FacilityResponse(
         id                              = human_readable_id,
         country_code                    = row.f_country_code,
