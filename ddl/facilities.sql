@@ -8,7 +8,7 @@ DROP TABLE IF EXISTS facilities_cooling_fluids;
 DROP TABLE IF EXISTS facilities_timeseries_configs;
 DROP TABLE IF EXISTS facilities;
 CREATE TABLE facilities (
-    f_id                                VARCHAR(36) NOT NULL PRIMARY KEY,
+    f_id                                INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     f_geo_lon                           DECIMAL(8,5) NOT NULL,
     f_geo_lat                           DECIMAL(8,5) NOT NULL,
     f_embedded_ghg_emissions_facility   DECIMAL(20,9),
@@ -31,8 +31,8 @@ CREATE TABLE facilities (
 );
 
 CREATE TABLE facilities_cooling_fluids (
-    fcf_id                              INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    fcf_f_id                            VARCHAR(36) NOT NULL,
+    fcf_id                              INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    fcf_f_id                            INT UNSIGNED NOT NULL,
     fcf_type                            TEXT NOT NULL,
     fcf_amount                          DECIMAL(20, 9) NOT NULL,
     fcf_gwp_factor                      DECIMAL(20, 9) DEFAULT NULL,
@@ -41,8 +41,8 @@ CREATE TABLE facilities_cooling_fluids (
 
 -- actually this is the structure of DataPoints in the spec ... rename this?
 CREATE TABLE facilities_timeseries_configs (
-    ftc_id                              INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    ftc_f_id                            VARCHAR(36) NOT NULL,
+    ftc_id                              INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    ftc_f_id                            INT UNSIGNED NOT NULL,
     ftc_name                            VARCHAR(200) NOT NULL,
     ftc_unit                            VARCHAR(200) NOT NULL,
     ftc_granularity_seconds             INT NOT NULL,

@@ -18,13 +18,13 @@ from nadiki_registrar.models.facility_create_cooling_fluids_inner import Facilit
 from nadiki_registrar.models.facility_time_series_data_point import FacilityTimeSeriesDataPoint  # noqa: E501
 from nadiki_registrar.models.location import Location  # noqa: E501
 
+import re
 import json
 import urllib3
 import urllib.parse
 import country_converter as coco
 
-from uuid import uuid4
-from sqlalchemy import create_engine, MetaData, Table, select, delete, insert
+from sqlalchemy import create_engine, MetaData, Table, select, delete, insert, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 
@@ -73,8 +73,7 @@ def create_facility(facility_create=None):  # noqa: E501
     """
     if connexion.request.is_json:
         facility_create = FacilityCreate.from_dict(connexion.request.get_json())  # noqa: E501
-        resp = FacilityResponse()
-        resp.id = uuid4()
+
         # resolve location to three letter countrycode
         # (TODO: exceptions here are likely for various reasons, maybe we should give the caller a hint on whether it was his fault or not)
         response = http.request("GET", BASE_URL_FOR_NOMINATIM+urllib.parse.urlencode({
@@ -82,28 +81,11 @@ def create_facility(facility_create=None):  # noqa: E501
             "lon": facility_create.location.longitude,
             "format": "json"
         }), headers={"User-agent": "Nadiki Registrar https://github.com/SDIAlliance/nadiki-registrar"})
-        resp.country_code = coco.convert(names=json.loads(response.data)["address"]["country_code"], to="ISO3")
+        country_code = coco.convert(names=json.loads(response.data)["address"]["country_code"], to="ISO3")
 
-        # FIXME: this does not work, because all other attributes will be gone afterwards:
-        #resp.__dict__.update(facility_create.__dict__)
-        resp.time_series_config = FacilityTimeSeriesConfig.from_dict({
-            "endpoint": PROMETHEUS_ENDPOINT_URL,
-            "dataPoints": [
-                {
-                    "name": x["name"],
-                    "unit": x["unit"],
-                    "granularitySeconds": GRANULARITY_IN_SECONDS,
-                    "labels": ADDITIONAL_LABELS | {
-                        "facility_id": resp.id,
-                        "country_code": resp.country_code
-                    }
-                }
-            for x in REQUESTED_METRICS]
-        })
         with engine.connect() as conn:
             try:
                 conn.execute(insert(facilities).values({
-                    "f_id": resp.id,
                     "f_geo_lon": facility_create.location.latitude,
                     "f_geo_lat": facility_create.location.longitude,
                     "f_embedded_ghg_emissions_facility": facility_create.embedded_ghg_emissions_facility,
@@ -118,37 +100,38 @@ def create_facility(facility_create=None):  # noqa: E501
                     "f_white_space_floors": facility_create.white_space_floors,
                     "f_total_space": facility_create.total_space,
                     "f_white_space": facility_create.white_space,
-                    "f_country_code": resp.country_code,
+                    "f_country_code": country_code,
                     "f_prometheus_endpoint": PROMETHEUS_ENDPOINT_URL,
                     "f_created_at": func.now(),
                     "f_updated_at": func.now(),
                 }))
+
+                result = conn.execute(text("SELECT LAST_INSERT_ID() AS id FROM facilities"));
+                id = next(result).id
+
                 for x in facility_create.cooling_fluids:
                     conn.execute(insert(facilities_cooling_fluids).values({
-                        "fcf_f_id": resp.id,
+                        "fcf_f_id": id,
                         "fcf_type": x.type,
                         "fcf_amount": x.amount,
                         "fcf_gwp_factor": x.gwp_factor
                     }))
                 for x in REQUESTED_METRICS:
                     conn.execute(insert(facilities_timeseries_configs).values({
-                        "ftc_f_id": resp.id,
+                        "ftc_f_id": id,
                         "ftc_name": x["name"],
                         "ftc_unit": x["unit"],
                         "ftc_granularity_seconds": GRANULARITY_IN_SECONDS,
                         "ftc_labels": json.dumps(ADDITIONAL_LABELS | {
-                            "country_code": resp.country_code,
-                            "facility_id": str(resp.id)
+                            "country_code": country_code,
+                            "facility_id": _numeric_to_human_readable_id(id, country_code)
                         })
                     }))
                 conn.commit()
             except IntegrityError as e:
                 return Error("A facility with this location already exists."), 400
 
-        return resp, 201
-
-    return 'do some magic!'
-
+        return get_facility(_numeric_to_human_readable_id(id, country_code))
 
 def delete_facility(facility_id):  # noqa: E501
     """Delete facility
@@ -161,8 +144,10 @@ def delete_facility(facility_id):  # noqa: E501
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
 
+    country_code, numeric_id = _human_readable_to_numeric_id(facility_id)
+
     with engine.connect() as conn:
-        result = conn.execute(delete(facilities).where(facilities.c.f_id == facility_id))
+        result = conn.execute(delete(facilities).where(facilities.c.f_id == numeric_id and facilities.c.f_country_code == country_code))
         conn.commit()
         if result.rowcount == 1:
             return "Facility deleted", 204
@@ -181,10 +166,14 @@ def get_facility(facility_id):  # noqa: E501
     :rtype: Union[FacilityResponse, Tuple[FacilityResponse, int], Tuple[FacilityResponse, int, Dict[str, str]]
     """
     
+    country_code, numeric_id = _human_readable_to_numeric_id(facility_id)
+
+    print(f"country_code={country_code}, numeric_id={numeric_id}")
+
     with engine.connect() as conn:
-        facilities_result = conn.execute(select(facilities).where(facilities.c.f_id == facility_id))
-        facilities_cooling_fluids_result = conn.execute(select(facilities_cooling_fluids).where(facilities_cooling_fluids.c.fcf_f_id == facility_id))
-        facilities_timeseries_configs_result = conn.execute(select(facilities_timeseries_configs).where(facilities_timeseries_configs.c.ftc_f_id == facility_id))
+        facilities_result = conn.execute(select(facilities).where(facilities.c.f_id == numeric_id and facilities.c.f_country_code == country_code))
+        facilities_cooling_fluids_result = conn.execute(select(facilities_cooling_fluids).where(facilities_cooling_fluids.c.fcf_f_id == numeric_id))
+        facilities_timeseries_configs_result = conn.execute(select(facilities_timeseries_configs).where(facilities_timeseries_configs.c.ftc_f_id == numeric_id))
 
 #        for row in facilities_cooling_fluids:
 
@@ -193,9 +182,19 @@ def get_facility(facility_id):  # noqa: E501
 
     return "Nothing to see here", 404
 
+def _numeric_to_human_readable_id(id, country_code):
+    return f"FACILITY-{country_code}-{'%03i' % id}"
+
+def _human_readable_to_numeric_id(id):
+    r = re.compile("FACILITY-([A-Z]{3})-([0-9]{3})")
+    m = r.match(id)
+    return m.groups()
+
+
 def _create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result):
+    human_readable_id = _numeric_to_human_readable_id(row.f_id, row.f_country_code)
     resp = FacilityResponse(
-        id                              = row.f_id,
+        id                              = human_readable_id,
         country_code                    = row.f_country_code,
         location                        = Location(latitude=row.f_geo_lat, longitude=row.f_geo_lon),
         embedded_ghg_emissions_facility = row.f_embedded_ghg_emissions_facility,
