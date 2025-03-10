@@ -97,7 +97,16 @@ def delete_rack(rack_id):  # noqa: E501
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
-    return 'do some magic!'
+
+    facility_human_readable_id, rack_numeric_id = rack_human_readable_to_numeric_id(rack_id)
+    country_code, facility_numeric_id = facility_human_readable_to_numeric_id(facility_human_readable_id)
+    with engine.connect() as conn:
+        result = conn.execute(delete(racks).where(racks.c.r_id == rack_numeric_id and racks.c.r_f_id == facility_numeric_id))
+        conn.commit()
+        if result.rowcount == 1:
+            return "Rack deleted", 204
+        else:
+            return Error(code=404, message="Rack not found"), 404
 
 
 def get_rack(rack_id):  # noqa: E501
@@ -113,12 +122,11 @@ def get_rack(rack_id):  # noqa: E501
     with engine.connect() as conn:
         facility_human_readable_id, rack_numeric_id = rack_human_readable_to_numeric_id(rack_id)
         result = conn.execute(select(racks.join(facilities, racks.c.r_f_id == facilities.c.f_id)).where(racks.c.r_id == rack_numeric_id and racks.c.r_facility_id == facility_human_readable_id))
-        return _create_rack_response(next(result))
+        rack_timeseries_configs_result = conn.execute(select(racks_timeseries_configs).where(racks_timeseries_configs.c.rtc_r_id == rack_numeric_id))
+        return _create_rack_response(next(result), rack_timeseries_configs_result)
 
-def _create_rack_response(row):
-    print(f"r_f_id={row.r_f_id}, f_country_code={row.f_country_code}")
+def _create_rack_response(row, timeseries_configs_result):
     facility_human_readable_id = facility_numeric_to_human_readable_id(row.r_f_id, row.f_country_code)
-    print(f"facility_human_readable_id={facility_human_readable_id}")
     resp = RackResponse(
         id                              = rack_numeric_to_human_readable_id(row.r_id, facility_human_readable_id),
         facility_id                     = facility_human_readable_id,
@@ -127,6 +135,15 @@ def _create_rack_response(row):
         number_of_pdus                  = row.r_number_of_pdus,
         power_redundancy                = row.r_power_redundancy,
         product_passport                = row.r_product_passport,
+        time_series_config              = RackTimeSeriesConfig(
+            endpoint    = row.r_prometheus_endpoint,
+            data_points = [RackTimeSeriesDataPoint(
+                name                = x.rtc_name,
+                unit                = x.rtc_unit,
+                granularity_seconds = x.rtc_granularity_seconds,
+                labels              = json.loads(x.rtc_labels)
+            ) for x in timeseries_configs_result]
+        ),
         created_at                      = row.r_created_at,
         updated_at                      = row.r_updated_at
     )
@@ -147,7 +164,17 @@ def list_racks(limit=None, offset=None, facility_id=None):  # noqa: E501
 
     :rtype: Union[ListRacks200Response, Tuple[ListRacks200Response, int], Tuple[ListRacks200Response, int, Dict[str, str]]
     """
-    return 'do some magic!'
+
+    with engine.connect() as conn:
+        racks_result = conn.execute(select(racks.join(facilities, racks.c.r_f_id == facilities.c.f_id)).limit(limit).offset(offset))
+
+        results = []
+        for row in racks_result:
+            rack_timeseries_configs_result = conn.execute(select(racks_timeseries_configs).where(racks_timeseries_configs.c.rtc_r_id == row.r_id))
+            results.append(_create_rack_response(row, rack_timeseries_configs_result))
+
+        resp = ListRacks200Response(items=results, total=racks_result.rowcount)
+        return resp, 200
 
 
 def query_rack_metrics(rack_id, rack_metrics_query):  # noqa: E501

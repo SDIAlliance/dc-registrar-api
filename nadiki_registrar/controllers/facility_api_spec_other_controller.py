@@ -225,7 +225,7 @@ def list_facilities(limit=None, offset=None):  # noqa: E501
     """
 
     with engine.connect() as conn:
-        facilities_result = conn.execute(select(facilities))
+        facilities_result = conn.execute(select(facilities).limit(limit).offset(offset))
 
 #        for row in facilities_cooling_fluids:
 
