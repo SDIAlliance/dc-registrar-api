@@ -123,7 +123,10 @@ def get_rack(rack_id):  # noqa: E501
         facility_human_readable_id, rack_numeric_id = rack_human_readable_to_numeric_id(rack_id)
         result = conn.execute(select(racks.join(facilities, racks.c.r_f_id == facilities.c.f_id)).where(racks.c.r_id == rack_numeric_id and racks.c.r_facility_id == facility_human_readable_id))
         rack_timeseries_configs_result = conn.execute(select(racks_timeseries_configs).where(racks_timeseries_configs.c.rtc_r_id == rack_numeric_id))
-        return _create_rack_response(next(result), rack_timeseries_configs_result)
+        if result.rowcount == 0:
+            return Error(code=404, message="Rack Id not found"), 404
+        else:
+            return _create_rack_response(next(result), rack_timeseries_configs_result)
 
 def _create_rack_response(row, timeseries_configs_result):
     facility_human_readable_id = facility_numeric_to_human_readable_id(row.r_f_id, row.f_country_code)

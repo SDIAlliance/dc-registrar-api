@@ -81,7 +81,10 @@ def create_facility(facility_create=None):  # noqa: E501
             "lon": facility_create.location.longitude,
             "format": "json"
         }), headers={"User-agent": "Nadiki Registrar https://github.com/SDIAlliance/nadiki-registrar"})
-        country_code = coco.convert(names=json.loads(response.data)["address"]["country_code"], to="ISO3")
+        try:
+            country_code = coco.convert(names=json.loads(response.data)["address"]["country_code"], to="ISO3")
+        except:
+            return Error(code=400, message="Could not resolve geo location"), 400
 
         with engine.connect() as conn:
             try:
@@ -129,7 +132,7 @@ def create_facility(facility_create=None):  # noqa: E501
                     }))
                 conn.commit()
             except IntegrityError as e:
-                return Error("A facility with this location already exists."), 400
+                return Error(code=400, message="A facility with this location already exists."), 400
 
         return get_facility(facility_numeric_to_human_readable_id(id, country_code))
 
@@ -177,7 +180,10 @@ def get_facility(facility_id):  # noqa: E501
 
 #        for row in facilities_cooling_fluids:
 
-        return _create_facility_response(next(row), facilities_cooling_fluids_result, facilities_timeseries_configs_result), 200
+        if facilities_result.rowcount == 0:
+            return Error(code=404, message="Facility Id not found"), 404
+        else:
+            return _create_facility_response(next(facilities_result), facilities_cooling_fluids_result, facilities_timeseries_configs_result), 200
 
     return "Nothing to see here", 404
 

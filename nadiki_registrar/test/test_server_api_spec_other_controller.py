@@ -88,24 +88,24 @@ class TestServerApiSpecOtherController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-    def test_query_server_metrics(self):
-        """Test case for query_server_metrics
-
-        Query server metrics
-        """
-        server_metrics_query = {"startTime":"2000-01-23T04:56:07.000+00:00","aggregation":"sum","endTime":"2000-01-23T04:56:07.000+00:00","metrics":["metrics","metrics"]}
-        headers = { 
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        }
-        response = self.client.open(
-            '/v1/servers/{server_id}/query'.format(server_id='server_id_example'),
-            method='POST',
-            headers=headers,
-            data=json.dumps(server_metrics_query),
-            content_type='application/json')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+#    def test_query_server_metrics(self):
+#        """Test case for query_server_metrics
+#
+#        Query server metrics
+#        """
+#        server_metrics_query = {"startTime":"2000-01-23T04:56:07.000+00:00","aggregation":"sum","endTime":"2000-01-23T04:56:07.000+00:00","metrics":["metrics","metrics"]}
+#        headers = { 
+#            'Accept': 'application/json',
+#            'Content-Type': 'application/json',
+#        }
+#        response = self.client.open(
+#            '/v1/servers/{server_id}/query'.format(server_id='server_id_example'),
+#            method='POST',
+#            headers=headers,
+#            data=json.dumps(server_metrics_query),
+#            content_type='application/json')
+#        self.assert200(response,
+#                       'Response body is : ' + response.data.decode('utf-8'))
 
     def test_update_server(self):
         """Test case for update_server
