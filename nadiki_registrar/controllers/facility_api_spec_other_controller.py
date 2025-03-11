@@ -134,7 +134,7 @@ def create_facility(facility_create=None):  # noqa: E501
             except IntegrityError as e:
                 return Error(code=400, message="A facility with this location already exists."), 400
 
-        return get_facility(facility_numeric_to_human_readable_id(id, country_code))
+        return get_facility(facility_numeric_to_human_readable_id(id, country_code)), 204
 
 def delete_facility(facility_id):  # noqa: E501
     """Delete facility

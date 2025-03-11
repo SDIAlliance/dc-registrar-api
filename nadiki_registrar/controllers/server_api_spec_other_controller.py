@@ -13,6 +13,13 @@ from nadiki_registrar.models.server_response import ServerResponse  # noqa: E501
 from nadiki_registrar.models.server_update import ServerUpdate  # noqa: E501
 from nadiki_registrar import util
 
+from nadiki_registrar.models.cpu import CPU  # noqa: E501
+from nadiki_registrar.models.gpu import GPU  # noqa: E501
+from nadiki_registrar.models.fpga import FPGA  # noqa: E501
+from nadiki_registrar.models.hard_disk import HardDisk  # noqa: E501
+from nadiki_registrar.models.server_time_series_config import ServerTimeSeriesConfig  # noqa: E501
+from nadiki_registrar.models.server_time_series_data_point import ServerTimeSeriesDataPoint  # noqa: E501
+
 import json
 
 from sqlalchemy import create_engine, MetaData, Table, select, delete, insert, text
@@ -51,6 +58,7 @@ def create_server(server_create=None):  # noqa: E501
                 "s_total_fpgas":            server_create.total_fpgas,
                 "s_product_passport":       json.dumps(server_create.product_passport),
                 "s_cooling_type":           server_create.cooling_type,
+                "s_prometheus_endpoint":    PROMETHEUS_ENDPOINT_URL,
                 "s_created_at":             func.now(),
                 "s_updated_at":             func.now(),
             }))
@@ -58,9 +66,59 @@ def create_server(server_create=None):  # noqa: E501
             result = conn.execute(text("SELECT LAST_INSERT_ID() AS id FROM servers"));
             id = next(result).id
 
+            for t in [
+                {
+                    "name": "cpu_energy_consumption_joules",
+                    "unit": "Energy"
+                },
+                {
+                    "name": "server_energy_consumption_joules",
+                    "unit": "Energy"
+                }]:
+
+                conn.execute(insert(servers_timeseries_configs).values({
+                    "stc_s_id": id,
+                    "stc_name": t["name"],
+                    "stc_unit": t["unit"],
+                    "stc_granularity_seconds": GRANULARITY_IN_SECONDS,
+                    "stc_labels": json.dumps({
+                        "facility_id": server_create.facility_id,
+                        "rack_id": server_create.rack_id,
+                        "country_code": rack_id.facility.country_code
+                    })
+                }))
+
+            for cpu in server_create.installed_cpus:
+                conn.execute(insert(servers_cpus).values({
+                    "sc_s_id": id,
+                    "sc_vendor": cpu.vendor,
+                    "sc_type": cpu.type
+                }))
+
+            for gpu in server_create.installed_gpus:
+                conn.execute(insert(servers_gpus).values({
+                    "sg_s_id": id,
+                    "sg_vendor": gpu.vendor,
+                    "sg_type": gpu.type
+                }))
+
+            for fpga in server_create.installed_fpgas:
+                conn.execute(insert(servers_fpgas).values({
+                    "sf_s_id": id,
+                    "sf_vendor": fpga.vendor,
+                    "sf_type": fpga.type
+                }))
+
+            for hd in server_create.hard_disks:
+                conn.execute(insert(servers_hard_disks).values({
+                    "sh_s_id": id,
+                    "sh_vendor": hd.vendor,
+                    "sh_type": hd.type
+                }))
+
             conn.commit()
         
-        return get_server(ServerId(server_create.rack_id, id).toString())
+        return get_server(ServerId(server_create.rack_id, id).toString()), 204
 
 
 def delete_server(server_id):  # noqa: E501
@@ -89,11 +147,16 @@ def get_server(server_id):  # noqa: E501
     
     srvid = ServerId.fromString(server_id)
     with engine.connect() as conn:
-        result = conn.execute(select(servers).where(servers.c.s_id == srvid.number))
-        return _create_server_response(next(result))
+        servers_result = conn.execute(select(servers).where(servers.c.s_id == srvid.number))
+        servers_timeseries_configs_result = conn.execute(select(servers_timeseries_configs).where(servers_timeseries_configs.c.stc_s_id == srvid.number))
+        servers_cpus_result = conn.execute(select(servers_cpus).where(servers_cpus.c.sc_s_id == srvid.number))
+        servers_gpus_result = conn.execute(select(servers_gpus).where(servers_gpus.c.sg_s_id == srvid.number))
+        servers_fpgas_result = conn.execute(select(servers_fpgas).where(servers_fpgas.c.sf_s_id == srvid.number))
+        servers_hard_disks_result = conn.execute(select(servers_hard_disks).where(servers_hard_disks.c.sh_s_id == srvid.number))
 
+        return _create_server_response(next(servers_result), servers_timeseries_configs_result, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_hard_disks_result)
 
-def _create_server_response(row):
+def _create_server_response(row, servers_timeseries_configs, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_hard_disks_result):
     return ServerResponse(
         id                      = row.s_id,
         rated_power             = row.s_rated_power,
@@ -104,7 +167,17 @@ def _create_server_response(row):
         total_gpus              = row.s_total_gpus,
         total_fpgas             = row.s_total_fpgas,
         product_passport        = row.s_product_passport,
-        cooling_type            = row.s_cooling_type
+        cooling_type            = row.s_cooling_type,
+        time_series_config      = ServerTimeSeriesConfig(endpoint=row.s_prometheus_endpoint, data_points=[ServerTimeSeriesDataPoint(
+            name                = x.stc_name,
+            unit                = x.stc_unit,
+            granularity_seconds = x.stc_granularity_seconds,
+            labels              = json.loads(x.stc_labels)) for x in servers_timeseries_configs]
+        ),
+        installed_cpus          = [CPU(vendor=x.sc_vendor, type=x.sc_type) for x in servers_cpus_result],
+        installed_gpus          = [GPU(vendor=x.sg_vendor, type=x.sg_type) for x in servers_gpus_result],
+        installed_fpgas         = [FPGA(vendor=x.sf_vendor, type=x.sf_type) for x in servers_fpgas_result],
+        hard_disks              = [HardDisk(vendor=x.sh_vendor, type=x.sh_type) for x in servers_hard_disks_result]
     )
 
 def list_servers(limit=None, offset=None, facility_id=None, rack_id=None):  # noqa: E501

@@ -17,6 +17,7 @@ CREATE TABLE servers (
     s_total_fpgas               INT UNSIGNED DEFAULT 0,
     s_product_passport          JSON,
     s_cooling_type              VARCHAR(50),
+    s_prometheus_endpoint       VARCHAR(255) NOT NULL,
     s_created_at                TIMESTAMP NOT NULL,
     s_updated_at                TIMESTAMP NOT NULL,
     CONSTRAINT s_fk FOREIGN KEY fk (s_r_id) REFERENCES racks (r_id) ON DELETE CASCADE
