@@ -17,4 +17,4 @@ servers_timeseries_configs      = Table("servers_timeseries_configs",       meta
 servers_cpus                    = Table("servers_cpus",                     meta, autoload_with=engine)
 servers_gpus                    = Table("servers_gpus",                     meta, autoload_with=engine)
 servers_fpgas                   = Table("servers_fpgas",                    meta, autoload_with=engine)
-servers_hard_disks              = Table("servers_hard_disks",               meta, autoload_with=engine)
+servers_storage_devices         = Table("servers_storage_devices",          meta, autoload_with=engine)

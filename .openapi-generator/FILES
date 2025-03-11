@@ -26,7 +26,6 @@ nadiki_registrar/models/facility_time_series_data_point_labels.py
 nadiki_registrar/models/facility_update.py
 nadiki_registrar/models/fpga.py
 nadiki_registrar/models/gpu.py
-nadiki_registrar/models/hard_disk.py
 nadiki_registrar/models/list_facilities200_response.py
 nadiki_registrar/models/list_racks200_response.py
 nadiki_registrar/models/list_servers200_response.py
@@ -51,6 +50,7 @@ nadiki_registrar/models/server_time_series_config.py
 nadiki_registrar/models/server_time_series_data_point.py
 nadiki_registrar/models/server_time_series_data_point_labels.py
 nadiki_registrar/models/server_update.py
+nadiki_registrar/models/storage_device.py
 nadiki_registrar/models/supported_time_series_metric.py
 nadiki_registrar/openapi/openapi.yaml
 nadiki_registrar/test/__init__.py

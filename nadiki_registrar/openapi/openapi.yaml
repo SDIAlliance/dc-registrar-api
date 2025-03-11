@@ -1316,7 +1316,7 @@ components:
       - vendor
       title: FPGA
       type: object
-    HardDisk:
+    StorageDevice:
       example:
         vendor: vendor
         type: NVMe
@@ -1344,7 +1344,7 @@ components:
       - capacity
       - type
       - vendor
-      title: HardDisk
+      title: StorageDevice
       type: object
     ServerCreate:
       example:
@@ -1355,16 +1355,14 @@ components:
           type: type
         - vendor: vendor
           type: type
-        total_fpgas: 0
-        hard_disks:
-        - vendor: vendor
-          type: NVMe
-          capacity: 2.302136
-        - vendor: vendor
-          type: NVMe
-          capacity: 2.302136
         total_cpu_sockets: 1
-        total_gpus: 0
+        storage_devices:
+        - vendor: vendor
+          type: NVMe
+          capacity: 2.302136
+        - vendor: vendor
+          type: NVMe
+          capacity: 2.302136
         total_installed_memory: 5
         cooling_type: air
         rack_id: rack_id
@@ -1421,30 +1419,18 @@ components:
           description: Number of memory units installed
           title: number_of_memory_units
           type: integer
-        hard_disks:
-          description: Array of installed hard disks
+        storage_devices:
+          description: Array of installed storage devices
           items:
-            $ref: '#/components/schemas/HardDisk'
-          title: hard_disks
+            $ref: '#/components/schemas/StorageDevice'
+          title: storage_devices
           type: array
-        total_gpus:
-          default: 0
-          description: Total number of GPUs installed
-          minimum: 0
-          title: total_gpus
-          type: integer
         installed_gpus:
           description: Array of installed GPUs
           items:
             $ref: '#/components/schemas/GPU'
           title: installed_gpus
           type: array
-        total_fpgas:
-          default: 0
-          description: Total number of FPGAs installed
-          minimum: 0
-          title: total_fpgas
-          type: integer
         installed_fpgas:
           description: Array of installed FPGAs
           items:
@@ -2063,11 +2049,11 @@ components:
       unit: Value
       description: 1 for grid; 2 for backup generators
     - name: pue_1_ratio
-      unit: Percentage
+      unit: Percent
       description: Power usage effectiveness measured from the output of the UPS systems
         for IT load
     - name: pue_2_ratio
-      unit: Percentage
+      unit: Percent
       description: Power usage effectiveness measured from the output of the PDU systems
         for IT load
   x-supported-rack-timeseries-metrics:

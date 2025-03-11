@@ -16,7 +16,7 @@ from nadiki_registrar import util
 from nadiki_registrar.models.cpu import CPU  # noqa: E501
 from nadiki_registrar.models.gpu import GPU  # noqa: E501
 from nadiki_registrar.models.fpga import FPGA  # noqa: E501
-from nadiki_registrar.models.hard_disk import HardDisk  # noqa: E501
+from nadiki_registrar.models.storage_device import StorageDevice  # noqa: E501
 from nadiki_registrar.models.server_time_series_config import ServerTimeSeriesConfig  # noqa: E501
 from nadiki_registrar.models.server_time_series_data_point import ServerTimeSeriesDataPoint  # noqa: E501
 
@@ -54,8 +54,6 @@ def create_server(server_create=None):  # noqa: E501
                 "s_number_of_psus":         server_create.number_of_psus,
                 "s_total_installed_memory": server_create.total_installed_memory,
                 "s_number_of_memory_units": server_create.number_of_memory_units,
-                "s_total_gpus":             server_create.total_gpus,
-                "s_total_fpgas":            server_create.total_fpgas,
                 "s_product_passport":       json.dumps(server_create.product_passport),
                 "s_cooling_type":           server_create.cooling_type,
                 "s_prometheus_endpoint":    PROMETHEUS_ENDPOINT_URL,
@@ -109,8 +107,8 @@ def create_server(server_create=None):  # noqa: E501
                     "sf_type": fpga.type
                 }))
 
-            for hd in server_create.hard_disks:
-                conn.execute(insert(servers_hard_disks).values({
+            for hd in server_create.storage_devices:
+                conn.execute(insert(servers_storage_devices).values({
                     "sh_s_id": id,
                     "sh_vendor": hd.vendor,
                     "sh_type": hd.type
@@ -131,7 +129,15 @@ def delete_server(server_id):  # noqa: E501
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
-    return 'do some magic!'
+    
+    srvid = ServerId.fromString(server_id)
+    with engine.connect() as conn:
+        result = conn.execute(delete(servers).where(servers.c.s_id == srvid.number and servers.c.s_r_id == srvid.rack.number))
+        conn.commit()
+        if result.rowcount == 1:
+            return "Server deleted", 204
+        else:
+            return Error(code=404, message="Server not found"), 404
 
 
 def get_server(server_id):  # noqa: E501
@@ -152,11 +158,11 @@ def get_server(server_id):  # noqa: E501
         servers_cpus_result = conn.execute(select(servers_cpus).where(servers_cpus.c.sc_s_id == srvid.number))
         servers_gpus_result = conn.execute(select(servers_gpus).where(servers_gpus.c.sg_s_id == srvid.number))
         servers_fpgas_result = conn.execute(select(servers_fpgas).where(servers_fpgas.c.sf_s_id == srvid.number))
-        servers_hard_disks_result = conn.execute(select(servers_hard_disks).where(servers_hard_disks.c.sh_s_id == srvid.number))
+        servers_storage_devices_result = conn.execute(select(servers_storage_devices).where(servers_storage_devices.c.sh_s_id == srvid.number))
 
-        return _create_server_response(next(servers_result), servers_timeseries_configs_result, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_hard_disks_result)
+        return _create_server_response(next(servers_result), servers_timeseries_configs_result, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result)
 
-def _create_server_response(row, servers_timeseries_configs, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_hard_disks_result):
+def _create_server_response(row, servers_timeseries_configs, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result):
     return ServerResponse(
         id                      = row.s_id,
         rated_power             = row.s_rated_power,
@@ -164,8 +170,6 @@ def _create_server_response(row, servers_timeseries_configs, servers_cpus_result
         number_of_psus          = row.s_number_of_psus,
         total_installed_memory  = row.s_total_installed_memory,
         number_of_memory_units  = row.s_number_of_memory_units,
-        total_gpus              = row.s_total_gpus,
-        total_fpgas             = row.s_total_fpgas,
         product_passport        = row.s_product_passport,
         cooling_type            = row.s_cooling_type,
         time_series_config      = ServerTimeSeriesConfig(endpoint=row.s_prometheus_endpoint, data_points=[ServerTimeSeriesDataPoint(
@@ -177,7 +181,9 @@ def _create_server_response(row, servers_timeseries_configs, servers_cpus_result
         installed_cpus          = [CPU(vendor=x.sc_vendor, type=x.sc_type) for x in servers_cpus_result],
         installed_gpus          = [GPU(vendor=x.sg_vendor, type=x.sg_type) for x in servers_gpus_result],
         installed_fpgas         = [FPGA(vendor=x.sf_vendor, type=x.sf_type) for x in servers_fpgas_result],
-        hard_disks              = [HardDisk(vendor=x.sh_vendor, type=x.sh_type) for x in servers_hard_disks_result]
+        storage_devices         = [StorageDevice(vendor=x.sh_vendor, type=x.sh_type) for x in servers_storage_devices_result],
+        created_at              = row.s_created_at,
+        updated_at              = row.s_updated_at
     )
 
 def list_servers(limit=None, offset=None, facility_id=None, rack_id=None):  # noqa: E501
@@ -196,7 +202,21 @@ def list_servers(limit=None, offset=None, facility_id=None, rack_id=None):  # no
 
     :rtype: Union[ListServers200Response, Tuple[ListServers200Response, int], Tuple[ListServers200Response, int, Dict[str, str]]
     """
-    return 'do some magic!'
+
+    result = []
+    with engine.connect() as conn:
+        servers_result = conn.execute(select(servers).limit(limit).offset(offset))
+        
+        for x in servers_result:
+            servers_timeseries_configs_result = conn.execute(select(servers_timeseries_configs).where(servers_timeseries_configs.c.stc_s_id == x.s_id))
+            servers_cpus_result = conn.execute(select(servers_cpus).where(servers_cpus.c.sc_s_id == x.s_id))
+            servers_gpus_result = conn.execute(select(servers_gpus).where(servers_gpus.c.sg_s_id == x.s_id))
+            servers_fpgas_result = conn.execute(select(servers_fpgas).where(servers_fpgas.c.sf_s_id == x.s_id))
+            servers_storage_devices_result = conn.execute(select(servers_storage_devices).where(servers_storage_devices.c.sh_s_id == x.s_id))
+            result.append(_create_server_response(x, servers_timeseries_configs_result, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result))
+
+        return ListServers200Response(items=result, total=servers_result.rowcount, limit=limit, offset=offset)
+    
 
 
 def query_server_metrics(server_id, server_metrics_query):  # noqa: E501

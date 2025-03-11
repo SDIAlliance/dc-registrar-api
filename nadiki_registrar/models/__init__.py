@@ -18,7 +18,6 @@ from nadiki_registrar.models.facility_time_series_data_point import FacilityTime
 from nadiki_registrar.models.facility_time_series_data_point_labels import FacilityTimeSeriesDataPointLabels
 from nadiki_registrar.models.facility_update import FacilityUpdate
 from nadiki_registrar.models.gpu import GPU
-from nadiki_registrar.models.hard_disk import HardDisk
 from nadiki_registrar.models.list_facilities200_response import ListFacilities200Response
 from nadiki_registrar.models.list_racks200_response import ListRacks200Response
 from nadiki_registrar.models.list_servers200_response import ListServers200Response
@@ -43,4 +42,5 @@ from nadiki_registrar.models.server_time_series_config import ServerTimeSeriesCo
 from nadiki_registrar.models.server_time_series_data_point import ServerTimeSeriesDataPoint
 from nadiki_registrar.models.server_time_series_data_point_labels import ServerTimeSeriesDataPointLabels
 from nadiki_registrar.models.server_update import ServerUpdate
+from nadiki_registrar.models.storage_device import StorageDevice
 from nadiki_registrar.models.supported_time_series_metric import SupportedTimeSeriesMetric

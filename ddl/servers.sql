@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS servers_timeseries_configs;
 DROP TABLE IF EXISTS servers_cpus;
 DROP TABLE IF EXISTS servers_gpus;
 DROP TABLE IF EXISTS servers_fpgas;
-DROP TABLE IF EXISTS servers_hard_disks;
+DROP TABLE IF EXISTS servers_storage_devices;
 DROP TABLE IF EXISTS servers;
 
 CREATE TABLE servers (
@@ -44,7 +44,7 @@ CREATE TABLE servers_fpgas(
     CONSTRAINT sf_fk FOREIGN KEY fk (sf_s_id) REFERENCES servers (s_id) ON DELETE CASCADE
 );
 
-CREATE TABLE servers_hard_disks(
+CREATE TABLE servers_storage_devices(
     sh_s_id     INT UNSIGNED NOT NULL,
     sh_vendor   VARCHAR(255) NOT NULL,
     sh_type     VARCHAR(255) NOT NULL,
