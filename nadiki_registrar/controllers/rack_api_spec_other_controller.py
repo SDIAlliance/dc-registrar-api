@@ -7,8 +7,6 @@ from typing import Union
 from nadiki_registrar.models.error import Error  # noqa: E501
 from nadiki_registrar.models.list_racks200_response import ListRacks200Response  # noqa: E501
 from nadiki_registrar.models.rack_create import RackCreate  # noqa: E501
-from nadiki_registrar.models.rack_metrics_query import RackMetricsQuery  # noqa: E501
-from nadiki_registrar.models.rack_metrics_query_response import RackMetricsQueryResponse  # noqa: E501
 from nadiki_registrar.models.rack_response import RackResponse  # noqa: E501
 from nadiki_registrar.models.rack_update import RackUpdate  # noqa: E501
 from nadiki_registrar import util
@@ -178,23 +176,6 @@ def list_racks(limit=None, offset=None, facility_id=None):  # noqa: E501
 
         resp = ListRacks200Response(items=results, total=racks_result.rowcount)
         return resp, 200
-
-
-def query_rack_metrics(rack_id, rack_metrics_query):  # noqa: E501
-    """Query rack metrics
-
-    Retrieve aggregated time series metrics for a rack over a specified time period # noqa: E501
-
-    :param rack_id: Unique rack identifier (format RACK-[FACILITY_ID]-[RACK_ID])
-    :type rack_id: str
-    :param rack_metrics_query: 
-    :type rack_metrics_query: dict | bytes
-
-    :rtype: Union[RackMetricsQueryResponse, Tuple[RackMetricsQueryResponse, int], Tuple[RackMetricsQueryResponse, int, Dict[str, str]]
-    """
-    if connexion.request.is_json:
-        rack_metrics_query = RackMetricsQuery.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
 
 
 def update_rack(rack_id, rack_update):  # noqa: E501

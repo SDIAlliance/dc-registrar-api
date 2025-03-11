@@ -7,8 +7,6 @@ from typing import Union
 from nadiki_registrar.models.error import Error  # noqa: E501
 from nadiki_registrar.models.list_servers200_response import ListServers200Response  # noqa: E501
 from nadiki_registrar.models.server_create import ServerCreate  # noqa: E501
-from nadiki_registrar.models.server_metrics_query import ServerMetricsQuery  # noqa: E501
-from nadiki_registrar.models.server_metrics_query_response import ServerMetricsQueryResponse  # noqa: E501
 from nadiki_registrar.models.server_response import ServerResponse  # noqa: E501
 from nadiki_registrar.models.server_update import ServerUpdate  # noqa: E501
 from nadiki_registrar import util
@@ -216,24 +214,6 @@ def list_servers(limit=None, offset=None, facility_id=None, rack_id=None):  # no
             result.append(_create_server_response(x, servers_timeseries_configs_result, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result))
 
         return ListServers200Response(items=result, total=servers_result.rowcount, limit=limit, offset=offset)
-    
-
-
-def query_server_metrics(server_id, server_metrics_query):  # noqa: E501
-    """Query server metrics
-
-    Retrieve aggregated time series metrics for a server over a specified time period # noqa: E501
-
-    :param server_id: Unique server identifier (format SERVER-[FACILITY_ID]-[RACK_ID]-[SERVER_ID])
-    :type server_id: str
-    :param server_metrics_query: 
-    :type server_metrics_query: dict | bytes
-
-    :rtype: Union[ServerMetricsQueryResponse, Tuple[ServerMetricsQueryResponse, int], Tuple[ServerMetricsQueryResponse, int, Dict[str, str]]
-    """
-    if connexion.request.is_json:
-        server_metrics_query = ServerMetricsQuery.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
 
 
 def update_server(server_id, server_update):  # noqa: E501

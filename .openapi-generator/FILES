@@ -15,9 +15,6 @@ nadiki_registrar/models/cpu.py
 nadiki_registrar/models/error.py
 nadiki_registrar/models/facility_create.py
 nadiki_registrar/models/facility_create_cooling_fluids_inner.py
-nadiki_registrar/models/facility_metrics_query.py
-nadiki_registrar/models/facility_metrics_query_response.py
-nadiki_registrar/models/facility_metrics_query_response_metrics_inner.py
 nadiki_registrar/models/facility_response.py
 nadiki_registrar/models/facility_response_all_of.py
 nadiki_registrar/models/facility_time_series_config.py
@@ -31,9 +28,6 @@ nadiki_registrar/models/list_racks200_response.py
 nadiki_registrar/models/list_servers200_response.py
 nadiki_registrar/models/location.py
 nadiki_registrar/models/rack_create.py
-nadiki_registrar/models/rack_metrics_query.py
-nadiki_registrar/models/rack_metrics_query_response.py
-nadiki_registrar/models/rack_metrics_query_response_metrics_inner.py
 nadiki_registrar/models/rack_response.py
 nadiki_registrar/models/rack_response_all_of.py
 nadiki_registrar/models/rack_time_series_config.py
@@ -41,9 +35,6 @@ nadiki_registrar/models/rack_time_series_data_point.py
 nadiki_registrar/models/rack_time_series_data_point_labels.py
 nadiki_registrar/models/rack_update.py
 nadiki_registrar/models/server_create.py
-nadiki_registrar/models/server_metrics_query.py
-nadiki_registrar/models/server_metrics_query_response.py
-nadiki_registrar/models/server_metrics_query_response_metrics_inner.py
 nadiki_registrar/models/server_response.py
 nadiki_registrar/models/server_response_all_of.py
 nadiki_registrar/models/server_time_series_config.py

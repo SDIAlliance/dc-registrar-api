@@ -6,8 +6,6 @@ from typing import Union
 
 from nadiki_registrar.models.error import Error  # noqa: E501
 from nadiki_registrar.models.facility_create import FacilityCreate  # noqa: E501
-from nadiki_registrar.models.facility_metrics_query import FacilityMetricsQuery  # noqa: E501
-from nadiki_registrar.models.facility_metrics_query_response import FacilityMetricsQueryResponse  # noqa: E501
 from nadiki_registrar.models.facility_response import FacilityResponse  # noqa: E501
 from nadiki_registrar.models.facility_update import FacilityUpdate  # noqa: E501
 from nadiki_registrar.models.list_facilities200_response import ListFacilities200Response  # noqa: E501
@@ -134,7 +132,8 @@ def create_facility(facility_create=None):  # noqa: E501
             except IntegrityError as e:
                 return Error(code=400, message="A facility with this location already exists."), 400
 
-        return get_facility(facility_numeric_to_human_readable_id(id, country_code)), 204
+        res, code = get_facility(facility_numeric_to_human_readable_id(id, country_code))
+        return res, 201
 
 def delete_facility(facility_id):  # noqa: E501
     """Delete facility
@@ -170,8 +169,6 @@ def get_facility(facility_id):  # noqa: E501
     """
     
     country_code, numeric_id = facility_human_readable_to_numeric_id(facility_id)
-
-    print(f"country_code={country_code}, numeric_id={numeric_id}")
 
     with engine.connect() as conn:
         facilities_result = conn.execute(select(facilities).where(facilities.c.f_id == numeric_id and facilities.c.f_country_code == country_code))
@@ -243,23 +240,6 @@ def list_facilities(limit=None, offset=None):  # noqa: E501
 
         resp = ListFacilities200Response(items=results, total=facilities_result.rowcount)
         return resp, 200
-
-
-def query_facility_metrics(facility_id, facility_metrics_query):  # noqa: E501
-    """Query facility metrics
-
-    Retrieve aggregated time series metrics for a facility over a specified time period # noqa: E501
-
-    :param facility_id: Unique facility identifier
-    :type facility_id: str
-    :param facility_metrics_query: 
-    :type facility_metrics_query: dict | bytes
-
-    :rtype: Union[FacilityMetricsQueryResponse, Tuple[FacilityMetricsQueryResponse, int], Tuple[FacilityMetricsQueryResponse, int, Dict[str, str]]
-    """
-    if connexion.request.is_json:
-        facility_metrics_query = FacilityMetricsQuery.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
 
 
 def update_facility(facility_id, facility_update):  # noqa: E501
