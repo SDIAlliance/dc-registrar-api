@@ -82,13 +82,13 @@ class TestRackApiSpecOtherController(BaseTestCase):
             '/v1/racks/{rack_id}'.format(rack_id=rack_response_dict["id"]),
             method='DELETE',
             headers=headers)
-        self.assertEquals(response.status_code, 204,
+        self.assertEqual(response.status_code, 204,
                        'Response body is : ' + response.data.decode('utf-8'))
         response = self.client.open(
             '/v1/racks/{rack_id}'.format(rack_id=rack_response_dict["id"]),
             method='DELETE',
             headers=headers)
-        self.assertEquals(response.status_code, 404,
+        self.assertEqual(response.status_code, 404,
                        'Second DELETE should fail, response body is : ' + response.data.decode('utf-8'))
 
     def test_get_rack(self):

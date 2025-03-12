@@ -15,7 +15,6 @@ from nadiki_registrar.test import BaseTestCase
 
 from nadiki_registrar.test.helpers import *
 
-from warnings import warn
 
 class TestServerApiSpecOtherController(BaseTestCase):
     """ServerApiSpecOtherController integration test stubs"""
@@ -64,8 +63,6 @@ class TestServerApiSpecOtherController(BaseTestCase):
         server_response = create_server_raw(self.client, server_input)
         server_response_dict = self._check_server_response(server_response)
 
-        warn(f"XXX server_id={server_response_dict['id']}")
-
         headers = { 
             'Accept': 'application/json',
         }
@@ -75,22 +72,35 @@ class TestServerApiSpecOtherController(BaseTestCase):
             headers=headers)
         self.assertEqual(response.status_code, 204,
                        'Response body is : ' + response.data.decode('utf-8'))
-#
-#    def test_get_server(self):
-#        """Test case for get_server
-#
-#        Get server details
-#        """
-#        headers = { 
-#            'Accept': 'application/json',
-#        }
-#        response = self.client.open(
-#            '/v1/servers/{server_id}'.format(server_id='server_id_example'),
-#            method='GET',
-#            headers=headers)
-#        self.assert200(response,
-#                       'Response body is : ' + response.data.decode('utf-8'))
-#
+
+    def test_get_server(self):
+        """Test case for get_server
+
+        Get server details
+        """
+        facility_input = create_facility_input()
+        facility_response = create_facility_raw(self.client, facility_input)
+        decoded_facility_response = facility_response.data.decode('utf-8')
+        facility_response_dict = json.loads(decoded_facility_response)
+        rack_input = create_rack_input(facility_response_dict["id"])
+        rack_response = create_rack_raw(self.client, rack_input)
+        decoded_rack_response = rack_response.data.decode('utf-8')
+        rack_response_dict = json.loads(decoded_rack_response)
+
+        server_input = create_server_input(facility_response_dict["id"], rack_response_dict["id"])
+        server_response = create_server_raw(self.client, server_input)
+        server_response_dict = self._check_server_response(server_response)
+
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/v1/servers/{server_id}'.format(server_id=server_response_dict["id"]),
+            method='GET',
+            headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
 #    def test_list_servers(self):
 #        """Test case for list_servers
 #

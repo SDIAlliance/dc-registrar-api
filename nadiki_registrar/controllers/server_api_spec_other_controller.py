@@ -26,6 +26,7 @@ from sqlalchemy import func
 
 from nadiki_registrar.controllers.config import *
 from nadiki_registrar.controllers.database import *
+from nadiki_registrar.controllers.identifiers import FacilityId
 from nadiki_registrar.controllers.identifiers import RackId
 from nadiki_registrar.controllers.identifiers import ServerId
 
@@ -151,7 +152,7 @@ def get_server(server_id):  # noqa: E501
     
     srvid = ServerId.fromString(server_id)
     with engine.connect() as conn:
-        servers_result = conn.execute(select(servers).where(servers.c.s_id == srvid.number))
+        servers_result = conn.execute(select(servers.join(racks, servers.c.s_r_id == racks.c.r_id).join(facilities, racks.c.r_f_id == facilities.c.f_id)).where(servers.c.s_id == srvid.number))
         servers_timeseries_configs_result = conn.execute(select(servers_timeseries_configs).where(servers_timeseries_configs.c.stc_s_id == srvid.number))
         servers_cpus_result = conn.execute(select(servers_cpus).where(servers_cpus.c.sc_s_id == srvid.number))
         servers_gpus_result = conn.execute(select(servers_gpus).where(servers_gpus.c.sg_s_id == srvid.number))
@@ -162,7 +163,7 @@ def get_server(server_id):  # noqa: E501
 
 def _create_server_response(row, servers_timeseries_configs, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result):
     return ServerResponse(
-        id                      = row.s_id,
+        id                      = ServerId(RackId(FacilityId(country_code=row.f_country_code, number=row.f_id).toString(), row.r_id).toString(), row.s_id).toString(),
         rated_power             = row.s_rated_power,
         total_cpu_sockets       = row.s_total_cpu_sockets,
         number_of_psus          = row.s_number_of_psus,
@@ -203,7 +204,7 @@ def list_servers(limit=None, offset=None, facility_id=None, rack_id=None):  # no
 
     result = []
     with engine.connect() as conn:
-        servers_result = conn.execute(select(servers).limit(limit).offset(offset))
+        servers_result = conn.execute(select(servers.join(racks, servers.c.s_r_id == racks.c.r_id).join(facilities, racks.c.r_f_id == facilities.c.f_id)).limit(limit).offset(offset))
         
         for x in servers_result:
             servers_timeseries_configs_result = conn.execute(select(servers_timeseries_configs).where(servers_timeseries_configs.c.stc_s_id == x.s_id))

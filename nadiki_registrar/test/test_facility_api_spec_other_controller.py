@@ -7,7 +7,6 @@ from flask import json
 from six import BytesIO
 
 from pprint import pformat
-from warnings import warn
 
 from datetime import datetime
 
@@ -78,13 +77,13 @@ class TestFacilityApiSpecOtherController(BaseTestCase):
             '/v1/facilities/{facility_id}'.format(facility_id=response_dict["id"]),
             method='DELETE',
             headers=headers)
-        self.assertEquals(response.status_code, 204,
+        self.assertEqual(response.status_code, 204,
                        'Response body is : ' + response.data.decode('utf-8'))
         response = self.client.open(
             '/v1/facilities/{facility_id}'.format(facility_id=response_dict["id"]),
             method='DELETE',
             headers=headers)
-        self.assertEquals(response.status_code, 404,
+        self.assertEqual(response.status_code, 404,
                        'Second DELETE should fail, response body is : ' + response.data.decode('utf-8'))
  
 
