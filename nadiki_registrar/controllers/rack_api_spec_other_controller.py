@@ -82,7 +82,7 @@ def create_rack(rack_create=None):  # noqa: E501
                     }))
             conn.commit()
 
-        return get_rack(rack_numeric_to_human_readable_id(id, rack_create.facility_id)), 204
+        return get_rack(rack_numeric_to_human_readable_id(id, rack_create.facility_id)), 201
 
 
 def delete_rack(rack_id):  # noqa: E501

@@ -114,7 +114,7 @@ def create_server(server_create=None):  # noqa: E501
 
             conn.commit()
         
-        return get_server(ServerId(server_create.rack_id, id).toString()), 204
+        return get_server(ServerId(server_create.rack_id, id).toString()), 201
 
 
 def delete_server(server_id):  # noqa: E501
