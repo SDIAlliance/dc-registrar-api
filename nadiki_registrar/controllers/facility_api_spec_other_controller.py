@@ -27,7 +27,7 @@ from sqlalchemy import func
 
 from nadiki_registrar.controllers.config import *
 from nadiki_registrar.controllers.database import *
-from nadiki_registrar.controllers.id_conversion import *
+from nadiki_registrar.controllers.identifiers import *
 
 #
 # Defaults
@@ -109,6 +109,7 @@ def create_facility(facility_create=None):  # noqa: E501
 
                 result = conn.execute(text("SELECT LAST_INSERT_ID() AS id FROM facilities"));
                 id = next(result).id
+                facility = FacilityId(country_code, id)
 
                 for x in facility_create.cooling_fluids:
                     conn.execute(insert(facilities_cooling_fluids).values({
@@ -125,14 +126,14 @@ def create_facility(facility_create=None):  # noqa: E501
                         "ftc_granularity_seconds": GRANULARITY_IN_SECONDS,
                         "ftc_labels": json.dumps(ADDITIONAL_LABELS | {
                             "country_code": country_code,
-                            "facility_id": facility_numeric_to_human_readable_id(id, country_code)
+                            "facility_id": facility.toString()
                         })
                     }))
                 conn.commit()
             except IntegrityError as e:
                 return Error(code=400, message="A facility with this location already exists."), 400
 
-        res, code = get_facility(facility_numeric_to_human_readable_id(id, country_code))
+        res, code = get_facility(facility.toString())
         return res, 201
 
 def delete_facility(facility_id):  # noqa: E501
@@ -146,10 +147,10 @@ def delete_facility(facility_id):  # noqa: E501
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
 
-    country_code, numeric_id = facility_human_readable_to_numeric_id(facility_id)
+    facility = FacilityId.fromString(facility_id)
 
     with engine.connect() as conn:
-        result = conn.execute(delete(facilities).where(facilities.c.f_id == numeric_id and facilities.c.f_country_code == country_code))
+        result = conn.execute(delete(facilities).where(facilities.c.f_id == facility.number and facilities.c.f_country_code == facility.country_code))
         conn.commit()
         if result.rowcount == 1:
             return "Facility deleted", 204
@@ -168,12 +169,12 @@ def get_facility(facility_id):  # noqa: E501
     :rtype: Union[FacilityResponse, Tuple[FacilityResponse, int], Tuple[FacilityResponse, int, Dict[str, str]]
     """
     
-    country_code, numeric_id = facility_human_readable_to_numeric_id(facility_id)
+    facility = FacilityId.fromString(facility_id)
 
     with engine.connect() as conn:
-        facilities_result = conn.execute(select(facilities).where(facilities.c.f_id == numeric_id and facilities.c.f_country_code == country_code))
-        facilities_cooling_fluids_result = conn.execute(select(facilities_cooling_fluids).where(facilities_cooling_fluids.c.fcf_f_id == numeric_id))
-        facilities_timeseries_configs_result = conn.execute(select(facilities_timeseries_configs).where(facilities_timeseries_configs.c.ftc_f_id == numeric_id))
+        facilities_result = conn.execute(select(facilities).where(facilities.c.f_id == facility.number and facilities.c.f_country_code == facility.country_code))
+        facilities_cooling_fluids_result = conn.execute(select(facilities_cooling_fluids).where(facilities_cooling_fluids.c.fcf_f_id == facility.number))
+        facilities_timeseries_configs_result = conn.execute(select(facilities_timeseries_configs).where(facilities_timeseries_configs.c.ftc_f_id == facility.number))
 
 #        for row in facilities_cooling_fluids:
 
@@ -185,9 +186,9 @@ def get_facility(facility_id):  # noqa: E501
     return "Nothing to see here", 404
 
 def _create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result):
-    human_readable_id = facility_numeric_to_human_readable_id(row.f_id, row.f_country_code)
+    facility = FacilityId(row.f_country_code, row.f_id)
     resp = FacilityResponse(
-        id                              = human_readable_id,
+        id                              = facility.toString(),
         country_code                    = row.f_country_code,
         location                        = Location(latitude=row.f_geo_lat, longitude=row.f_geo_lon),
         embedded_ghg_emissions_facility = row.f_embedded_ghg_emissions_facility,

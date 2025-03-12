@@ -23,7 +23,7 @@ from sqlalchemy import func
 
 from nadiki_registrar.controllers.config import *
 from nadiki_registrar.controllers.database import *
-from nadiki_registrar.controllers.id_conversion import *
+from nadiki_registrar.controllers.identifiers import *
 
 def create_rack(rack_create=None):  # noqa: E501
     """Register a new rack
@@ -38,12 +38,12 @@ def create_rack(rack_create=None):  # noqa: E501
     if connexion.request.is_json:
         rack_create = RackCreate.from_dict(connexion.request.get_json())  # noqa: E501
 
-        facility_country_code, facility_numeric_id = facility_human_readable_to_numeric_id(rack_create.facility_id)
+        facility = FacilityId.fromString(rack_create.facility_id)
 
         with engine.connect() as conn:
             try:
                 conn.execute(insert(racks).values({
-                    "r_f_id":                               facility_numeric_id,
+                    "r_f_id":                               facility.number,
                     "r_total_available_power":              rack_create.total_available_power,
                     "r_total_available_cooling_capacity":   rack_create.total_available_cooling_capacity,
                     "r_number_of_pdus":                     rack_create.number_of_pdus,
@@ -58,6 +58,7 @@ def create_rack(rack_create=None):  # noqa: E501
 
             result = conn.execute(text("SELECT LAST_INSERT_ID() AS id FROM racks"))
             id = next(result).id
+            rack = RackId(rack_create.facility_id, id)
 
             for t in [{
                     "name": "inlet_temperature_celsius",
@@ -76,13 +77,13 @@ def create_rack(rack_create=None):  # noqa: E501
                         "rtc_granularity_seconds": GRANULARITY_IN_SECONDS,
                         "rtc_labels": json.dumps({
                             "facility_id": rack_create.facility_id,
-                            "rack_id": rack_numeric_to_human_readable_id(id, rack_create.facility_id),
-                            "country_code": facility_country_code
+                            "rack_id": rack.toString(),
+                            "country_code": rack.facility.country_code
                         })
                     }))
             conn.commit()
 
-        return get_rack(rack_numeric_to_human_readable_id(id, rack_create.facility_id)), 201
+        return get_rack(rack.toString()), 201
 
 
 def delete_rack(rack_id):  # noqa: E501
@@ -96,10 +97,9 @@ def delete_rack(rack_id):  # noqa: E501
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
 
-    facility_human_readable_id, rack_numeric_id = rack_human_readable_to_numeric_id(rack_id)
-    country_code, facility_numeric_id = facility_human_readable_to_numeric_id(facility_human_readable_id)
+    rack = RackId.fromString(rack_id)
     with engine.connect() as conn:
-        result = conn.execute(delete(racks).where(racks.c.r_id == rack_numeric_id and racks.c.r_f_id == facility_numeric_id))
+        result = conn.execute(delete(racks).where(racks.c.r_id == rack.number and racks.c.r_f_id == rack.facility.number))
         conn.commit()
         if result.rowcount == 1:
             return "Rack deleted", 204
@@ -117,20 +117,21 @@ def get_rack(rack_id):  # noqa: E501
 
     :rtype: Union[RackResponse, Tuple[RackResponse, int], Tuple[RackResponse, int, Dict[str, str]]
     """
+    rack = RackId.fromString(rack_id)
     with engine.connect() as conn:
-        facility_human_readable_id, rack_numeric_id = rack_human_readable_to_numeric_id(rack_id)
-        result = conn.execute(select(racks.join(facilities, racks.c.r_f_id == facilities.c.f_id)).where(racks.c.r_id == rack_numeric_id and racks.c.r_facility_id == facility_human_readable_id))
-        rack_timeseries_configs_result = conn.execute(select(racks_timeseries_configs).where(racks_timeseries_configs.c.rtc_r_id == rack_numeric_id))
+        result = conn.execute(select(racks.join(facilities, racks.c.r_f_id == facilities.c.f_id)).where(racks.c.r_id == rack.number and racks.c.r_facility_id == rack.facility.number))
+        rack_timeseries_configs_result = conn.execute(select(racks_timeseries_configs).where(racks_timeseries_configs.c.rtc_r_id == rack.number))
         if result.rowcount == 0:
             return Error(code=404, message="Rack Id not found"), 404
         else:
             return _create_rack_response(next(result), rack_timeseries_configs_result)
 
 def _create_rack_response(row, timeseries_configs_result):
-    facility_human_readable_id = facility_numeric_to_human_readable_id(row.r_f_id, row.f_country_code)
+    facility = FacilityId(row.f_country_code, row.f_id)
+    rack = RackId(facility, row.r_id)
     resp = RackResponse(
-        id                              = rack_numeric_to_human_readable_id(row.r_id, facility_human_readable_id),
-        facility_id                     = facility_human_readable_id,
+        id                              = rack.toString(),
+        facility_id                     = facility.toString(),
         total_available_power           = row.r_total_available_power,
         total_available_cooling_capacity= row.r_total_available_cooling_capacity,
         number_of_pdus                  = row.r_number_of_pdus,

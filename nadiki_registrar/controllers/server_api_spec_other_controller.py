@@ -163,7 +163,8 @@ def get_server(server_id):  # noqa: E501
 
 def _create_server_response(row, servers_timeseries_configs, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result):
     return ServerResponse(
-        id                      = ServerId(RackId(FacilityId(country_code=row.f_country_code, number=row.f_id).toString(), row.r_id).toString(), row.s_id).toString(),
+        #id                      = ServerId(RackId(FacilityId(country_code=row.f_country_code, number=row.f_id).toString(), row.r_id).toString(), row.s_id).toString(),
+        id                      = ServerId(row.f_country_code, row.f_id, row.r_id, row.s_id).toString(),
         rated_power             = row.s_rated_power,
         total_cpu_sockets       = row.s_total_cpu_sockets,
         number_of_psus          = row.s_number_of_psus,

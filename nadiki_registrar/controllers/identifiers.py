@@ -52,9 +52,23 @@ class RackId(BaseId):
         if groups != None:
             return RackId(groups[1], int(groups[2]))
 
-    def __init__(self, facility_id, number):
-        self.facility = FacilityId.fromString(facility_id)
-        self.number = number
+    def __init__(self, *params):
+        if len(params) == 2:
+            facility_id = params[0]
+            number      = params[1]
+            if isinstance(facility_id, FacilityId):
+                self.facility = facility_id
+            else:
+                self.facility = FacilityId.fromString(facility_id)
+            self.number = number
+        elif len(params) == 3:
+            facility_country_code   = params[0]
+            facility_number         = params[1]
+            number                  = params[2]
+            self.facility = FacilityId(facility_country_code, facility_number)
+            self.number = number
+        else:
+            raise TypeError('Wrong number of parameters')
 
     @property
     def facility(self):
@@ -77,9 +91,24 @@ class ServerId(BaseId):
         if groups != None:
             return ServerId(groups[1], int(groups[2]))
 
-    def __init__(self, rack_id, number):
-        self.rack = RackId.fromString(rack_id)
-        self.number = number
+    def __init__(self, *params):
+        if len(params) == 2:
+            rack_id = params[0]
+            number = params[1]
+            if isinstance(rack_id, RackId):
+                self.rack = rack_id
+            else:
+                self.rack = RackId.fromString(rack_id)
+            self.number = number
+        elif len(params) == 4:
+            facility_country_code = params[0]
+            facility_number = params[1]
+            rack_number = params[2]
+            server_number = params[3]
+            self.rack = RackId(FacilityId(facility_country_code, facility_number), rack_number)
+            self.number = server_number
+        else:
+            raise TypeError('Wrong number of parameters')
 
     @property
     def rack(self):
