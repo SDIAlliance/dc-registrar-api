@@ -1,39 +1,43 @@
 import json
 import random
+import math
 
 random.seed()
+
+def __truncated_random_float(order_of_magnitude=10, digits=9, minimum=0):
+    return math.floor((minimum+random.random()*order_of_magnitude)*10**digits)/10**digits
 
 def create_facility_input():
     rnd = random.Random()
     facility_create = {
-        "embeddedGhgEmissionsFacility":1.4658129,
-        "maintenanceHoursGenerator":3.6160767,
-        "whiteSpace":6.846853,
-        "designPue":1.7386281,
+        "embeddedGhgEmissionsFacility": __truncated_random_float(),
+        "maintenanceHoursGenerator": __truncated_random_float(),
+        "whiteSpace": __truncated_random_float(),
+        "designPue": __truncated_random_float(minimum=1),
         "coolingFluids": [
             {
-                "amount":7.0614014,
-                "gwpFactor":9.301444,
+                "amount": __truncated_random_float(),
+                "gwpFactor": __truncated_random_float(),
                 "type":"beer"
             },
             {
-                "amount":7.0614014,
-                "gwpFactor":9.301444,
+                "amount": __truncated_random_float(),
+                "gwpFactor": __truncated_random_float(),
                 "type":"water"
             }
         ],
-        "totalSpace":1.4894159,
+        "totalSpace": __truncated_random_float(),
         "gridPowerFeeds":1,
         "lifetimeFacility":1,
         "whiteSpaceFloors":1,
-        "installedCapacity":2.027123,
+        "installedCapacity": __truncated_random_float(),
         "lifetimeAssets":1,
         "tierLevel":1,
         "location": {
             "latitude":48.13715+rnd.random(), # prevent conflicts because location must be unique
             "longitude":11.5761236+rnd.random()
         },
-        "embeddedGhgEmissionsAssets":5.637377
+        "embeddedGhgEmissionsAssets": __truncated_random_float()
     }
     return facility_create
 

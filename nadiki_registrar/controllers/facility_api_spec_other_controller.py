@@ -21,7 +21,7 @@ import urllib3
 import urllib.parse
 import country_converter as coco
 
-from sqlalchemy import create_engine, MetaData, Table, select, delete, insert, text
+from sqlalchemy import create_engine, MetaData, Table, select, delete, insert, update, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 
@@ -72,15 +72,8 @@ def create_facility(facility_create=None):  # noqa: E501
     if connexion.request.is_json:
         facility_create = FacilityCreate.from_dict(connexion.request.get_json())  # noqa: E501
 
-        # resolve location to three letter countrycode
-        # (TODO: exceptions here are likely for various reasons, maybe we should give the caller a hint on whether it was his fault or not)
-        response = http.request("GET", BASE_URL_FOR_NOMINATIM+urllib.parse.urlencode({
-            "lat": facility_create.location.latitude,
-            "lon": facility_create.location.longitude,
-            "format": "json"
-        }), headers={"User-agent": "Nadiki Registrar https://github.com/SDIAlliance/nadiki-registrar"})
         try:
-            country_code = coco.convert(names=json.loads(response.data)["address"]["country_code"], to="ISO3")
+            country_code = __geo_location_to_country_code(facility_create.location.latitude, facility_create.location.longitude)
         except:
             return Error(code=400, message="Could not resolve geo location"), 400
 
@@ -243,7 +236,7 @@ def list_facilities(limit=None, offset=None):  # noqa: E501
         return resp, 200
 
 
-def update_facility(facility_id, facility_update):  # noqa: E501
+def update_facility(facility_id, facility_update=None):  # noqa: E501
     """Update facility
 
     Update all facility information # noqa: E501
@@ -257,4 +250,61 @@ def update_facility(facility_id, facility_update):  # noqa: E501
     """
     if connexion.request.is_json:
         facility_update = FacilityUpdate.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+
+        try:
+            country_code = __geo_location_to_country_code(facility_update.location.latitude, facility_update.location.longitude)
+        except:
+            return Error(code=400, message="Could not resolve geo location"), 400
+
+
+        facility = FacilityId.fromString(facility_id)
+        with engine.connect() as conn:
+            try:
+                result = conn.execute(update(facilities).where(facilities.c.f_id == facility.number).values({
+                    "f_geo_lon": facility_update.location.latitude,
+                    "f_geo_lat": facility_update.location.longitude,
+                    "f_embedded_ghg_emissions_facility": facility_update.embedded_ghg_emissions_facility,
+                    "f_lifetime_facility": facility_update.lifetime_facility,
+                    "f_embedded_ghg_emissions_assets": facility_update.embedded_ghg_emissions_assets,
+                    "f_lifetime_assets": facility_update.lifetime_assets,
+                    "f_maintenance_hours_generator": facility_update.maintenance_hours_generator,
+                    "f_installed_capacity": facility_update.installed_capacity,
+                    "f_grid_power_feeds": facility_update.grid_power_feeds,
+                    "f_design_pue": facility_update.design_pue,
+                    "f_tier_level": str(facility_update.tier_level), # MariaDB expects a string here
+                    "f_white_space_floors": facility_update.white_space_floors,
+                    "f_total_space": facility_update.total_space,
+                    "f_white_space": facility_update.white_space,
+                    "f_country_code": country_code,
+                    "f_updated_at": func.now(),
+                }))
+
+                if result.rowcount != 1:
+                    return Error(code=404, message="Facility not found"), 404
+
+                conn.execute(delete(facilities_cooling_fluids).where(facilities_cooling_fluids.c.fcf_f_id == facility.number))
+
+                for x in facility_update.cooling_fluids:
+                    conn.execute(insert(facilities_cooling_fluids).values({
+                        "fcf_f_id": facility.number,
+                        "fcf_type": x.type,
+                        "fcf_amount": x.amount,
+                        "fcf_gwp_factor": x.gwp_factor
+                    }))
+
+                conn.commit()
+            except IntegrityError as e:
+                return Error(code=400, message="A facility with this location already exists."), 400
+
+        return get_facility(facility_id)
+
+
+def __geo_location_to_country_code(lat, lon):
+    # resolve location to three letter countrycode
+    # (TODO: exceptions here are likely for various reasons, maybe we should give the caller a hint on whether it was his fault or not)
+    response = http.request("GET", BASE_URL_FOR_NOMINATIM+urllib.parse.urlencode({
+        "lat": lat,
+        "lon": lon,
+        "format": "json"
+    }), headers={"User-agent": "Nadiki Registrar https://github.com/SDIAlliance/nadiki-registrar"})
+    return coco.convert(names=json.loads(response.data)["address"]["country_code"], to="ISO3")

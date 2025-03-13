@@ -47,7 +47,8 @@ class TestFacilityApiSpecOtherController(BaseTestCase):
         self.assertTrue(len(response_dict["id"]) > 0,                               "no id in output")
         self.assertTrue(len(response_dict["createdAt"]) > 0,                        "no createdAt in output")
         self.assertTrue(len(response_dict["updatedAt"]) > 0,                        "no updatedAt in output")
-        self.assertEqual(response_dict["createdAt"], response_dict["updatedAt"],    "createdAt and updatedAt not equal for new facility")
+        self.assertTrue(datetime.fromisoformat(response_dict["createdAt"]).timestamp() <= datetime.fromisoformat(response_dict["updatedAt"]).timestamp(),
+                        "createdAt not less than or equal to updatedAt")
         created_at = datetime.fromisoformat(response_dict["createdAt"])
         self.assertTrue(datetime.now().timestamp() - created_at.timestamp() < 10,   "createdAt is more than 10 seconds ago for new facility")
         self.assertTrue(len(response_dict["countryCode"]) > 0,                      "no country code in output")
@@ -131,24 +132,27 @@ class TestFacilityApiSpecOtherController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
 
-#    def test_update_facility(self):
-#        """Test case for update_facility
-#
-#        Update facility
-#        """
-#        facility_update = null
-#        headers = { 
-#            'Accept': 'application/json',
-#            'Content-Type': 'application/json',
-#        }
-#        response = self.client.open(
-#            '/v1/facilities/{facility_id}'.format(facility_id='FACILITY-DEU-099'),
-#            method='PUT',
-#            headers=headers,
-#            data=json.dumps(facility_update),
-#            content_type='application/json')
-#        self.assert200(response,
-#                       'Response body is : ' + response.data.decode('utf-8'))
+    def test_update_facility(self):
+        """Test case for update_facility
+
+        Update facility
+        """
+        input = create_facility_input()
+        response = create_facility_raw(self.client, input)
+        response_dict = self._check_facility_response(input, response, 201)
+
+        facility_update = create_facility_input()
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+        response = self.client.open(
+            '/v1/facilities/{facility_id}'.format(facility_id=response_dict["id"]),
+            method='PUT',
+            headers=headers,
+            data=json.dumps(facility_update),
+            content_type='application/json')
+        self._check_facility_response(facility_update, response, 200)
 
 
 if __name__ == '__main__':
