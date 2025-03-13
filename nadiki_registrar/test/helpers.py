@@ -27,12 +27,12 @@ def create_facility_input():
             }
         ],
         "totalSpace": __truncated_random_float(),
-        "gridPowerFeeds":1,
-        "lifetimeFacility":1,
-        "whiteSpaceFloors":1,
+        "gridPowerFeeds": random.randint(1,3),
+        "lifetimeFacility": random.randint(5,15),
+        "whiteSpaceFloors": random.randint(1,5),
         "installedCapacity": __truncated_random_float(),
-        "lifetimeAssets":1,
-        "tierLevel":1,
+        "lifetimeAssets": random.randint(3,5),
+        "tierLevel": random.randint(1,4),
         "location": {
             "latitude":48.13715+rnd.random(), # prevent conflicts because location must be unique
             "longitude":11.5761236+rnd.random()
@@ -56,11 +56,11 @@ def create_facility_raw(client, input):
 
 def create_rack_input(facility_id):
     rack_create = {
-        "total_available_cooling_capacity": 6.0274563,
-        "total_available_power": 0.8008282,
-        "number_of_pdus": 1,
+        "total_available_cooling_capacity": __truncated_random_float(),
+        "total_available_power": __truncated_random_float(),
+        "number_of_pdus": random.randint(1,2),
         "product_passport":{},
-        "power_redundancy": 1,
+        "power_redundancy": random.randint(1,3),
         "facility_id": facility_id
     }
     return rack_create

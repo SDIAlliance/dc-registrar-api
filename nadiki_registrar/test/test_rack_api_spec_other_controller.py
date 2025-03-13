@@ -133,27 +133,35 @@ class TestRackApiSpecOtherController(BaseTestCase):
             query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-#
-#
-#    def test_update_rack(self):
-#        """Test case for update_rack
-#
-#        Update rack
-#        """
-#        rack_update = null
-#        headers = { 
-#            'Accept': 'application/json',
-#            'Content-Type': 'application/json',
-#        }
-#        response = self.client.open(
-#            '/v1/racks/{rack_id}'.format(rack_id='RACK-FACILITY-DEU-099-099'),
-#            method='PUT',
-#            headers=headers,
-#            data=json.dumps(rack_update),
-#            content_type='application/json')
-#        self.assert200(response,
-#                       'Response body is : ' + response.data.decode('utf-8'))
-#
+
+
+    def test_update_rack(self):
+        """Test case for update_rack
+
+        Update rack
+        """
+        facility_input = create_facility_input()
+        facility_response = create_facility_raw(self.client, facility_input)
+        decoded_facility_response = facility_response.data.decode('utf-8')
+        facility_response_dict = json.loads(decoded_facility_response)
+        rack_input = create_rack_input(facility_response_dict["id"])
+        rack_response = create_rack_raw(self.client, rack_input)
+        rack_response_dict = self._check_rack_response(rack_input, rack_response, 201)
+
+        rack_update = create_rack_input(facility_id=rack_response_dict["facility_id"])
+        headers = { 
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+        response = self.client.open(
+            '/v1/racks/{rack_id}'.format(rack_id=rack_response_dict["id"]),
+            method='PUT',
+            headers=headers,
+            data=json.dumps(rack_update),
+            content_type='application/json')
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
 
 if __name__ == '__main__':
     unittest.main()

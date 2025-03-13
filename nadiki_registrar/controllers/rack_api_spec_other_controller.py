@@ -17,7 +17,7 @@ from nadiki_registrar.models.rack_time_series_data_point import RackTimeSeriesDa
 import json
 
 from uuid import uuid4
-from sqlalchemy import create_engine, MetaData, Table, select, delete, insert, text
+from sqlalchemy import create_engine, MetaData, Table, select, delete, insert, update, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 
@@ -179,7 +179,7 @@ def list_racks(limit=None, offset=None, facility_id=None):  # noqa: E501
         return resp, 200
 
 
-def update_rack(rack_id, rack_update):  # noqa: E501
+def update_rack(rack_id, rack_update=None):  # noqa: E501
     """Update rack
 
     Update all rack information # noqa: E501
@@ -193,4 +193,24 @@ def update_rack(rack_id, rack_update):  # noqa: E501
     """
     if connexion.request.is_json:
         rack_update = RackUpdate.from_dict(connexion.request.get_json())  # noqa: E501
+
+        facility = FacilityId.fromString(rack_update.facility_id)
+        rack = RackId.fromString(rack_id)
+
+        with engine.connect() as conn:
+            try:
+                conn.execute(update(racks).where(racks.c.r_id == rack.number).values({
+                    "r_f_id":                               facility.number,
+                    "r_total_available_power":              rack_update.total_available_power,
+                    "r_total_available_cooling_capacity":   rack_update.total_available_cooling_capacity,
+                    "r_number_of_pdus":                     rack_update.number_of_pdus,
+                    "r_power_redundancy":                   rack_update.power_redundancy,
+                    "r_product_passport":                   json.dumps(rack_update.product_passport),
+                    "r_updated_at":                         func.now()
+                }))
+            except IntegrityError as e:
+                return Error(message="Integrity error", details="Does the given facility ID exist?", code=400), 400
+
+        return get_rack(rack_id)
+
     return 'do some magic!'
