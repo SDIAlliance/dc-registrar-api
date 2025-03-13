@@ -79,18 +79,18 @@ def create_rack_raw(client, input):
 
 def create_server_input(facility_id, rack_id):
     server_create = {
-        "number_of_psus": 1,
-        "rated_power": 0.8008282,
+        "number_of_psus": random.randint(1,2),
+        "rated_power": __truncated_random_float(),
         "installed_gpus": [
             {"vendor":"vendor","type":"type"},
             {"vendor":"vendor","type":"type"}
         ],
         "storage_devices": [
-            {"vendor":"vendor","type":"NVMe","capacity":2.302136},
-            {"vendor":"vendor","type":"NVMe","capacity":2.302136}
+            {"vendor":"vendor","type":"NVMe","capacity": random.randint(1024, 1024**2)},
+            {"vendor":"vendor","type":"NVMe","capacity": random.randint(1024, 1024**2)}
         ],
-        "total_cpu_sockets": 1,
-        "total_installed_memory": 5,
+        "total_cpu_sockets": random.randint(1,4),
+        "total_installed_memory": random.randint(1,1024),
         "cooling_type": "air",
         "rack_id": rack_id,
         "installed_fpgas": [
@@ -103,7 +103,7 @@ def create_server_input(facility_id, rack_id):
             {"vendor":"vendor","type":"type"}
         ],
         "facility_id": facility_id,
-        "number_of_memory_units": 5
+        "number_of_memory_units": random.randint(1,10)
     }
     return server_create
 

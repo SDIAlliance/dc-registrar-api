@@ -101,46 +101,60 @@ class TestServerApiSpecOtherController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-#    def test_list_servers(self):
-#        """Test case for list_servers
-#
-#        List all servers
-#        """
-#        query_string = [('limit', 20),
-#                        ('offset', 0),
-#                        ('facility_id', 'facility_id_example'),
-#                        ('rack_id', 'rack_id_example')]
-#        headers = { 
-#            'Accept': 'application/json',
-#        }
-#        response = self.client.open(
-#            '/v1/servers',
-#            method='GET',
-#            headers=headers,
-#            query_string=query_string)
-#        self.assert200(response,
-#                       'Response body is : ' + response.data.decode('utf-8'))
-#
-#
-#    def test_update_server(self):
-#        """Test case for update_server
-#
-#        Update server
-#        """
-#        server_update = null
-#        headers = { 
-#            'Accept': 'application/json',
-#            'Content-Type': 'application/json',
-#        }
-#        response = self.client.open(
-#            '/v1/servers/{server_id}'.format(server_id='server_id_example'),
-#            method='PUT',
-#            headers=headers,
-#            data=json.dumps(server_update),
-#            content_type='application/json')
-#        self.assert200(response,
-#                       'Response body is : ' + response.data.decode('utf-8'))
-#
+    def test_list_servers(self):
+        """Test case for list_servers
+
+        List all servers
+        """
+        query_string = [('limit', 20),
+                        ('offset', 0),
+                        ('facility_id', 'facility_id_example'),
+                        ('rack_id', 'rack_id_example')]
+        headers = {
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/v1/servers',
+            method='GET',
+            headers=headers,
+            query_string=query_string)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+
+    def test_update_server(self):
+        """Test case for update_server
+
+        Update server
+        """
+        facility_input = create_facility_input()
+        facility_response = create_facility_raw(self.client, facility_input)
+        decoded_facility_response = facility_response.data.decode('utf-8')
+        facility_response_dict = json.loads(decoded_facility_response)
+        rack_input = create_rack_input(facility_response_dict["id"])
+        rack_response = create_rack_raw(self.client, rack_input)
+        decoded_rack_response = rack_response.data.decode('utf-8')
+        rack_response_dict = json.loads(decoded_rack_response)
+
+        server_input = create_server_input(facility_response_dict["id"], rack_response_dict["id"])
+        server_response = create_server_raw(self.client, server_input)
+        server_response_dict = self._check_server_response(server_response)
+
+        server_update = create_server_input(facility_response_dict["id"], rack_response_dict["id"])
+
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+        response = self.client.open(
+            '/v1/servers/{server_id}'.format(server_id=server_response_dict["id"]),
+            method='PUT',
+            headers=headers,
+            data=json.dumps(server_update),
+            content_type='application/json')
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
 
 if __name__ == '__main__':
     unittest.main()

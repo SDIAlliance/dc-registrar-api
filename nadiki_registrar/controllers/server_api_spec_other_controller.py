@@ -20,7 +20,7 @@ from nadiki_registrar.models.server_time_series_data_point import ServerTimeSeri
 
 import json
 
-from sqlalchemy import create_engine, MetaData, Table, select, delete, insert, text
+from sqlalchemy import create_engine, MetaData, Table, select, delete, insert, update, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 
@@ -218,7 +218,7 @@ def list_servers(limit=None, offset=None, facility_id=None, rack_id=None):  # no
         return ListServers200Response(items=result, total=servers_result.rowcount, limit=limit, offset=offset)
 
 
-def update_server(server_id, server_update):  # noqa: E501
+def update_server(server_id, server_update=None):  # noqa: E501
     """Update server
 
     Update all server information # noqa: E501
@@ -232,4 +232,55 @@ def update_server(server_id, server_update):  # noqa: E501
     """
     if connexion.request.is_json:
         server_update = ServerUpdate.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+
+        server = ServerId.fromString(server_id)
+        rack = RackId.fromString(server_update.rack_id)
+
+        with engine.connect() as conn:
+            conn.execute(update(servers).values({
+                "s_r_id":                   rack.number,
+                "s_rated_power":            server_update.rated_power,
+                "s_total_cpu_sockets":      server_update.total_cpu_sockets,
+                "s_number_of_psus":         server_update.number_of_psus,
+                "s_total_installed_memory": server_update.total_installed_memory,
+                "s_number_of_memory_units": server_update.number_of_memory_units,
+                "s_product_passport":       json.dumps(server_update.product_passport),
+                "s_cooling_type":           server_update.cooling_type,
+                "s_updated_at":             func.now(),
+            }))
+
+            conn.execute(delete(servers_cpus).where(servers_cpus.c.sc_s_id == server.number))
+            for cpu in server_update.installed_cpus:
+                conn.execute(insert(servers_cpus).values({
+                    "sc_s_id": server.number,
+                    "sc_vendor": cpu.vendor,
+                    "sc_type": cpu.type
+                }))
+
+            conn.execute(delete(servers_gpus).where(servers_gpus.c.sg_s_id == server.number))
+            for gpu in server_update.installed_gpus:
+                conn.execute(insert(servers_gpus).values({
+                    "sg_s_id": server.number,
+                    "sg_vendor": gpu.vendor,
+                    "sg_type": gpu.type
+                }))
+
+            conn.execute(delete(servers_fpgas).where(servers_fpgas.c.sf_s_id == server.number))
+            for fpga in server_update.installed_fpgas:
+                conn.execute(insert(servers_fpgas).values({
+                    "sf_s_id": server.number,
+                    "sf_vendor": fpga.vendor,
+                    "sf_type": fpga.type
+                }))
+
+            conn.execute(delete(servers_storage_devices).where(servers_storage_devices.c.sh_s_id == server.number))
+            for hd in server_update.storage_devices:
+                conn.execute(insert(servers_storage_devices).values({
+                    "sh_s_id": server.number,
+                    "sh_vendor": hd.vendor,
+                    "sh_type": hd.type
+                }))
+
+            conn.commit()
+
+        return get_server(server_id)
