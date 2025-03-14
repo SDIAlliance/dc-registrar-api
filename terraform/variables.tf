@@ -22,3 +22,8 @@ variable "availability_zones" {
   type        = list(string)
   description = "List of AWS availability_zones to use"
 }
+
+variable "mariadb_image_tag" {
+  type        = string
+  description = "Tag to use when accessing the MariaDB mirror ECR"
+}
