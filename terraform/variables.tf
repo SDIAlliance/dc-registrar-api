@@ -27,3 +27,50 @@ variable "mariadb_image_tag" {
   type        = string
   description = "Tag to use when accessing the MariaDB mirror ECR"
 }
+
+variable "registrar_image_tag" {
+  type        = string
+  description = "Tag to use when accessing the registrar ECR"
+}
+
+variable "mariadb_cpu" {
+  type        = number
+  description = "CPU value for the MariaDB ECS service"
+  default     = 256
+}
+
+variable "mariadb_ram" {
+  type        = number
+  description = "RAM in MB to use for the Registrar ECS service"
+  default     = 512
+}
+
+variable "registrar_cpu" {
+  type        = number
+  description = "CPU value for the Registrar ECS service"
+  default     = 256
+}
+
+variable "registrar_ram" {
+  type        = number
+  description = "RAM in MB to use for the MariaDB ECS service"
+  default     = 512
+}
+
+variable "internal_domain_name" {
+  type        = string
+  description = "DNS zone to use for service discovery"
+  default     = "leitmotiv.intern"
+}
+
+variable "mariadb_container_port" {
+  type        = number
+  description = "Port where MariaDB listens"
+  default     = 3306
+}
+
+variable "registrar_container_port" {
+  type        = number
+  description = "Port where Registrar listens"
+  default     = 8080
+}
