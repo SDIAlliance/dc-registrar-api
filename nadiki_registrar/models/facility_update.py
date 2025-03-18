@@ -19,7 +19,7 @@ class FacilityUpdate(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, location=None, embedded_ghg_emissions_facility=None, lifetime_facility=15, embedded_ghg_emissions_assets=None, lifetime_assets=10, cooling_fluids=None, maintenance_hours_generator=None, installed_capacity=None, grid_power_feeds=3, design_pue=1.4, tier_level=3, white_space_floors=1, total_space=None, white_space=None):  # noqa: E501
+    def __init__(self, location=None, embedded_ghg_emissions_facility=None, lifetime_facility=15, embedded_ghg_emissions_assets=None, lifetime_assets=10, cooling_fluids=None, maintenance_hours_generator=None, installed_capacity=None, grid_power_feeds=3, design_pue=1.4, tier_level=3, white_space_floors=1, total_space=None, white_space=None, description=None):  # noqa: E501
         """FacilityUpdate - a model defined in OpenAPI
 
         :param location: The location of this FacilityUpdate.  # noqa: E501
@@ -50,6 +50,8 @@ class FacilityUpdate(Model):
         :type total_space: float
         :param white_space: The white_space of this FacilityUpdate.  # noqa: E501
         :type white_space: float
+        :param description: The description of this FacilityUpdate.  # noqa: E501
+        :type description: str
         """
         self.openapi_types = {
             'location': Location,
@@ -65,7 +67,8 @@ class FacilityUpdate(Model):
             'tier_level': int,
             'white_space_floors': int,
             'total_space': float,
-            'white_space': float
+            'white_space': float,
+            'description': str
         }
 
         self.attribute_map = {
@@ -82,7 +85,8 @@ class FacilityUpdate(Model):
             'tier_level': 'tierLevel',
             'white_space_floors': 'whiteSpaceFloors',
             'total_space': 'totalSpace',
-            'white_space': 'whiteSpace'
+            'white_space': 'whiteSpace',
+            'description': 'description'
         }
 
         self._location = location
@@ -99,6 +103,7 @@ class FacilityUpdate(Model):
         self._white_space_floors = white_space_floors
         self._total_space = total_space
         self._white_space = white_space
+        self._description = description
 
     @classmethod
     def from_dict(cls, dikt) -> 'FacilityUpdate':
@@ -446,3 +451,26 @@ class FacilityUpdate(Model):
         """
 
         self._white_space = white_space
+
+    @property
+    def description(self):
+        """Gets the description of this FacilityUpdate.
+
+        Textual description ob the facility for informational purposes  # noqa: E501
+
+        :return: The description of this FacilityUpdate.
+        :rtype: str
+        """
+        return self._description
+
+    @description.setter
+    def description(self, description):
+        """Sets the description of this FacilityUpdate.
+
+        Textual description ob the facility for informational purposes  # noqa: E501
+
+        :param description: The description of this FacilityUpdate.
+        :type description: str
+        """
+
+        self._description = description

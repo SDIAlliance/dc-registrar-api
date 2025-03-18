@@ -17,39 +17,40 @@ CREATE TABLE servers (
     s_total_fpgas               INT UNSIGNED DEFAULT 0,
     s_product_passport          JSON,
     s_cooling_type              VARCHAR(50),
+    s_description               TEXT,
     s_prometheus_endpoint       VARCHAR(255) NOT NULL,
     s_created_at                TIMESTAMP NOT NULL,
     s_updated_at                TIMESTAMP NOT NULL,
     CONSTRAINT s_fk FOREIGN KEY fk (s_r_id) REFERENCES racks (r_id) ON DELETE CASCADE
-);
+) WITH SYSTEM VERSIONING;
 
 CREATE TABLE servers_cpus (
     sc_s_id     INT UNSIGNED NOT NULL,
     sc_vendor   VARCHAR(255) NOT NULL,
     sc_type     VARCHAR(255) NOT NULL,
     CONSTRAINT sc_fk FOREIGN KEY fk (sc_s_id) REFERENCES servers (s_id) ON DELETE CASCADE
-);
+) WITH SYSTEM VERSIONING;
 
 CREATE TABLE servers_gpus(
     sg_s_id     INT UNSIGNED NOT NULL,
     sg_vendor   VARCHAR(255) NOT NULL,
     sg_type     VARCHAR(255) NOT NULL,
     CONSTRAINT sg_fk FOREIGN KEY fk (sg_s_id) REFERENCES servers (s_id) ON DELETE CASCADE
-);
+) WITH SYSTEM VERSIONING;
 
 CREATE TABLE servers_fpgas(
     sf_s_id     INT UNSIGNED NOT NULL,
     sf_vendor   VARCHAR(255) NOT NULL,
     sf_type     VARCHAR(255) NOT NULL,
     CONSTRAINT sf_fk FOREIGN KEY fk (sf_s_id) REFERENCES servers (s_id) ON DELETE CASCADE
-);
+) WITH SYSTEM VERSIONING;
 
 CREATE TABLE servers_storage_devices(
     sh_s_id     INT UNSIGNED NOT NULL,
     sh_vendor   VARCHAR(255) NOT NULL,
     sh_type     VARCHAR(255) NOT NULL,
     CONSTRAINT sh_fk FOREIGN KEY fk (sh_s_id) REFERENCES servers (s_id) ON DELETE CASCADE
-);
+) WITH SYSTEM VERSIONING;
  
 CREATE TABLE servers_timeseries_configs (
     stc_id                              INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -59,4 +60,4 @@ CREATE TABLE servers_timeseries_configs (
     stc_granularity_seconds             INT NOT NULL,
     stc_labels                          JSON,
     CONSTRAINT stc_fk FOREIGN KEY fk (stc_s_id) REFERENCES servers (s_id) ON DELETE CASCADE
-);
+) WITH SYSTEM VERSIONING;

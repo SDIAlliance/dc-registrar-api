@@ -55,6 +55,7 @@ def create_server(server_create=None):  # noqa: E501
                 "s_number_of_memory_units": server_create.number_of_memory_units,
                 "s_product_passport":       json.dumps(server_create.product_passport),
                 "s_cooling_type":           server_create.cooling_type,
+                "s_description":            server_create.description,
                 "s_prometheus_endpoint":    PROMETHEUS_ENDPOINT_URL,
                 "s_created_at":             func.now(),
                 "s_updated_at":             func.now(),
@@ -172,6 +173,7 @@ def _create_server_response(row, servers_timeseries_configs, servers_cpus_result
         number_of_memory_units  = row.s_number_of_memory_units,
         product_passport        = row.s_product_passport,
         cooling_type            = row.s_cooling_type,
+        description             = row.s_description,
         time_series_config      = ServerTimeSeriesConfig(endpoint=row.s_prometheus_endpoint, data_points=[ServerTimeSeriesDataPoint(
             name                = x.stc_name,
             unit                = x.stc_unit,
@@ -246,6 +248,7 @@ def update_server(server_id, server_update=None):  # noqa: E501
                 "s_number_of_memory_units": server_update.number_of_memory_units,
                 "s_product_passport":       json.dumps(server_update.product_passport),
                 "s_cooling_type":           server_update.cooling_type,
+                "s_description":            server_update.description,
                 "s_updated_at":             func.now(),
             }))
 

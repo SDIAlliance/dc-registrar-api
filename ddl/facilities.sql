@@ -23,12 +23,13 @@ CREATE TABLE facilities (
     f_white_space_floors                INT UNSIGNED DEFAULT 1,
     f_total_space                       DECIMAL(20, 9) DEFAULT NULL,
     f_white_space                       DECIMAL(20, 9) DEFAULT NULL,
+    f_description                       TEXT,
     f_country_code                      VARCHAR(3) NOT NULL,
     f_prometheus_endpoint               VARCHAR(255) NOT NULL,
     f_created_at                        TIMESTAMP NOT NULL,
     f_updated_at                        TIMESTAMP NOT NULL,
     UNIQUE (f_geo_lat, f_geo_lon)
-);
+) WITH SYSTEM VERSIONING;
 
 CREATE TABLE facilities_cooling_fluids (
     fcf_id                              INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -37,7 +38,7 @@ CREATE TABLE facilities_cooling_fluids (
     fcf_amount                          DECIMAL(20, 9) NOT NULL,
     fcf_gwp_factor                      DECIMAL(20, 9) DEFAULT NULL,
     CONSTRAINT fcf_fk FOREIGN KEY fk (fcf_f_id) REFERENCES facilities (f_id) ON DELETE CASCADE
-);
+) WITH SYSTEM VERSIONING;
 
 -- actually this is the structure of DataPoints in the spec ... rename this?
 CREATE TABLE facilities_timeseries_configs (
@@ -48,4 +49,4 @@ CREATE TABLE facilities_timeseries_configs (
     ftc_granularity_seconds             INT NOT NULL,
     ftc_labels                          JSON,
     CONSTRAINT ftc_fk FOREIGN KEY fk (ftc_f_id) REFERENCES facilities (f_id) ON DELETE CASCADE
-);
+) WITH SYSTEM VERSIONING;

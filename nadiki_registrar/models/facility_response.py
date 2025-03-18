@@ -21,7 +21,7 @@ class FacilityResponse(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, location=None, embedded_ghg_emissions_facility=None, lifetime_facility=15, embedded_ghg_emissions_assets=None, lifetime_assets=10, cooling_fluids=None, maintenance_hours_generator=None, installed_capacity=None, grid_power_feeds=3, design_pue=1.4, tier_level=3, white_space_floors=1, total_space=None, white_space=None, id=None, country_code=None, time_series_config=None, created_at=None, updated_at=None):  # noqa: E501
+    def __init__(self, location=None, embedded_ghg_emissions_facility=None, lifetime_facility=15, embedded_ghg_emissions_assets=None, lifetime_assets=10, cooling_fluids=None, maintenance_hours_generator=None, installed_capacity=None, grid_power_feeds=3, design_pue=1.4, tier_level=3, white_space_floors=1, total_space=None, white_space=None, description=None, id=None, country_code=None, time_series_config=None, created_at=None, updated_at=None):  # noqa: E501
         """FacilityResponse - a model defined in OpenAPI
 
         :param location: The location of this FacilityResponse.  # noqa: E501
@@ -52,6 +52,8 @@ class FacilityResponse(Model):
         :type total_space: float
         :param white_space: The white_space of this FacilityResponse.  # noqa: E501
         :type white_space: float
+        :param description: The description of this FacilityResponse.  # noqa: E501
+        :type description: str
         :param id: The id of this FacilityResponse.  # noqa: E501
         :type id: str
         :param country_code: The country_code of this FacilityResponse.  # noqa: E501
@@ -78,6 +80,7 @@ class FacilityResponse(Model):
             'white_space_floors': int,
             'total_space': float,
             'white_space': float,
+            'description': str,
             'id': str,
             'country_code': str,
             'time_series_config': FacilityTimeSeriesConfig,
@@ -100,6 +103,7 @@ class FacilityResponse(Model):
             'white_space_floors': 'whiteSpaceFloors',
             'total_space': 'totalSpace',
             'white_space': 'whiteSpace',
+            'description': 'description',
             'id': 'id',
             'country_code': 'countryCode',
             'time_series_config': 'timeSeriesConfig',
@@ -121,6 +125,7 @@ class FacilityResponse(Model):
         self._white_space_floors = white_space_floors
         self._total_space = total_space
         self._white_space = white_space
+        self._description = description
         self._id = id
         self._country_code = country_code
         self._time_series_config = time_series_config
@@ -473,6 +478,29 @@ class FacilityResponse(Model):
         """
 
         self._white_space = white_space
+
+    @property
+    def description(self):
+        """Gets the description of this FacilityResponse.
+
+        Textual description ob the facility for informational purposes  # noqa: E501
+
+        :return: The description of this FacilityResponse.
+        :rtype: str
+        """
+        return self._description
+
+    @description.setter
+    def description(self, description):
+        """Sets the description of this FacilityResponse.
+
+        Textual description ob the facility for informational purposes  # noqa: E501
+
+        :param description: The description of this FacilityResponse.
+        :type description: str
+        """
+
+        self._description = description
 
     @property
     def id(self):

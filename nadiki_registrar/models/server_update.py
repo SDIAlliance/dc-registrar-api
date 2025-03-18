@@ -23,7 +23,7 @@ class ServerUpdate(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, facility_id=None, rack_id=None, rated_power=None, total_cpu_sockets=2, installed_cpus=None, number_of_psus=2, total_installed_memory=None, number_of_memory_units=None, storage_devices=None, installed_gpus=None, installed_fpgas=None, product_passport=None, cooling_type='air'):  # noqa: E501
+    def __init__(self, facility_id=None, rack_id=None, rated_power=None, total_cpu_sockets=2, installed_cpus=None, number_of_psus=2, total_installed_memory=None, number_of_memory_units=None, storage_devices=None, installed_gpus=None, installed_fpgas=None, product_passport=None, cooling_type='air', description=None):  # noqa: E501
         """ServerUpdate - a model defined in OpenAPI
 
         :param facility_id: The facility_id of this ServerUpdate.  # noqa: E501
@@ -52,6 +52,8 @@ class ServerUpdate(Model):
         :type product_passport: object
         :param cooling_type: The cooling_type of this ServerUpdate.  # noqa: E501
         :type cooling_type: str
+        :param description: The description of this ServerUpdate.  # noqa: E501
+        :type description: str
         """
         self.openapi_types = {
             'facility_id': str,
@@ -66,7 +68,8 @@ class ServerUpdate(Model):
             'installed_gpus': List[GPU],
             'installed_fpgas': List[FPGA],
             'product_passport': object,
-            'cooling_type': str
+            'cooling_type': str,
+            'description': str
         }
 
         self.attribute_map = {
@@ -82,7 +85,8 @@ class ServerUpdate(Model):
             'installed_gpus': 'installed_gpus',
             'installed_fpgas': 'installed_fpgas',
             'product_passport': 'product_passport',
-            'cooling_type': 'cooling_type'
+            'cooling_type': 'cooling_type',
+            'description': 'description'
         }
 
         self._facility_id = facility_id
@@ -98,6 +102,7 @@ class ServerUpdate(Model):
         self._installed_fpgas = installed_fpgas
         self._product_passport = product_passport
         self._cooling_type = cooling_type
+        self._description = description
 
     @classmethod
     def from_dict(cls, dikt) -> 'ServerUpdate':
@@ -422,3 +427,26 @@ class ServerUpdate(Model):
             )
 
         self._cooling_type = cooling_type
+
+    @property
+    def description(self):
+        """Gets the description of this ServerUpdate.
+
+        Textual description ob the facility for informational purposes  # noqa: E501
+
+        :return: The description of this ServerUpdate.
+        :rtype: str
+        """
+        return self._description
+
+    @description.setter
+    def description(self, description):
+        """Sets the description of this ServerUpdate.
+
+        Textual description ob the facility for informational purposes  # noqa: E501
+
+        :param description: The description of this ServerUpdate.
+        :type description: str
+        """
+
+        self._description = description

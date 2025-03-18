@@ -94,6 +94,7 @@ def create_facility(facility_create=None):  # noqa: E501
                     "f_white_space_floors": facility_create.white_space_floors,
                     "f_total_space": facility_create.total_space,
                     "f_white_space": facility_create.white_space,
+                    "f_description": facility_create.description,
                     "f_country_code": country_code,
                     "f_prometheus_endpoint": PROMETHEUS_ENDPOINT_URL,
                     "f_created_at": func.now(),
@@ -196,6 +197,7 @@ def _create_facility_response(row, facilities_cooling_fluids_result, facilities_
         white_space_floors              = row.f_white_space_floors,
         total_space                     = row.f_total_space,
         white_space                     = row.f_white_space,
+        description                     = row.f_description,
         time_series_config              = FacilityTimeSeriesConfig(endpoint=row.f_prometheus_endpoint, data_points=[
             FacilityTimeSeriesDataPoint(name=x.ftc_name, unit=x.ftc_unit, granularity_seconds=x.ftc_granularity_seconds, labels=json.loads(x.ftc_labels)) for x in facilities_timeseries_configs_result
         ]),
@@ -275,6 +277,7 @@ def update_facility(facility_id, facility_update=None):  # noqa: E501
                     "f_white_space_floors": facility_update.white_space_floors,
                     "f_total_space": facility_update.total_space,
                     "f_white_space": facility_update.white_space,
+                    "f_description": facility_update.description,
                     "f_country_code": country_code,
                     "f_updated_at": func.now(),
                 }))

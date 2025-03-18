@@ -17,7 +17,7 @@ class RackResponse(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, facility_id=None, total_available_power=5, total_available_cooling_capacity=5, number_of_pdus=2, power_redundancy=2, product_passport=None, id=None, time_series_config=None, created_at=None, updated_at=None):  # noqa: E501
+    def __init__(self, facility_id=None, total_available_power=5, total_available_cooling_capacity=5, number_of_pdus=2, power_redundancy=2, product_passport=None, description=None, id=None, time_series_config=None, created_at=None, updated_at=None):  # noqa: E501
         """RackResponse - a model defined in OpenAPI
 
         :param facility_id: The facility_id of this RackResponse.  # noqa: E501
@@ -32,6 +32,8 @@ class RackResponse(Model):
         :type power_redundancy: int
         :param product_passport: The product_passport of this RackResponse.  # noqa: E501
         :type product_passport: object
+        :param description: The description of this RackResponse.  # noqa: E501
+        :type description: str
         :param id: The id of this RackResponse.  # noqa: E501
         :type id: str
         :param time_series_config: The time_series_config of this RackResponse.  # noqa: E501
@@ -48,6 +50,7 @@ class RackResponse(Model):
             'number_of_pdus': int,
             'power_redundancy': int,
             'product_passport': object,
+            'description': str,
             'id': str,
             'time_series_config': RackTimeSeriesConfig,
             'created_at': datetime,
@@ -61,6 +64,7 @@ class RackResponse(Model):
             'number_of_pdus': 'number_of_pdus',
             'power_redundancy': 'power_redundancy',
             'product_passport': 'product_passport',
+            'description': 'description',
             'id': 'id',
             'time_series_config': 'timeSeriesConfig',
             'created_at': 'createdAt',
@@ -73,6 +77,7 @@ class RackResponse(Model):
         self._number_of_pdus = number_of_pdus
         self._power_redundancy = power_redundancy
         self._product_passport = product_passport
+        self._description = description
         self._id = id
         self._time_series_config = time_series_config
         self._created_at = created_at
@@ -232,6 +237,29 @@ class RackResponse(Model):
         """
 
         self._product_passport = product_passport
+
+    @property
+    def description(self):
+        """Gets the description of this RackResponse.
+
+        Textual description ob the facility for informational purposes  # noqa: E501
+
+        :return: The description of this RackResponse.
+        :rtype: str
+        """
+        return self._description
+
+    @description.setter
+    def description(self, description):
+        """Sets the description of this RackResponse.
+
+        Textual description ob the facility for informational purposes  # noqa: E501
+
+        :param description: The description of this RackResponse.
+        :type description: str
+        """
+
+        self._description = description
 
     @property
     def id(self):

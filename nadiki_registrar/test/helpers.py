@@ -1,6 +1,7 @@
 import json
 import random
 import math
+import uuid
 
 random.seed()
 
@@ -37,7 +38,8 @@ def create_facility_input():
             "latitude":48.13715+rnd.random(), # prevent conflicts because location must be unique
             "longitude":11.5761236+rnd.random()
         },
-        "embeddedGhgEmissionsAssets": __truncated_random_float()
+        "embeddedGhgEmissionsAssets": __truncated_random_float(),
+        "description": f"Facility {uuid.uuid4()}"
     }
     return facility_create
 
@@ -61,7 +63,8 @@ def create_rack_input(facility_id):
         "number_of_pdus": random.randint(1,2),
         "product_passport":{},
         "power_redundancy": random.randint(1,3),
-        "facility_id": facility_id
+        "facility_id": facility_id,
+        "description": f"Rack {uuid.uuid4()}"
     }
     return rack_create
 
@@ -103,7 +106,8 @@ def create_server_input(facility_id, rack_id):
             {"vendor":"vendor","type":"type"}
         ],
         "facility_id": facility_id,
-        "number_of_memory_units": random.randint(1,10)
+        "number_of_memory_units": random.randint(1,10),
+        "description": f"Server {uuid.uuid4()}"
     }
     return server_create
 

@@ -15,7 +15,7 @@ class RackUpdate(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, facility_id=None, total_available_power=5, total_available_cooling_capacity=5, number_of_pdus=2, power_redundancy=2, product_passport=None):  # noqa: E501
+    def __init__(self, facility_id=None, total_available_power=5, total_available_cooling_capacity=5, number_of_pdus=2, power_redundancy=2, product_passport=None, description=None):  # noqa: E501
         """RackUpdate - a model defined in OpenAPI
 
         :param facility_id: The facility_id of this RackUpdate.  # noqa: E501
@@ -30,6 +30,8 @@ class RackUpdate(Model):
         :type power_redundancy: int
         :param product_passport: The product_passport of this RackUpdate.  # noqa: E501
         :type product_passport: object
+        :param description: The description of this RackUpdate.  # noqa: E501
+        :type description: str
         """
         self.openapi_types = {
             'facility_id': str,
@@ -37,7 +39,8 @@ class RackUpdate(Model):
             'total_available_cooling_capacity': float,
             'number_of_pdus': int,
             'power_redundancy': int,
-            'product_passport': object
+            'product_passport': object,
+            'description': str
         }
 
         self.attribute_map = {
@@ -46,7 +49,8 @@ class RackUpdate(Model):
             'total_available_cooling_capacity': 'total_available_cooling_capacity',
             'number_of_pdus': 'number_of_pdus',
             'power_redundancy': 'power_redundancy',
-            'product_passport': 'product_passport'
+            'product_passport': 'product_passport',
+            'description': 'description'
         }
 
         self._facility_id = facility_id
@@ -55,6 +59,7 @@ class RackUpdate(Model):
         self._number_of_pdus = number_of_pdus
         self._power_redundancy = power_redundancy
         self._product_passport = product_passport
+        self._description = description
 
     @classmethod
     def from_dict(cls, dikt) -> 'RackUpdate':
@@ -210,3 +215,26 @@ class RackUpdate(Model):
         """
 
         self._product_passport = product_passport
+
+    @property
+    def description(self):
+        """Gets the description of this RackUpdate.
+
+        Textual description ob the facility for informational purposes  # noqa: E501
+
+        :return: The description of this RackUpdate.
+        :rtype: str
+        """
+        return self._description
+
+    @description.setter
+    def description(self, description):
+        """Sets the description of this RackUpdate.
+
+        Textual description ob the facility for informational purposes  # noqa: E501
+
+        :param description: The description of this RackUpdate.
+        :type description: str
+        """
+
+        self._description = description

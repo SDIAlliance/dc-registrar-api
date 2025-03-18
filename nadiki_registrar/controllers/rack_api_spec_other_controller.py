@@ -49,6 +49,7 @@ def create_rack(rack_create=None):  # noqa: E501
                     "r_number_of_pdus":                     rack_create.number_of_pdus,
                     "r_power_redundancy":                   rack_create.power_redundancy,
                     "r_product_passport":                   json.dumps(rack_create.product_passport),
+                    "r_description":                        rack_create.description,
                     "r_prometheus_endpoint":                PROMETHEUS_ENDPOINT_URL,
                     "r_created_at":                         func.now(),
                     "r_updated_at":                         func.now()
@@ -137,6 +138,7 @@ def _create_rack_response(row, timeseries_configs_result):
         number_of_pdus                  = row.r_number_of_pdus,
         power_redundancy                = row.r_power_redundancy,
         product_passport                = row.r_product_passport,
+        description                     = row.r_description,
         time_series_config              = RackTimeSeriesConfig(
             endpoint    = row.r_prometheus_endpoint,
             data_points = [RackTimeSeriesDataPoint(
@@ -206,6 +208,7 @@ def update_rack(rack_id, rack_update=None):  # noqa: E501
                     "r_number_of_pdus":                     rack_update.number_of_pdus,
                     "r_power_redundancy":                   rack_update.power_redundancy,
                     "r_product_passport":                   json.dumps(rack_update.product_passport),
+                    "r_description":                        rack_update.description,
                     "r_updated_at":                         func.now()
                 }))
             except IntegrityError as e:

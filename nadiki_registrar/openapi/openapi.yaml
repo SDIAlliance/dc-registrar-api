@@ -587,6 +587,7 @@ components:
         maintenanceHoursGenerator: 3.6160767
         whiteSpace: 6.846853
         designPue: 1.7386281
+        description: description
         coolingFluids:
         - amount: 7.0614014
           gwpFactor: 9.301444
@@ -684,6 +685,10 @@ components:
           format: float
           title: whiteSpace
           type: number
+        description:
+          description: Textual description ob the facility for informational purposes
+          title: description
+          type: string
       required:
       - location
       title: FacilityCreate
@@ -826,6 +831,7 @@ components:
         product_passport: "{}"
         power_redundancy: 1
         facility_id: facility_id
+        description: description
       properties:
         facility_id:
           description: ID of the facility where the rack is located
@@ -859,6 +865,10 @@ components:
           description: LCA product passport data
           title: product_passport
           type: object
+        description:
+          description: Textual description ob the facility for informational purposes
+          title: description
+          type: string
       required:
       - facility_id
       title: RackCreate
@@ -1024,6 +1034,7 @@ components:
           type: type
         - vendor: vendor
           type: type
+        description: description
         total_cpu_sockets: 1
         storage_devices:
         - vendor: vendor
@@ -1120,6 +1131,10 @@ components:
           - back-door-fan
           - air
           title: cooling_type
+          type: string
+        description:
+          description: Textual description ob the facility for informational purposes
+          title: description
           type: string
       required:
       - cooling_type
