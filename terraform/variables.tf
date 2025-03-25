@@ -74,3 +74,9 @@ variable "registrar_container_port" {
   description = "Port where Registrar listens"
   default     = 8080
 }
+
+variable "public_zone_name" {
+  type        = string
+  description = "Name of the public DNS zone"
+  default     = "svc.nadiki.work"
+}

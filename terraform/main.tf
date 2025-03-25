@@ -92,3 +92,16 @@ resource "aws_secretsmanager_secret" "mariadb_root_password" {
 resource "aws_cloudwatch_log_group" "default" {
   name = "/${var.namespace}-${var.name}"
 }
+
+module "dns_updater" {
+  source = "github.com/dboesswetter/ecs-public-dns-update"
+  service_name_mappings = [
+    {
+      hosted_zone_id   = aws_route53_zone.default.id
+      dns_name         = "registrar.${var.public_zone_name}"
+      dns_ttl          = 60 # keep it short because deployments will change the IP
+      ecs_service_name = aws_ecs_service.registrar.name
+      ecs_cluster_name = module.ecs_cluster.name
+    }
+  ]
+}

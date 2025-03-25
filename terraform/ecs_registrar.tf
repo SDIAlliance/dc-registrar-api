@@ -59,9 +59,6 @@ resource "aws_ecs_service" "registrar" {
   launch_type                        = "FARGATE"
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
-  service_registries {
-    registry_arn = aws_service_discovery_service.registrar.arn
-  }
   network_configuration {
     subnets          = module.dynamic_subnets.public_subnet_ids
     assign_public_ip = true
@@ -110,25 +107,6 @@ resource "aws_vpc_security_group_egress_rule" "registrar-database" {
   description       = "Database access"
 }
 
-resource "aws_service_discovery_public_dns_namespace" "default" {
-  name = "service.nadiki.work"
-}
-
-resource "aws_service_discovery_service" "registrar" {
-  name = "registrar"
-
-  dns_config {
-    namespace_id = aws_service_discovery_public_dns_namespace.default.id
-
-    dns_records {
-      ttl  = 10
-      type = "A"
-    }
-
-    routing_policy = "MULTIVALUE"
-  }
-
-  health_check_custom_config {
-    failure_threshold = 1
-  }
+resource "aws_route53_zone" "default" {
+  name = var.public_zone_name
 }
