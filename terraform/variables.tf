@@ -41,7 +41,7 @@ variable "mariadb_cpu" {
 
 variable "mariadb_ram" {
   type        = number
-  description = "RAM in MB to use for the Registrar ECS service"
+  description = "RAM in MB to use for the MariaDB ECS service"
   default     = 512
 }
 
@@ -53,7 +53,7 @@ variable "registrar_cpu" {
 
 variable "registrar_ram" {
   type        = number
-  description = "RAM in MB to use for the MariaDB ECS service"
+  description = "RAM in MB to use for the Registrar ECS service"
   default     = 512
 }
 
@@ -79,4 +79,22 @@ variable "public_zone_name" {
   type        = string
   description = "Name of the public DNS zone"
   default     = "svc.nadiki.work"
+}
+
+variable "influxdb_container_port" {
+  type        = number
+  description = "InfluxDB port"
+  default     = 8086
+}
+
+variable "influxdb_cpu" {
+  type        = number
+  description = "CPU value for the InfluxDB ECS service"
+  default     = 256
+}
+
+variable "influxdb_ram" {
+  type        = number
+  description = "RAM in MB to use for the InfluxDB ECS service"
+  default     = 512
 }
