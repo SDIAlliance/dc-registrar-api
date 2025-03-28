@@ -700,38 +700,18 @@ components:
         - location
         type: object
       title: FacilityUpdate
-    SupportedTimeSeriesMetric:
-      properties:
-        name:
-          description: Prometheus metric name with unit suffix
-          type: string
-        unit:
-          description: Prometheus metric family
-          enum:
-          - Time
-          - Temperature
-          - Length
-          - Bytes
-          - Percent
-          - Voltage
-          - Electric current
-          - Energy
-          - Power
-          - Mass
-          - Value
-          type: string
-        description:
-          description: Detailed description of what this metric measures
-          type: string
-      required:
-      - description
-      - name
-      - unit
-      type: object
     FacilityTimeSeriesDataPoint:
       properties:
-        name:
-          description: Prometheus metric name with unit suffix
+        measurement:
+          description: Name of the Influx measurement
+          enum:
+          - facility
+          - rack
+          - server
+          title: measurement
+          type: string
+        field:
+          description: Metric name with unit suffix
           enum:
           - heatpump_power_consumption_joules
           - office_energy_use_joules
@@ -749,44 +729,43 @@ components:
           - electricity_source
           - pue_1_ratio
           - pue_2_ratio
-          title: name
-          type: string
-        unit:
-          description: Prometheus metric family
-          enum:
-          - Time
-          - Temperature
-          - Length
-          - Bytes
-          - Percent
-          - Voltage
-          - Electric current
-          - Energy
-          - Power
-          - Mass
-          - Value
-          title: unit
+          title: field
           type: string
         granularitySeconds:
           default: 30
           description: Time series data granularity in seconds
           title: granularitySeconds
           type: integer
-        labels:
-          $ref: '#/components/schemas/FacilityTimeSeriesDataPoint_labels'
+        tags:
+          $ref: '#/components/schemas/FacilityTimeSeriesDataPoint_tags'
       required:
+      - field
       - granularitySeconds
-      - labels
-      - name
-      - unit
+      - measurement
+      - tags
       title: FacilityTimeSeriesDataPoint
       type: object
     FacilityTimeSeriesConfig:
       properties:
         endpoint:
-          description: Time series endpoint URL with port number
-          example: https://timeseries.registry.example.com:9090
+          description: InfluxDB endpoint URL with port number
+          example: https://timeseries.registry.example.com:8086
           title: endpoint
+          type: string
+        org:
+          description: InfluxDB organization to use
+          example: leitmotiv
+          title: org
+          type: string
+        bucket:
+          description: InfluxDB bucket to send data to
+          example: my-bucket
+          title: bucket
+          type: string
+        token:
+          description: InfluxDB token to use for authentication
+          example: ABCDEFGHIJK
+          title: token
           type: string
         dataPoints:
           description: List of time series metrics available for streaming
@@ -795,8 +774,11 @@ components:
           title: dataPoints
           type: array
       required:
+      - bucket
       - dataPoints
       - endpoint
+      - org
+      - token
       title: FacilityTimeSeriesConfig
       type: object
     FacilityResponse:
@@ -882,48 +864,56 @@ components:
       title: RackUpdate
     RackTimeSeriesDataPoint:
       properties:
-        name:
+        measurement:
+          description: Name of the Influx measurement
+          enum:
+          - facility
+          - rack
+          - server
+          title: measurement
+          type: string
+        field:
           description: "Prometheus metric name with unit suffix. For PDU metrics,\
             \ \nthe name must follow the pattern 'pdu_N_energy_consumption_joules'\
             \ \nwhere N is the PDU number (1 to number_of_pdus)\n"
           pattern: "/^(pdu_[1-9][0-9]*_energy_consumption_joules|inlet_temperature_celsius|outlet_temperature_celsius)$/"
-          title: name
-          type: string
-        unit:
-          description: Prometheus metric family
-          enum:
-          - Time
-          - Temperature
-          - Length
-          - Bytes
-          - Percent
-          - Voltage
-          - Electric current
-          - Energy
-          - Power
-          - Mass
-          title: unit
+          title: field
           type: string
         granularitySeconds:
           default: 30
           description: Time series data granularity in seconds
           title: granularitySeconds
           type: integer
-        labels:
-          $ref: '#/components/schemas/RackTimeSeriesDataPoint_labels'
+        tags:
+          $ref: '#/components/schemas/RackTimeSeriesDataPoint_tags'
       required:
+      - field
       - granularitySeconds
-      - labels
-      - name
-      - unit
+      - measurement
+      - tags
       title: RackTimeSeriesDataPoint
       type: object
     RackTimeSeriesConfig:
       properties:
         endpoint:
-          description: Time series endpoint URL with port number
-          example: https://timeseries.registry.example.com:9090
+          description: InfluxDB endpoint URL with port number
+          example: https://timeseries.registry.example.com:8086
           title: endpoint
+          type: string
+        org:
+          description: InfluxDB organization to use
+          example: leitmotiv
+          title: org
+          type: string
+        bucket:
+          description: InfluxDB bucket to send data to
+          example: my-bucket
+          title: bucket
+          type: string
+        token:
+          description: InfluxDB token to use for authentication
+          example: ABCDEFGHIJK
+          title: token
           type: string
         dataPoints:
           description: List of time series metrics available for streaming
@@ -932,8 +922,11 @@ components:
           title: dataPoints
           type: array
       required:
+      - bucket
       - dataPoints
       - endpoint
+      - org
+      - token
       title: RackTimeSeriesConfig
       type: object
     RackResponse:
@@ -1153,46 +1146,54 @@ components:
       title: ServerUpdate
     ServerTimeSeriesDataPoint:
       properties:
-        name:
-          description: Prometheus metric name with unit suffix
-          pattern: /^(cpu_energy_consumption_joules|server_energy_consumption_joules)$/
-          title: name
-          type: string
-        unit:
-          description: Prometheus metric family
+        measurement:
+          description: Name of the Influx measurement
           enum:
-          - Time
-          - Temperature
-          - Length
-          - Bytes
-          - Percent
-          - Voltage
-          - Electric current
-          - Energy
-          - Power
-          - Mass
-          title: unit
+          - facility
+          - rack
+          - server
+          title: measurement
+          type: string
+        field:
+          description: Metric name with unit suffix
+          pattern: /^(cpu_energy_consumption_joules|server_energy_consumption_joules)$/
+          title: field
           type: string
         granularitySeconds:
           default: 30
           description: Time series data granularity in seconds
           title: granularitySeconds
           type: integer
-        labels:
-          $ref: '#/components/schemas/ServerTimeSeriesDataPoint_labels'
+        tags:
+          $ref: '#/components/schemas/ServerTimeSeriesDataPoint_tags'
       required:
+      - field
       - granularitySeconds
-      - labels
-      - name
-      - unit
+      - measurement
+      - tags
       title: ServerTimeSeriesDataPoint
       type: object
     ServerTimeSeriesConfig:
       properties:
         endpoint:
-          description: Time series endpoint URL with port number
-          example: https://timeseries.registry.example.com:9090
+          description: InfluxDB endpoint URL with port number
+          example: https://timeseries.registry.example.com:8086
           title: endpoint
+          type: string
+        org:
+          description: InfluxDB organization to use
+          example: leitmotiv
+          title: org
+          type: string
+        bucket:
+          description: InfluxDB bucket to send data to
+          example: my-bucket
+          title: bucket
+          type: string
+        token:
+          description: InfluxDB token to use for authentication
+          example: ABCDEFGHIJK
+          title: token
           type: string
         dataPoints:
           description: List of time series metrics available for streaming
@@ -1201,8 +1202,11 @@ components:
           title: dataPoints
           type: array
       required:
+      - bucket
       - dataPoints
       - endpoint
+      - org
+      - token
       title: ServerTimeSeriesConfig
       type: object
     ServerResponse:
@@ -1319,7 +1323,7 @@ components:
       - type
       title: FacilityCreate_coolingFluids_inner
       type: object
-    FacilityTimeSeriesDataPoint_labels:
+    FacilityTimeSeriesDataPoint_tags:
       properties:
         facility_id:
           description: Facility identifier
@@ -1332,7 +1336,7 @@ components:
       required:
       - country_code
       - facility_id
-      title: FacilityTimeSeriesDataPoint_labels
+      title: FacilityTimeSeriesDataPoint_tags
       type: object
     FacilityResponse_allOf:
       properties:
@@ -1364,7 +1368,7 @@ components:
       title: FacilityResponse_allOf
       type: object
       example: null
-    RackTimeSeriesDataPoint_labels:
+    RackTimeSeriesDataPoint_tags:
       properties:
         facility_id:
           description: Facility identifier
@@ -1382,7 +1386,7 @@ components:
       - country_code
       - facility_id
       - rack_id
-      title: RackTimeSeriesDataPoint_labels
+      title: RackTimeSeriesDataPoint_tags
       type: object
     RackResponse_allOf:
       properties:
@@ -1408,7 +1412,7 @@ components:
       title: RackResponse_allOf
       type: object
       example: null
-    ServerTimeSeriesDataPoint_labels:
+    ServerTimeSeriesDataPoint_tags:
       properties:
         facility_id:
           description: Facility identifier
@@ -1431,7 +1435,7 @@ components:
       - facility_id
       - rack_id
       - server_id
-      title: ServerTimeSeriesDataPoint_labels
+      title: ServerTimeSeriesDataPoint_tags
       type: object
     ServerResponse_allOf:
       properties:

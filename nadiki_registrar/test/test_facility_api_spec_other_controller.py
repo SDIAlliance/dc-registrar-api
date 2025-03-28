@@ -55,8 +55,8 @@ class TestFacilityApiSpecOtherController(BaseTestCase):
         self.assertTrue(len(response_dict["timeSeriesConfig"]["dataPoints"]) > 0,   "no data points in output")
 
         for d in response_dict["timeSeriesConfig"]["dataPoints"]:
-            self.assertEqual(d["labels"]["country_code"], response_dict["countryCode"], "label country_code does not match country_code")
-            self.assertEqual(d["labels"]["facility_id"], response_dict["id"], "label facility_id does not match facility_id")
+            self.assertEqual(d["tags"]["country_code"], response_dict["countryCode"], "tag country_code does not match country_code")
+            self.assertEqual(d["tags"]["facility_id"], response_dict["id"], "tag facility_id does not match facility_id")
 
         return response_dict
 

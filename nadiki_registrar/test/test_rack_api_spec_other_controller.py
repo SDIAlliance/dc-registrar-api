@@ -57,7 +57,7 @@ class TestRackApiSpecOtherController(BaseTestCase):
 
         for d in response_dict["timeSeriesConfig"]["dataPoints"]:
 #            self.assertEqual(d["labels"]["country_code"], response_dict["countryCode"], "label country_code does not match country_code")
-            self.assertEqual(d["labels"]["rack_id"],  response_dict["id"], "label rack_id does not match rack_id")
+            self.assertEqual(d["tags"]["rack_id"],  response_dict["id"], "label rack_id does not match rack_id")
 
         return response_dict
 

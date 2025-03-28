@@ -56,13 +56,13 @@ def create_server(server_create=None):  # noqa: E501
                 "s_product_passport":       json.dumps(server_create.product_passport),
                 "s_cooling_type":           server_create.cooling_type,
                 "s_description":            server_create.description,
-                "s_prometheus_endpoint":    PROMETHEUS_ENDPOINT_URL,
                 "s_created_at":             func.now(),
                 "s_updated_at":             func.now(),
             }))
 
             result = conn.execute(text("SELECT LAST_INSERT_ID() AS id FROM servers"));
             id = next(result).id
+            server = ServerId(rack_id, id)
 
             for t in [
                 {
@@ -76,12 +76,13 @@ def create_server(server_create=None):  # noqa: E501
 
                 conn.execute(insert(servers_timeseries_configs).values({
                     "stc_s_id": id,
-                    "stc_name": t["name"],
-                    "stc_unit": t["unit"],
+                    "stc_measurement": "server",
+                    "stc_field": t["name"],
                     "stc_granularity_seconds": GRANULARITY_IN_SECONDS,
-                    "stc_labels": json.dumps({
+                    "stc_tags": json.dumps({
                         "facility_id": server_create.facility_id,
                         "rack_id": server_create.rack_id,
+                        "server_id": server.toString(),
                         "country_code": rack_id.facility.country_code
                     })
                 }))
@@ -163,9 +164,12 @@ def get_server(server_id):  # noqa: E501
         return _create_server_response(next(servers_result), servers_timeseries_configs_result, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result)
 
 def _create_server_response(row, servers_timeseries_configs, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result):
+    server = ServerId(row.f_country_code, row.f_id, row.r_id, row.s_id)
     return ServerResponse(
         #id                      = ServerId(RackId(FacilityId(country_code=row.f_country_code, number=row.f_id).toString(), row.r_id).toString(), row.s_id).toString(),
-        id                      = ServerId(row.f_country_code, row.f_id, row.r_id, row.s_id).toString(),
+        id                      = server.toString(),
+        rack_id                 = server.rack.toString(),
+        facility_id             = server.rack.facility.toString(),
         rated_power             = row.s_rated_power,
         total_cpu_sockets       = row.s_total_cpu_sockets,
         number_of_psus          = row.s_number_of_psus,
@@ -174,11 +178,16 @@ def _create_server_response(row, servers_timeseries_configs, servers_cpus_result
         product_passport        = row.s_product_passport,
         cooling_type            = row.s_cooling_type,
         description             = row.s_description,
-        time_series_config      = ServerTimeSeriesConfig(endpoint=row.s_prometheus_endpoint, data_points=[ServerTimeSeriesDataPoint(
-            name                = x.stc_name,
-            unit                = x.stc_unit,
-            granularity_seconds = x.stc_granularity_seconds,
-            labels              = json.loads(x.stc_labels)) for x in servers_timeseries_configs]
+        time_series_config      = ServerTimeSeriesConfig(
+            endpoint    = row.f_influxdb_endpoint,
+            org         = row.f_influxdb_org,
+            bucket      = server.rack.facility.toString(),
+            token       = row.f_influxdb_token,
+            data_points = [ServerTimeSeriesDataPoint(
+                measurement         = x.stc_measurement,
+                field               = x.stc_field,
+                granularity_seconds = x.stc_granularity_seconds,
+                tags                = json.loads(x.stc_tags)) for x in servers_timeseries_configs]
         ),
         installed_cpus          = [CPU(vendor=x.sc_vendor, type=x.sc_type) for x in servers_cpus_result],
         installed_gpus          = [GPU(vendor=x.sg_vendor, type=x.sg_type) for x in servers_gpus_result],

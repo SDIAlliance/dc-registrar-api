@@ -17,25 +17,40 @@ class RackTimeSeriesConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, endpoint=None, data_points=None):  # noqa: E501
+    def __init__(self, endpoint=None, org=None, bucket=None, token=None, data_points=None):  # noqa: E501
         """RackTimeSeriesConfig - a model defined in OpenAPI
 
         :param endpoint: The endpoint of this RackTimeSeriesConfig.  # noqa: E501
         :type endpoint: str
+        :param org: The org of this RackTimeSeriesConfig.  # noqa: E501
+        :type org: str
+        :param bucket: The bucket of this RackTimeSeriesConfig.  # noqa: E501
+        :type bucket: str
+        :param token: The token of this RackTimeSeriesConfig.  # noqa: E501
+        :type token: str
         :param data_points: The data_points of this RackTimeSeriesConfig.  # noqa: E501
         :type data_points: List[RackTimeSeriesDataPoint]
         """
         self.openapi_types = {
             'endpoint': str,
+            'org': str,
+            'bucket': str,
+            'token': str,
             'data_points': List[RackTimeSeriesDataPoint]
         }
 
         self.attribute_map = {
             'endpoint': 'endpoint',
+            'org': 'org',
+            'bucket': 'bucket',
+            'token': 'token',
             'data_points': 'dataPoints'
         }
 
         self._endpoint = endpoint
+        self._org = org
+        self._bucket = bucket
+        self._token = token
         self._data_points = data_points
 
     @classmethod
@@ -53,7 +68,7 @@ class RackTimeSeriesConfig(Model):
     def endpoint(self):
         """Gets the endpoint of this RackTimeSeriesConfig.
 
-        Time series endpoint URL with port number  # noqa: E501
+        InfluxDB endpoint URL with port number  # noqa: E501
 
         :return: The endpoint of this RackTimeSeriesConfig.
         :rtype: str
@@ -64,7 +79,7 @@ class RackTimeSeriesConfig(Model):
     def endpoint(self, endpoint):
         """Sets the endpoint of this RackTimeSeriesConfig.
 
-        Time series endpoint URL with port number  # noqa: E501
+        InfluxDB endpoint URL with port number  # noqa: E501
 
         :param endpoint: The endpoint of this RackTimeSeriesConfig.
         :type endpoint: str
@@ -73,6 +88,81 @@ class RackTimeSeriesConfig(Model):
             raise ValueError("Invalid value for `endpoint`, must not be `None`")  # noqa: E501
 
         self._endpoint = endpoint
+
+    @property
+    def org(self):
+        """Gets the org of this RackTimeSeriesConfig.
+
+        InfluxDB organization to use  # noqa: E501
+
+        :return: The org of this RackTimeSeriesConfig.
+        :rtype: str
+        """
+        return self._org
+
+    @org.setter
+    def org(self, org):
+        """Sets the org of this RackTimeSeriesConfig.
+
+        InfluxDB organization to use  # noqa: E501
+
+        :param org: The org of this RackTimeSeriesConfig.
+        :type org: str
+        """
+        if org is None:
+            raise ValueError("Invalid value for `org`, must not be `None`")  # noqa: E501
+
+        self._org = org
+
+    @property
+    def bucket(self):
+        """Gets the bucket of this RackTimeSeriesConfig.
+
+        InfluxDB bucket to send data to  # noqa: E501
+
+        :return: The bucket of this RackTimeSeriesConfig.
+        :rtype: str
+        """
+        return self._bucket
+
+    @bucket.setter
+    def bucket(self, bucket):
+        """Sets the bucket of this RackTimeSeriesConfig.
+
+        InfluxDB bucket to send data to  # noqa: E501
+
+        :param bucket: The bucket of this RackTimeSeriesConfig.
+        :type bucket: str
+        """
+        if bucket is None:
+            raise ValueError("Invalid value for `bucket`, must not be `None`")  # noqa: E501
+
+        self._bucket = bucket
+
+    @property
+    def token(self):
+        """Gets the token of this RackTimeSeriesConfig.
+
+        InfluxDB token to use for authentication  # noqa: E501
+
+        :return: The token of this RackTimeSeriesConfig.
+        :rtype: str
+        """
+        return self._token
+
+    @token.setter
+    def token(self, token):
+        """Sets the token of this RackTimeSeriesConfig.
+
+        InfluxDB token to use for authentication  # noqa: E501
+
+        :param token: The token of this RackTimeSeriesConfig.
+        :type token: str
+        """
+        if token is None:
+            raise ValueError("Invalid value for `token`, must not be `None`")  # noqa: E501
+
+        self._token = token
 
     @property
     def data_points(self):

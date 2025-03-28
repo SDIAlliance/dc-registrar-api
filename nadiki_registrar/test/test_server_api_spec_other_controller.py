@@ -35,13 +35,21 @@ class TestServerApiSpecOtherController(BaseTestCase):
 
         server_input = create_server_input(facility_response_dict["id"], rack_response_dict["id"])
         server_response = create_server_raw(self.client, server_input)
-        self._check_server_response(server_response)
+        self._check_server_response(server_input, server_response)
 
-    def _check_server_response(self, response):
+    def _check_server_response(self, input, response):
         self.assertEqual(response.status_code, 201,
                        'Response body is : ' + response.data.decode('utf-8'))
         decoded_server_response = response.data.decode('utf-8')
         server_response_dict = json.loads(decoded_server_response)
+
+        for k in input:
+            if type(input[k]) != dict and type(input[k]) != list:
+                self.assertEqual(str(server_response_dict[k]), str(input[k]), f"Property {k} does not match the input")
+
+        for d in server_response_dict["timeSeriesConfig"]["dataPoints"]:
+#            self.assertEqual(d["labels"]["country_code"], response_dict["countryCode"], "label country_code does not match country_code")
+            self.assertEqual(d["tags"]["server_id"], server_response_dict["id"], "label server_id does not match server id")
 
         return server_response_dict
 
@@ -61,7 +69,7 @@ class TestServerApiSpecOtherController(BaseTestCase):
 
         server_input = create_server_input(facility_response_dict["id"], rack_response_dict["id"])
         server_response = create_server_raw(self.client, server_input)
-        server_response_dict = self._check_server_response(server_response)
+        server_response_dict = self._check_server_response(server_input, server_response)
 
         headers = { 
             'Accept': 'application/json',
@@ -89,7 +97,7 @@ class TestServerApiSpecOtherController(BaseTestCase):
 
         server_input = create_server_input(facility_response_dict["id"], rack_response_dict["id"])
         server_response = create_server_raw(self.client, server_input)
-        server_response_dict = self._check_server_response(server_response)
+        server_response_dict = self._check_server_response(server_input, server_response)
 
         headers = { 
             'Accept': 'application/json',
@@ -138,7 +146,7 @@ class TestServerApiSpecOtherController(BaseTestCase):
 
         server_input = create_server_input(facility_response_dict["id"], rack_response_dict["id"])
         server_response = create_server_raw(self.client, server_input)
-        server_response_dict = self._check_server_response(server_response)
+        server_response_dict = self._check_server_response(server_input, server_response)
 
         server_update = create_server_input(facility_response_dict["id"], rack_response_dict["id"])
 

@@ -25,7 +25,9 @@ CREATE TABLE facilities (
     f_white_space                       DECIMAL(20, 9) DEFAULT NULL,
     f_description                       TEXT,
     f_country_code                      VARCHAR(3) NOT NULL,
-    f_prometheus_endpoint               VARCHAR(255) NOT NULL,
+    f_influxdb_endpoint                 VARCHAR(255) NOT NULL,
+    f_influxdb_org                      VARCHAR(50) NOT NULL,
+    f_influxdb_token                    VARCHAR(100) NOT NULL,
     f_created_at                        TIMESTAMP NOT NULL,
     f_updated_at                        TIMESTAMP NOT NULL,
     UNIQUE (f_geo_lat, f_geo_lon)
@@ -44,9 +46,9 @@ CREATE TABLE facilities_cooling_fluids (
 CREATE TABLE facilities_timeseries_configs (
     ftc_id                              INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     ftc_f_id                            INT UNSIGNED NOT NULL,
-    ftc_name                            VARCHAR(200) NOT NULL,
-    ftc_unit                            VARCHAR(200) NOT NULL,
+    ftc_measurement                     VARCHAR(200) NOT NULL,
+    ftc_field                           VARCHAR(200) NOT NULL,
     ftc_granularity_seconds             INT NOT NULL,
-    ftc_labels                          JSON,
+    ftc_tags                            JSON,
     CONSTRAINT ftc_fk FOREIGN KEY fk (ftc_f_id) REFERENCES facilities (f_id) ON DELETE CASCADE
 ) WITH SYSTEM VERSIONING;

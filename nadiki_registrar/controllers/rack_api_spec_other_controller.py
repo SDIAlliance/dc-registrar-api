@@ -50,7 +50,6 @@ def create_rack(rack_create=None):  # noqa: E501
                     "r_power_redundancy":                   rack_create.power_redundancy,
                     "r_product_passport":                   json.dumps(rack_create.product_passport),
                     "r_description":                        rack_create.description,
-                    "r_prometheus_endpoint":                PROMETHEUS_ENDPOINT_URL,
                     "r_created_at":                         func.now(),
                     "r_updated_at":                         func.now()
                 }))
@@ -73,10 +72,10 @@ def create_rack(rack_create=None):  # noqa: E501
                 conn.execute(insert(racks_timeseries_configs).values(
                     {
                         "rtc_r_id": id,
-                        "rtc_name": t["name"],
-                        "rtc_unit": t["unit"],
+                        "rtc_measurement": "rack",
+                        "rtc_field": t["name"],
                         "rtc_granularity_seconds": GRANULARITY_IN_SECONDS,
-                        "rtc_labels": json.dumps({
+                        "rtc_tags": json.dumps({
                             "facility_id": rack_create.facility_id,
                             "rack_id": rack.toString(),
                             "country_code": rack.facility.country_code
@@ -140,12 +139,15 @@ def _create_rack_response(row, timeseries_configs_result):
         product_passport                = row.r_product_passport,
         description                     = row.r_description,
         time_series_config              = RackTimeSeriesConfig(
-            endpoint    = row.r_prometheus_endpoint,
+            endpoint    = row.f_influxdb_endpoint,
+            org         = row.f_influxdb_org,
+            bucket      = rack.facility.toString(),
+            token       = row.f_influxdb_token,
             data_points = [RackTimeSeriesDataPoint(
-                name                = x.rtc_name,
-                unit                = x.rtc_unit,
+                measurement         = x.rtc_measurement,
+                field               = x.rtc_field,
                 granularity_seconds = x.rtc_granularity_seconds,
-                labels              = json.loads(x.rtc_labels)
+                tags                = json.loads(x.rtc_tags)
             ) for x in timeseries_configs_result]
         ),
         created_at                      = row.r_created_at,

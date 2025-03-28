@@ -18,7 +18,6 @@ CREATE TABLE servers (
     s_product_passport          JSON,
     s_cooling_type              VARCHAR(50),
     s_description               TEXT,
-    s_prometheus_endpoint       VARCHAR(255) NOT NULL,
     s_created_at                TIMESTAMP NOT NULL,
     s_updated_at                TIMESTAMP NOT NULL,
     CONSTRAINT s_fk FOREIGN KEY fk (s_r_id) REFERENCES racks (r_id) ON DELETE CASCADE
@@ -55,9 +54,9 @@ CREATE TABLE servers_storage_devices(
 CREATE TABLE servers_timeseries_configs (
     stc_id                              INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     stc_s_id                            INT UNSIGNED NOT NULL,
-    stc_name                            VARCHAR(200) NOT NULL,
-    stc_unit                            VARCHAR(200) NOT NULL,
+    stc_measurement                     VARCHAR(200) NOT NULL,
+    stc_field                           VARCHAR(200) NOT NULL,
     stc_granularity_seconds             INT NOT NULL,
-    stc_labels                          JSON,
+    stc_tags                            JSON,
     CONSTRAINT stc_fk FOREIGN KEY fk (stc_s_id) REFERENCES servers (s_id) ON DELETE CASCADE
 ) WITH SYSTEM VERSIONING;

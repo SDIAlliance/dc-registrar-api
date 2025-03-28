@@ -25,6 +25,11 @@ from sqlalchemy import create_engine, MetaData, Table, select, delete, insert, u
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 
+from nadiki_registrar.controllers.influxdb import influxdb_client
+from influxdb_client import BucketRetentionRules
+from influxdb_client import Permission
+from influxdb_client import PermissionResource
+
 from nadiki_registrar.controllers.config import *
 from nadiki_registrar.controllers.database import *
 from nadiki_registrar.controllers.identifiers import *
@@ -77,6 +82,7 @@ def create_facility(facility_create=None):  # noqa: E501
         except:
             return Error(code=400, message="Could not resolve geo location"), 400
 
+
         with engine.connect() as conn:
             try:
                 conn.execute(insert(facilities).values({
@@ -96,7 +102,9 @@ def create_facility(facility_create=None):  # noqa: E501
                     "f_white_space": facility_create.white_space,
                     "f_description": facility_create.description,
                     "f_country_code": country_code,
-                    "f_prometheus_endpoint": PROMETHEUS_ENDPOINT_URL,
+                    "f_influxdb_endpoint": INFLUXDB_ENDPOINT_URL,
+                    "f_influxdb_org": INFLUXDB_ORG,
+                    "f_influxdb_token": "TBD",
                     "f_created_at": func.now(),
                     "f_updated_at": func.now(),
                 }))
@@ -105,6 +113,19 @@ def create_facility(facility_create=None):  # noqa: E501
                 id = next(result).id
                 facility = FacilityId(country_code, id)
 
+                # create a bucket in InfluxDB and create an auth token which is allowed to write to it
+                bucket_api = influxdb_client.buckets_api()
+                bucket = bucket_api.create_bucket(bucket_name=facility.toString(), org=INFLUXDB_ORG, retention_rules=BucketRetentionRules(type="expire", every_seconds=INFLUXDB_EXPIRY_SECONDS))
+
+                org_api = influxdb_client.organizations_api()
+                org_id = [x.id for x in org_api.find_organizations() if x.name == "Leitmotiv"].pop()
+
+                auth_api = influxdb_client.authorizations_api()
+                # why is it not possible to add a description to a token through the Python API? It is possible with the REST API...
+                auth = auth_api.create_authorization(org_id=org_id, permissions=[Permission(action="write", resource=PermissionResource(id=bucket.id, type="buckets"))])
+                conn.execute(update(facilities).values({"f_influxdb_token": auth.token}).where(facilities.c.f_id == id))
+
+                # insert the weak entities (cooling fluids and time series configs)
                 for x in facility_create.cooling_fluids:
                     conn.execute(insert(facilities_cooling_fluids).values({
                         "fcf_f_id": id,
@@ -115,10 +136,10 @@ def create_facility(facility_create=None):  # noqa: E501
                 for x in REQUESTED_METRICS:
                     conn.execute(insert(facilities_timeseries_configs).values({
                         "ftc_f_id": id,
-                        "ftc_name": x["name"],
-                        "ftc_unit": x["unit"],
+                        "ftc_measurement": "facility",
+                        "ftc_field": x["name"],
                         "ftc_granularity_seconds": GRANULARITY_IN_SECONDS,
-                        "ftc_labels": json.dumps(ADDITIONAL_LABELS | {
+                        "ftc_tags": json.dumps(ADDITIONAL_LABELS | {
                             "country_code": country_code,
                             "facility_id": facility.toString()
                         })
@@ -198,8 +219,8 @@ def _create_facility_response(row, facilities_cooling_fluids_result, facilities_
         total_space                     = row.f_total_space,
         white_space                     = row.f_white_space,
         description                     = row.f_description,
-        time_series_config              = FacilityTimeSeriesConfig(endpoint=row.f_prometheus_endpoint, data_points=[
-            FacilityTimeSeriesDataPoint(name=x.ftc_name, unit=x.ftc_unit, granularity_seconds=x.ftc_granularity_seconds, labels=json.loads(x.ftc_labels)) for x in facilities_timeseries_configs_result
+        time_series_config              = FacilityTimeSeriesConfig(endpoint=row.f_influxdb_endpoint, org=row.f_influxdb_org, bucket=facility.toString(), token=row.f_influxdb_token, data_points=[
+            FacilityTimeSeriesDataPoint(measurement=x.ftc_measurement, field=x.ftc_field, granularity_seconds=x.ftc_granularity_seconds, tags=json.loads(x.ftc_tags)) for x in facilities_timeseries_configs_result
         ]),
         cooling_fluids                  = [
             FacilityCreateCoolingFluidsInner(type=x.fcf_type, amount=x.fcf_amount, gwp_factor=x.fcf_gwp_factor) for x in facilities_cooling_fluids_result

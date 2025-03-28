@@ -27,3 +27,5 @@ requirements.txt
 nadiki_registrar/controllers/facility_api_spec_other_controller.py
 nadiki_registrar/controllers/rack_api_spec_other_controller.py
 nadiki_registrar/controllers/server_api_spec_other_controller.py
+tox.ini
+.gitignore

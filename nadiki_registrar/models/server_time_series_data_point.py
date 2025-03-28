@@ -6,11 +6,11 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from nadiki_registrar.models.base_model_ import Model
-from nadiki_registrar.models.server_time_series_data_point_labels import ServerTimeSeriesDataPointLabels
+from nadiki_registrar.models.server_time_series_data_point_tags import ServerTimeSeriesDataPointTags
 import re
 from nadiki_registrar import util
 
-from nadiki_registrar.models.server_time_series_data_point_labels import ServerTimeSeriesDataPointLabels  # noqa: E501
+from nadiki_registrar.models.server_time_series_data_point_tags import ServerTimeSeriesDataPointTags  # noqa: E501
 import re  # noqa: E501
 
 class ServerTimeSeriesDataPoint(Model):
@@ -19,36 +19,36 @@ class ServerTimeSeriesDataPoint(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, name=None, unit=None, granularity_seconds=30, labels=None):  # noqa: E501
+    def __init__(self, measurement=None, field=None, granularity_seconds=30, tags=None):  # noqa: E501
         """ServerTimeSeriesDataPoint - a model defined in OpenAPI
 
-        :param name: The name of this ServerTimeSeriesDataPoint.  # noqa: E501
-        :type name: str
-        :param unit: The unit of this ServerTimeSeriesDataPoint.  # noqa: E501
-        :type unit: str
+        :param measurement: The measurement of this ServerTimeSeriesDataPoint.  # noqa: E501
+        :type measurement: str
+        :param field: The field of this ServerTimeSeriesDataPoint.  # noqa: E501
+        :type field: str
         :param granularity_seconds: The granularity_seconds of this ServerTimeSeriesDataPoint.  # noqa: E501
         :type granularity_seconds: int
-        :param labels: The labels of this ServerTimeSeriesDataPoint.  # noqa: E501
-        :type labels: ServerTimeSeriesDataPointLabels
+        :param tags: The tags of this ServerTimeSeriesDataPoint.  # noqa: E501
+        :type tags: ServerTimeSeriesDataPointTags
         """
         self.openapi_types = {
-            'name': str,
-            'unit': str,
+            'measurement': str,
+            'field': str,
             'granularity_seconds': int,
-            'labels': ServerTimeSeriesDataPointLabels
+            'tags': ServerTimeSeriesDataPointTags
         }
 
         self.attribute_map = {
-            'name': 'name',
-            'unit': 'unit',
+            'measurement': 'measurement',
+            'field': 'field',
             'granularity_seconds': 'granularitySeconds',
-            'labels': 'labels'
+            'tags': 'tags'
         }
 
-        self._name = name
-        self._unit = unit
+        self._measurement = measurement
+        self._field = field
         self._granularity_seconds = granularity_seconds
-        self._labels = labels
+        self._tags = tags
 
     @classmethod
     def from_dict(cls, dikt) -> 'ServerTimeSeriesDataPoint':
@@ -62,60 +62,60 @@ class ServerTimeSeriesDataPoint(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def name(self):
-        """Gets the name of this ServerTimeSeriesDataPoint.
+    def measurement(self):
+        """Gets the measurement of this ServerTimeSeriesDataPoint.
 
-        Prometheus metric name with unit suffix  # noqa: E501
+        Name of the Influx measurement  # noqa: E501
 
-        :return: The name of this ServerTimeSeriesDataPoint.
+        :return: The measurement of this ServerTimeSeriesDataPoint.
         :rtype: str
         """
-        return self._name
+        return self._measurement
 
-    @name.setter
-    def name(self, name):
-        """Sets the name of this ServerTimeSeriesDataPoint.
+    @measurement.setter
+    def measurement(self, measurement):
+        """Sets the measurement of this ServerTimeSeriesDataPoint.
 
-        Prometheus metric name with unit suffix  # noqa: E501
+        Name of the Influx measurement  # noqa: E501
 
-        :param name: The name of this ServerTimeSeriesDataPoint.
-        :type name: str
+        :param measurement: The measurement of this ServerTimeSeriesDataPoint.
+        :type measurement: str
         """
-        if name is None:
-            raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
-        if name is not None and not re.search(r'^(cpu_energy_consumption_joules|server_energy_consumption_joules)$', name):  # noqa: E501
-            raise ValueError("Invalid value for `name`, must be a follow pattern or equal to `/^(cpu_energy_consumption_joules|server_energy_consumption_joules)$/`")  # noqa: E501
-
-        self._name = name
-
-    @property
-    def unit(self):
-        """Gets the unit of this ServerTimeSeriesDataPoint.
-
-        Prometheus metric family  # noqa: E501
-
-        :return: The unit of this ServerTimeSeriesDataPoint.
-        :rtype: str
-        """
-        return self._unit
-
-    @unit.setter
-    def unit(self, unit):
-        """Sets the unit of this ServerTimeSeriesDataPoint.
-
-        Prometheus metric family  # noqa: E501
-
-        :param unit: The unit of this ServerTimeSeriesDataPoint.
-        :type unit: str
-        """
-        allowed_values = ["Time", "Temperature", "Length", "Bytes", "Percent", "Voltage", "Electric current", "Energy", "Power", "Mass"]  # noqa: E501
-        if unit not in allowed_values:
+        allowed_values = ["facility", "rack", "server"]  # noqa: E501
+        if measurement not in allowed_values:
             raise ValueError(
-                "Invalid value for `unit` ({0}), must be one of {1}"
-                .format(unit, allowed_values)
+                "Invalid value for `measurement` ({0}), must be one of {1}"
+                .format(measurement, allowed_values)
             )
 
-        self._unit = unit
+        self._measurement = measurement
+
+    @property
+    def field(self):
+        """Gets the field of this ServerTimeSeriesDataPoint.
+
+        Metric name with unit suffix  # noqa: E501
+
+        :return: The field of this ServerTimeSeriesDataPoint.
+        :rtype: str
+        """
+        return self._field
+
+    @field.setter
+    def field(self, field):
+        """Sets the field of this ServerTimeSeriesDataPoint.
+
+        Metric name with unit suffix  # noqa: E501
+
+        :param field: The field of this ServerTimeSeriesDataPoint.
+        :type field: str
+        """
+        if field is None:
+            raise ValueError("Invalid value for `field`, must not be `None`")  # noqa: E501
+        if field is not None and not re.search(r'^(cpu_energy_consumption_joules|server_energy_consumption_joules)$', field):  # noqa: E501
+            raise ValueError("Invalid value for `field`, must be a follow pattern or equal to `/^(cpu_energy_consumption_joules|server_energy_consumption_joules)$/`")  # noqa: E501
+
+        self._field = field
 
     @property
     def granularity_seconds(self):
@@ -143,24 +143,24 @@ class ServerTimeSeriesDataPoint(Model):
         self._granularity_seconds = granularity_seconds
 
     @property
-    def labels(self):
-        """Gets the labels of this ServerTimeSeriesDataPoint.
+    def tags(self):
+        """Gets the tags of this ServerTimeSeriesDataPoint.
 
 
-        :return: The labels of this ServerTimeSeriesDataPoint.
-        :rtype: ServerTimeSeriesDataPointLabels
+        :return: The tags of this ServerTimeSeriesDataPoint.
+        :rtype: ServerTimeSeriesDataPointTags
         """
-        return self._labels
+        return self._tags
 
-    @labels.setter
-    def labels(self, labels):
-        """Sets the labels of this ServerTimeSeriesDataPoint.
+    @tags.setter
+    def tags(self, tags):
+        """Sets the tags of this ServerTimeSeriesDataPoint.
 
 
-        :param labels: The labels of this ServerTimeSeriesDataPoint.
-        :type labels: ServerTimeSeriesDataPointLabels
+        :param tags: The tags of this ServerTimeSeriesDataPoint.
+        :type tags: ServerTimeSeriesDataPointTags
         """
-        if labels is None:
-            raise ValueError("Invalid value for `labels`, must not be `None`")  # noqa: E501
+        if tags is None:
+            raise ValueError("Invalid value for `tags`, must not be `None`")  # noqa: E501
 
-        self._labels = labels
+        self._tags = tags
