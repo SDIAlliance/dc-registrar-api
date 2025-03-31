@@ -98,3 +98,21 @@ variable "influxdb_ram" {
   description = "RAM in MB to use for the InfluxDB ECS service"
   default     = 512
 }
+
+variable "certbot_cpu" {
+  type        = number
+  description = "CPU value for the certbot ECS task"
+  default     = 256
+}
+
+variable "certbot_ram" {
+  type        = number
+  description = "RAM in MB to use for the certbot ECS task"
+  default     = 512
+}
+
+variable "cert_admin_email" {
+  type        = string
+  default     = "daniel@daniel-boesswetter.de"
+  description = "E-mail address to specify when retrieving letsencrypt certificates"
+}

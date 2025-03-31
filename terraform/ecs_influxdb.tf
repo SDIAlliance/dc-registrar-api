@@ -16,8 +16,18 @@ module "influxdb_container_definition" {
       sourceVolume  = "influxdb-storage"
     },
     {
-      containerPath = "/etc/influxdb2/certs",
+      containerPath = "/etc/letsencrypt",
       sourceVolume  = "influxdb-certs"
+    }
+  ]
+  environment = [
+    {
+      name  = "INFLUXD_TLS_CERT"
+      value = "/etc/letsencrypt/live/influxdb.svc.nadiki.work/fullchain.pem"
+    },
+    {
+      name  = "INFLUXD_TLS_KEY"
+      value = "/etc/letsencrypt/live/influxdb.svc.nadiki.work/privkey.pem"
     }
   ]
   log_configuration = {
@@ -134,15 +144,20 @@ resource "aws_efs_mount_target" "influxdb" {
 }
 
 resource "aws_efs_access_point" "default" {
-  for_each = toset(["data", "certs"])
+  for_each       = toset(["data", "certs"])
   file_system_id = aws_efs_file_system.influxdb.id
   root_directory {
     path = "/${each.key}"
     creation_info {
-      owner_gid = 0
-      owner_uid = 0
+      owner_gid   = 0
+      owner_uid   = 0
       permissions = 0755
     }
+  }
+  # not nice, but otherwise we can not read the certificates
+  posix_user {
+    uid = 0
+    gid = 0
   }
 }
 
@@ -156,6 +171,15 @@ resource "aws_vpc_security_group_ingress_rule" "influxdb-efs" {
   from_port                    = 2049
   to_port                      = 2049
   referenced_security_group_id = aws_security_group.influxdb.id
+  ip_protocol                  = "tcp"
+  description                  = "Allow NFS from inside VPC"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "certbot-efs" {
+  security_group_id            = aws_security_group.influxdb-efs.id
+  from_port                    = 2049
+  to_port                      = 2049
+  referenced_security_group_id = aws_security_group.certbot.id
   ip_protocol                  = "tcp"
   description                  = "Allow NFS from inside VPC"
 }
