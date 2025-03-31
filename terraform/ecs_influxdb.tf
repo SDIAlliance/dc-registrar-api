@@ -15,10 +15,10 @@ module "influxdb_container_definition" {
       containerPath = "/var/lib/influxdb2",
       sourceVolume  = "influxdb-storage"
     },
-    #    {
-    #      containerPath = "/etc/influxdb2",
-    #      sourceVolume  = "influxdb-config"
-    #    }
+    {
+      containerPath = "/etc/influxdb2/certs",
+      sourceVolume  = "influxdb-certs"
+    }
   ]
   log_configuration = {
     logDriver = "awslogs"
@@ -50,20 +50,23 @@ resource "aws_ecs_task_definition" "influxdb" {
     efs_volume_configuration {
       file_system_id     = aws_efs_file_system.influxdb.id
       transit_encryption = "ENABLED"
-      ## this does not work because someone needs to create this directory
-      #      root_directory = "/data"
+      authorization_config {
+        access_point_id = aws_efs_access_point.default["data"].id
+      }
     }
   }
 
-  #  volume {
-  #    name = "influxdb-config"
-  #
-  #    efs_volume_configuration {
-  #      file_system_id     = aws_efs_file_system.influxdb.id
-  #      transit_encryption = "ENABLED"
-  #      root_directory = "/config"
-  #    }
-  #  }
+  volume {
+    name = "influxdb-certs"
+
+    efs_volume_configuration {
+      file_system_id     = aws_efs_file_system.influxdb.id
+      transit_encryption = "ENABLED"
+      authorization_config {
+        access_point_id = aws_efs_access_point.default["certs"].id
+      }
+    }
+  }
 }
 
 resource "aws_ecs_service" "influxdb" {
@@ -118,6 +121,9 @@ resource "aws_vpc_security_group_egress_rule" "influxdb-efs" {
 
 resource "aws_efs_file_system" "influxdb" {
   encrypted = true
+  tags = {
+    Name = "${var.namespace}-${var.name}-influxdb"
+  }
 }
 
 resource "aws_efs_mount_target" "influxdb" {
@@ -125,6 +131,19 @@ resource "aws_efs_mount_target" "influxdb" {
   file_system_id  = aws_efs_file_system.influxdb.id
   security_groups = [aws_security_group.influxdb-efs.id]
   subnet_id       = each.key
+}
+
+resource "aws_efs_access_point" "default" {
+  for_each = toset(["data", "certs"])
+  file_system_id = aws_efs_file_system.influxdb.id
+  root_directory {
+    path = "/${each.key}"
+    creation_info {
+      owner_gid = 0
+      owner_uid = 0
+      permissions = 0755
+    }
+  }
 }
 
 resource "aws_security_group" "influxdb-efs" {

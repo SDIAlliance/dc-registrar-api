@@ -108,6 +108,9 @@ resource "aws_vpc_security_group_egress_rule" "mariadb-efs" {
 
 resource "aws_efs_file_system" "mariadb" {
   encrypted = true
+  tags = {
+    Name = "${var.namespace}-${var.name}-mariadb"
+  }
 }
 
 resource "aws_efs_mount_target" "mariadb" {
