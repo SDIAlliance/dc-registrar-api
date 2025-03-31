@@ -66,7 +66,8 @@ resource "aws_iam_role_policy" "execution-secrets" {
         Effect = "Allow"
         Sid    = "AllowRootPassword"
         Resource = [
-          aws_secretsmanager_secret.mariadb_root_password.arn
+          aws_secretsmanager_secret.mariadb_root_password.arn,
+          aws_secretsmanager_secret.influxdb_admin_token.arn
         ]
       },
       {
@@ -87,6 +88,10 @@ resource "aws_iam_role_policy" "execution-secrets" {
 
 resource "aws_secretsmanager_secret" "mariadb_root_password" {
   name = "${var.namespace}-${var.stage}-mariadb-root-password"
+}
+
+resource "aws_secretsmanager_secret" "influxdb_admin_token" {
+  name = "${var.namespace}-${var.stage}-influxdb-admin-token"
 }
 
 resource "aws_cloudwatch_log_group" "default" {
@@ -111,4 +116,10 @@ module "dns_updater" {
       ecs_cluster_name = module.ecs_cluster.name
     }
   ]
+}
+
+resource "aws_service_discovery_private_dns_namespace" "default" {
+  name        = var.internal_domain_name
+  description = "Private DNS namespace for Nadiki services"
+  vpc         = module.vpc.vpc_id
 }

@@ -60,9 +60,6 @@ resource "aws_ecs_task_definition" "influxdb" {
     efs_volume_configuration {
       file_system_id     = aws_efs_file_system.influxdb.id
       transit_encryption = "ENABLED"
-      authorization_config {
-        access_point_id = aws_efs_access_point.default["data"].id
-      }
     }
   }
 
@@ -70,10 +67,11 @@ resource "aws_ecs_task_definition" "influxdb" {
     name = "influxdb-certs"
 
     efs_volume_configuration {
-      file_system_id     = aws_efs_file_system.influxdb.id
+      file_system_id     = aws_efs_file_system.certbot.id
       transit_encryption = "ENABLED"
       authorization_config {
-        access_point_id = aws_efs_access_point.default["certs"].id
+        # we need an access point with root privs in order to read the certificates
+        access_point_id = aws_efs_access_point.certbot.id
       }
     }
   }
@@ -86,10 +84,13 @@ resource "aws_ecs_service" "influxdb" {
   desired_count                      = 1
   deployment_maximum_percent         = 100 # prevent more than one task from accessing the storage
   deployment_minimum_healthy_percent = 0
+  service_registries {
+    registry_arn = aws_service_discovery_service.influxdb.arn
+  }
   network_configuration {
     subnets          = module.dynamic_subnets.public_subnet_ids
     assign_public_ip = true
-    security_groups  = [aws_security_group.influxdb.id]
+    security_groups  = [aws_security_group.influxdb-task.id]
   }
   capacity_provider_strategy {
     capacity_provider = "FARGATE_SPOT"
@@ -97,13 +98,13 @@ resource "aws_ecs_service" "influxdb" {
   }
 }
 
-resource "aws_security_group" "influxdb" {
+resource "aws_security_group" "influxdb-task" {
   name   = "${var.namespace}-${var.stage}-influxdb"
   vpc_id = module.vpc.vpc_id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "influxdb" {
-  security_group_id = aws_security_group.influxdb.id
+resource "aws_vpc_security_group_ingress_rule" "influxdb-task-http-in" {
+  security_group_id = aws_security_group.influxdb-task.id
   from_port         = var.influxdb_container_port
   to_port           = var.influxdb_container_port
   cidr_ipv4         = module.vpc.vpc_cidr_block
@@ -111,8 +112,8 @@ resource "aws_vpc_security_group_ingress_rule" "influxdb" {
   description       = "Database access"
 }
 
-resource "aws_vpc_security_group_egress_rule" "influxdb" {
-  security_group_id = aws_security_group.influxdb.id
+resource "aws_vpc_security_group_egress_rule" "influxdb-task-container-registry" {
+  security_group_id = aws_security_group.influxdb-task.id
   from_port         = 443
   to_port           = 443
   cidr_ipv4         = "0.0.0.0/0" # this could be narrowed down to ECR or docker hub
@@ -120,8 +121,9 @@ resource "aws_vpc_security_group_egress_rule" "influxdb" {
   description       = "Access to pull container"
 }
 
-resource "aws_vpc_security_group_egress_rule" "influxdb-efs" {
-  security_group_id = aws_security_group.influxdb.id
+# FIXME: close this down to just our EFS mount targets
+resource "aws_vpc_security_group_egress_rule" "influxdb-task-efs" {
+  security_group_id = aws_security_group.influxdb-task.id
   from_port         = 2049
   to_port           = 2049
   cidr_ipv4         = module.vpc.vpc_cidr_block
@@ -143,52 +145,44 @@ resource "aws_efs_mount_target" "influxdb" {
   subnet_id       = each.key
 }
 
-resource "aws_efs_access_point" "default" {
-  for_each       = toset(["data", "certs"])
-  file_system_id = aws_efs_file_system.influxdb.id
-  root_directory {
-    path = "/${each.key}"
-    creation_info {
-      owner_gid   = 0
-      owner_uid   = 0
-      permissions = 0755
-    }
-  }
-  # not nice, but otherwise we can not read the certificates
-  posix_user {
-    uid = 0
-    gid = 0
-  }
-}
-
 resource "aws_security_group" "influxdb-efs" {
   name   = "${var.namespace}-${var.stage}-influx-efs"
   vpc_id = module.vpc.vpc_id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "influxdb-efs" {
+resource "aws_vpc_security_group_ingress_rule" "influxdb-efs-nfs-in" {
   security_group_id            = aws_security_group.influxdb-efs.id
   from_port                    = 2049
   to_port                      = 2049
-  referenced_security_group_id = aws_security_group.influxdb.id
+  referenced_security_group_id = aws_security_group.influxdb-task.id
   ip_protocol                  = "tcp"
-  description                  = "Allow NFS from inside VPC"
+  description                  = "Allow NFS from InfluxDB"
 }
 
-resource "aws_vpc_security_group_ingress_rule" "certbot-efs" {
-  security_group_id            = aws_security_group.influxdb-efs.id
-  from_port                    = 2049
-  to_port                      = 2049
-  referenced_security_group_id = aws_security_group.certbot.id
-  ip_protocol                  = "tcp"
-  description                  = "Allow NFS from inside VPC"
-}
-
-resource "aws_vpc_security_group_egress_rule" "efs-influxdb" {
+resource "aws_vpc_security_group_egress_rule" "influxedb-efs-out" {
   security_group_id = aws_security_group.influxdb-efs.id
   from_port         = -1
   to_port           = -1
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = -1
   description       = "Allow to serve data inside VPC"
+}
+
+resource "aws_service_discovery_service" "influxdb" {
+  name = "influxdb"
+
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.default.id
+
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
 }

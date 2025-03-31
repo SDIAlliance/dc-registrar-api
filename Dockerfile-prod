@@ -9,9 +9,9 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY . /usr/src/app
 
-EXPOSE 8000
+EXPOSE 443
 
 ENTRYPOINT ["gunicorn"]
 
 #CMD ["-b", "0.0.0.0", "nadiki_registrar.__main__:main()"]
-CMD ["nadiki_registrar.__main__:main()"]
+CMD ["--certfile", "/etc/letsencrypt/live/registrar.svc.nadiki.work/fullchain.pem", "--keyfile", "/etc/letsencrypt/live/registrar.svc.nadiki.work/privkey.pem", "nadiki_registrar.__main__:main()", "-b", "0.0.0.0:443"]

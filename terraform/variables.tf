@@ -72,7 +72,7 @@ variable "mariadb_container_port" {
 variable "registrar_container_port" {
   type        = number
   description = "Port where Registrar listens"
-  default     = 8080
+  default     = 443
 }
 
 variable "public_zone_name" {
@@ -115,4 +115,10 @@ variable "cert_admin_email" {
   type        = string
   default     = "daniel@daniel-boesswetter.de"
   description = "E-mail address to specify when retrieving letsencrypt certificates"
+}
+
+variable "influxdb_org" {
+  type        = string
+  default     = "Leitmotiv"
+  description = "InfluxDB organization to authenticate with"
 }

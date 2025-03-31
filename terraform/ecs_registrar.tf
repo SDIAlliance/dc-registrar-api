@@ -4,10 +4,21 @@ module "registrar_container_definition" {
 
   container_name  = "registrar"
   container_image = "${module.ecr.repository_url_map["${var.namespace}/registrar"]}:${var.registrar_image_tag}"
+
+  # Why do I need to say this again here? Should this be taken from the Dockerfile-prod???
+  entrypoint = ["gunicorn"]
+  command    = ["--certfile", "/etc/letsencrypt/live/registrar.svc.nadiki.work/fullchain.pem", "--keyfile", "/etc/letsencrypt/live/registrar.svc.nadiki.work/privkey.pem", "nadiki_registrar.__main__:main()", "-b", "0.0.0.0:443"]
+
   port_mappings = [
     {
       containerPort = var.registrar_container_port
       name          = "http"
+    }
+  ]
+  mount_points = [
+    {
+      containerPath = "/etc/letsencrypt",
+      sourceVolume  = "registrar-certs"
     }
   ]
   environment = [
@@ -18,12 +29,24 @@ module "registrar_container_definition" {
     {
       name  = "DATABASE_USER",
       value = "root" # FIXME
+    },
+    {
+      name  = "INFLUXDB_ORG",
+      value = var.influxdb_org
+    },
+    {
+      name  = "INFLUXDB_ENDPOINT_URL",
+      value = "https://influxdb.${var.internal_domain_name}:${var.influxdb_container_port}"
     }
   ]
   secrets = [
     {
       name      = "DATABASE_PASSWORD",
       valueFrom = aws_secretsmanager_secret.mariadb_root_password.arn
+    },
+    {
+      name      = "INFLUXDB_ADMIN_TOKEN",
+      valueFrom = aws_secretsmanager_secret.influxdb_admin_token.arn
     }
   ]
   log_configuration = {
@@ -49,6 +72,19 @@ resource "aws_ecs_task_definition" "registrar" {
     operating_system_family = "LINUX"
     cpu_architecture        = "X86_64" # FIXME
   }
+
+  volume {
+    name = "registrar-certs"
+
+    efs_volume_configuration {
+      file_system_id     = aws_efs_file_system.certbot.id
+      transit_encryption = "ENABLED"
+      authorization_config {
+        # we need an access point with root privs in order to read the certificates
+        access_point_id = aws_efs_access_point.certbot.id
+      }
+    }
+  }
 }
 
 resource "aws_ecs_service" "registrar" {
@@ -62,17 +98,18 @@ resource "aws_ecs_service" "registrar" {
   network_configuration {
     subnets          = module.dynamic_subnets.public_subnet_ids
     assign_public_ip = true
-    security_groups  = [aws_security_group.registrar.id]
+    security_groups  = [aws_security_group.registrar-task.id]
   }
 }
 
-resource "aws_security_group" "registrar" {
+resource "aws_security_group" "registrar-task" {
   name   = "${var.namespace}-${var.stage}-registrar"
   vpc_id = module.vpc.vpc_id
 }
 
+# FIXME: remove this
 resource "aws_vpc_security_group_ingress_rule" "registrar-daniel" {
-  security_group_id = aws_security_group.registrar.id
+  security_group_id = aws_security_group.registrar-task.id
   from_port         = var.registrar_container_port
   to_port           = var.registrar_container_port
   cidr_ipv4         = "79.238.45.3/32"
@@ -81,7 +118,7 @@ resource "aws_vpc_security_group_ingress_rule" "registrar-daniel" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "registrar-vpc" {
-  security_group_id = aws_security_group.registrar.id
+  security_group_id = aws_security_group.registrar-task.id
   from_port         = var.registrar_container_port
   to_port           = var.registrar_container_port
   cidr_ipv4         = module.vpc.vpc_cidr_block
@@ -90,7 +127,7 @@ resource "aws_vpc_security_group_ingress_rule" "registrar-vpc" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "registrar-ecr" {
-  security_group_id = aws_security_group.registrar.id
+  security_group_id = aws_security_group.registrar-task.id
   from_port         = 443
   to_port           = 443
   cidr_ipv4         = "0.0.0.0/0" # this could be narrowed down to ECR
@@ -99,12 +136,31 @@ resource "aws_vpc_security_group_egress_rule" "registrar-ecr" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "registrar-database" {
-  security_group_id = aws_security_group.registrar.id
+  security_group_id = aws_security_group.registrar-task.id
   from_port         = var.mariadb_container_port
   to_port           = var.mariadb_container_port
   cidr_ipv4         = module.vpc.vpc_cidr_block
   ip_protocol       = "tcp"
   description       = "Database access"
+}
+
+resource "aws_vpc_security_group_egress_rule" "registrar-influxdb" {
+  security_group_id = aws_security_group.registrar-task.id
+  from_port         = var.influxdb_container_port
+  to_port           = var.influxdb_container_port
+  cidr_ipv4         = module.vpc.vpc_cidr_block
+  ip_protocol       = "tcp"
+  description       = "InfluxDB access"
+}
+
+# FIXME: close this down to just our EFS mount targets
+resource "aws_vpc_security_group_egress_rule" "registrar-task-efs" {
+  security_group_id = aws_security_group.registrar-task.id
+  from_port         = 2049
+  to_port           = 2049
+  cidr_ipv4         = module.vpc.vpc_cidr_block
+  ip_protocol       = "tcp"
+  description       = "NFS access to EFS file system"
 }
 
 resource "aws_route53_zone" "default" {

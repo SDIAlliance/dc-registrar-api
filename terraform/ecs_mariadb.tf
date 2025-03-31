@@ -143,12 +143,6 @@ resource "aws_vpc_security_group_egress_rule" "efs" {
   description       = "Allow to serve data inside VPC"
 }
 
-resource "aws_service_discovery_private_dns_namespace" "default" {
-  name        = var.internal_domain_name
-  description = "Private DNS namespace for using haproxy with CloudMap"
-  vpc         = module.vpc.vpc_id
-}
-
 resource "aws_service_discovery_service" "default" {
   name = "mariadb"
 
