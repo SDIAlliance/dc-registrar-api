@@ -28,6 +28,10 @@ module "influxdb_container_definition" {
     {
       name  = "INFLUXD_TLS_KEY"
       value = "/etc/letsencrypt/live/influxdb.svc.nadiki.work/privkey.pem"
+    },
+    {
+      name  = "INFLUXD_HTTP_BIND_ADDRESS",
+      value = ":${var.influxdb_container_port}"
     }
   ]
   log_configuration = {
