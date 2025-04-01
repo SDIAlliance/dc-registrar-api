@@ -4,7 +4,7 @@ from nadiki_registrar.controllers.config import DATABASE_URL
 #
 # Initialize SQLAlchemy
 #
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 meta = MetaData()
 meta.reflect(engine)
 facilities                      = Table("facilities",                       meta, autoload_with=engine)
