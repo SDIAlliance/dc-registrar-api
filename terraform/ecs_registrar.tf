@@ -107,16 +107,6 @@ resource "aws_security_group" "registrar-task" {
   vpc_id = module.vpc.vpc_id
 }
 
-# FIXME: remove this
-resource "aws_vpc_security_group_ingress_rule" "registrar-daniel" {
-  security_group_id = aws_security_group.registrar-task.id
-  from_port         = var.registrar_container_port
-  to_port           = var.registrar_container_port
-  cidr_ipv4         = "79.238.45.3/32"
-  ip_protocol       = "tcp"
-  description       = "Daniel @ Home"
-}
-
 resource "aws_vpc_security_group_ingress_rule" "registrar-vpc" {
   security_group_id = aws_security_group.registrar-task.id
   from_port         = var.registrar_container_port
