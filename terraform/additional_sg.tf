@@ -16,26 +16,26 @@
 
 
 locals {
-    security_groups = [
-        {
-            id = aws_security_group.influxdb-task.id
-            port = var.influxdb_container_port
-        },
-#        {
-#            id = aws_security_group.mariadb.id
-#            port = var.mariadb_container_port
-#        },
-        {
-            id = aws_security_group.registrar-task.id
-            port = var.registrar_container_port
-        }
-    ]
-    client_cidr_blocks = try(jsondecode(file("client_cidr_blocks.json")), [])
-    client_rules = setproduct(local.security_groups, local.client_cidr_blocks)
+  security_groups = [
+    {
+      id   = aws_security_group.influxdb-task.id
+      port = var.influxdb_container_port
+    },
+    #        {
+    #            id = aws_security_group.mariadb.id
+    #            port = var.mariadb_container_port
+    #        },
+    {
+      id   = aws_security_group.registrar-task.id
+      port = var.registrar_container_port
+    }
+  ]
+  client_cidr_blocks = try(jsondecode(file("client_cidr_blocks.json")), [])
+  client_rules       = setproduct(local.security_groups, local.client_cidr_blocks)
 }
 
 resource "aws_vpc_security_group_ingress_rule" "client" {
-  count = length(local.client_rules)
+  count             = length(local.client_rules)
   security_group_id = local.client_rules[count.index][0].id
   from_port         = local.client_rules[count.index][0].port
   to_port           = local.client_rules[count.index][0].port
