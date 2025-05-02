@@ -152,7 +152,3 @@ resource "aws_vpc_security_group_egress_rule" "registrar-task-efs" {
   ip_protocol       = "tcp"
   description       = "NFS access to EFS file system"
 }
-
-resource "aws_route53_zone" "default" {
-  name = var.public_zone_name
-}

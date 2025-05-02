@@ -33,6 +33,11 @@ variable "registrar_image_tag" {
   description = "Tag to use when accessing the registrar ECR"
 }
 
+variable "ui_image_tag" {
+  type        = string
+  description = "Tag to use when accessing the UI ECR"
+}
+
 variable "mariadb_cpu" {
   type        = number
   description = "CPU value for the MariaDB ECS service"
@@ -57,6 +62,19 @@ variable "registrar_ram" {
   default     = 512
 }
 
+variable "ui_cpu" {
+  type        = number
+  description = "CPU value for the UI ECS service"
+  default     = 256
+}
+
+variable "ui_ram" {
+  type        = number
+  description = "RAM in MB to use for the UI ECS service"
+  default     = 512
+}
+
+
 variable "internal_domain_name" {
   type        = string
   description = "DNS zone to use for service discovery"
@@ -73,6 +91,12 @@ variable "registrar_container_port" {
   type        = number
   description = "Port where Registrar listens"
   default     = 443
+}
+
+variable "ui_container_port" {
+  type        = number
+  description = "Port where UI listens"
+  default     = 80
 }
 
 variable "public_zone_name" {
