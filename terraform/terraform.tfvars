@@ -8,4 +8,5 @@ vpc_cidr_block          = "10.14.12.0/24"
 availability_zones      = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
 mariadb_image_tag       = "11.7.2"
 registrar_image_tag     = "latest"
+ui_image_tag            = "latest"
 influxdb_container_port = 8443 # change this because we use TLS

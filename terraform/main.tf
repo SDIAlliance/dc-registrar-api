@@ -21,15 +21,13 @@ module "ecs_cluster" {
   capacity_providers_fargate = true
 }
 
-data "aws_caller_identity" "default" {}
-
 module "ecr" {
   source                 = "cloudposse/ecr/aws"
   version                = "0.42.1"
   namespace              = var.namespace
   stage                  = var.stage
   name                   = var.name
-  image_names            = ["${var.namespace}/mariadb", "${var.namespace}/registrar"]
+  image_names            = ["${var.namespace}/mariadb", "${var.namespace}/registrar", "${var.namespace}/ui"]
   image_tag_mutability   = "MUTABLE"
   principals_full_access = ["arn:aws:iam::${data.aws_caller_identity.default.account_id}:root"]
 }
@@ -114,6 +112,13 @@ module "dns_updater" {
       dns_ttl          = 60 # keep it short because deployments will change the IP
       ecs_service_name = aws_ecs_service.influxdb.name
       ecs_cluster_name = module.ecs_cluster.name
+    },
+    {
+      hosted_zone_id   = aws_route53_zone.default.id
+      dns_name         = "app.${var.public_zone_name}"
+      dns_ttl          = 60 # keep it short because deployments will change the IP
+      ecs_service_name = aws_ecs_service.ui.name
+      ecs_cluster_name = module.ecs_cluster.name
     }
   ]
 }
@@ -122,4 +127,8 @@ resource "aws_service_discovery_private_dns_namespace" "default" {
   name        = var.internal_domain_name
   description = "Private DNS namespace for Nadiki services"
   vpc         = module.vpc.vpc_id
+}
+
+resource "aws_route53_zone" "default" {
+  name = var.public_zone_name
 }
