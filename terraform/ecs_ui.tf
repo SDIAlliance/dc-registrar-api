@@ -7,7 +7,7 @@ module "ui_container_definition" {
 
   # Why do I need to say this again here? Should this be taken from the Dockerfile-prod???
   entrypoint = ["gunicorn"]
-  command    = ["nadiki_ui:app", "-b", "0.0.0.0:${var.ui_container_port}"]
+  command    = ["--certfile", "/etc/letsencrypt/live/app.svc.nadiki.work/fullchain.pem", "--keyfile", "/etc/letsencrypt/live/app.svc.nadiki.work/privkey.pem", "nadiki_ui:app", "-b", "0.0.0.0:${var.ui_container_port}"]
 
   port_mappings = [
     {
