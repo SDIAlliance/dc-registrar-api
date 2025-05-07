@@ -10,4 +10,4 @@ mariadb_image_tag       = "11.7.2"
 registrar_image_tag     = "latest"
 ui_image_tag            = "latest"
 influxdb_container_port = 8443 # change this because we use TLS
-ui_container_port = 443
+ui_container_port       = 443

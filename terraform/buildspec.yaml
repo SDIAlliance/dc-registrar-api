@@ -1,0 +1,11 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.eu-central-1.amazonaws.com
+  build:
+    on-failure: ABORT
+    commands: |
+      docker build -t ${repo_url} .
+      docker push ${repo_url}
