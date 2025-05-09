@@ -31,10 +31,6 @@ module "jupyter-lab_container_definition" {
       value = "/etc/letsencrypt/live/jupyter.svc.nadiki.work/fullchain.pem"
     },
     {
-      name  = "TLS_CA_PATH"
-      value = "/etc/letsencrypt/live/jupyter.svc.nadiki.work/fullchain.pem"
-    },
-    {
       name  = "TLS_KEY_PATH"
       value = "/etc/letsencrypt/live/jupyter.svc.nadiki.work/privkey.pem"
     },
