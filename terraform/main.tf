@@ -27,7 +27,7 @@ module "ecr" {
   namespace              = var.namespace
   stage                  = var.stage
   name                   = var.name
-  image_names            = ["${var.namespace}/mariadb", "${var.namespace}/registrar", "${var.namespace}/ui", "${var.namespace}/jupyter-lab"]
+  image_names            = ["${var.namespace}/mariadb", "${var.namespace}/registrar", "${var.namespace}/ui", "${var.namespace}/jupyter-lab", "${var.namespace}/telegraf-prometheus-remote-write-receiver"]
   image_tag_mutability   = "MUTABLE"
   principals_full_access = ["arn:aws:iam::${data.aws_caller_identity.default.account_id}:root"]
 }
@@ -125,6 +125,13 @@ module "dns_updater" {
       dns_name         = "jupyter.${var.public_zone_name}"
       dns_ttl          = 60 # keep it short because deployments will change the IP
       ecs_service_name = aws_ecs_service.jupyter-lab.name
+      ecs_cluster_name = module.ecs_cluster.name
+    },
+    {
+      hosted_zone_id   = aws_route53_zone.default.id
+      dns_name         = "promrcv.${var.public_zone_name}"
+      dns_ttl          = 60 # keep it short because deployments will change the IP
+      ecs_service_name = aws_ecs_service.telegraf_promrvc.name
       ecs_cluster_name = module.ecs_cluster.name
     }
   ]

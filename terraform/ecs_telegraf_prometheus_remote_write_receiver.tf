@@ -1,51 +1,43 @@
-module "ui_container_definition" {
+module "telegraf_promrvc_container_definition" {
   source  = "cloudposse/ecs-container-definition/aws"
   version = "0.61.2"
 
-  container_name  = "ui"
-  container_image = "${module.ecr.repository_url_map["${var.namespace}/ui"]}:${var.ui_image_tag}"
-
-  # Why do I need to say this again here? Should this be taken from the Dockerfile-prod???
-  entrypoint = ["gunicorn"]
-  command    = ["--certfile", "/etc/letsencrypt/live/app.svc.nadiki.work/fullchain.pem", "--keyfile", "/etc/letsencrypt/live/app.svc.nadiki.work/privkey.pem", "nadiki_ui:app", "-b", "0.0.0.0:${var.ui_container_port}"]
+  container_name  = "telegraf_promrvc"
+  container_image = "${module.ecr.repository_url_map["${var.namespace}/telegraf-prometheus-remote-write-receiver"]}:${var.telegraf_promrvc_image_tag}"
 
   port_mappings = [
     {
-      containerPort = var.ui_container_port
+      containerPort = var.telegraf_promrvc_container_port
       name          = "http"
     }
   ]
   mount_points = [
     {
       containerPath = "/etc/letsencrypt",
-      sourceVolume  = "ui-certs"
+      sourceVolume  = "telegraf_promrvc-certs"
     }
   ]
   environment = [
     {
-      name  = "DATABASE_HOST",
-      value = "mariadb.${var.internal_domain_name}"
-    },
-    {
-      name  = "DATABASE_USER",
-      value = "root" # FIXME
-    },
-    {
-      name  = "INFLUXDB_ORG",
+      name  = "OUTPUT_INFLUXDB_ORGANIZATION",
       value = var.influxdb_org
     },
     {
-      name  = "INFLUXDB_ENDPOINT_URL",
+      name  = "OUTPUT_INFLUXDB_URL",
       value = "https://influxdb.${var.internal_domain_name}:${var.influxdb_container_port}"
+    },
+    {
+      name  = "OUTPUT_INFLUXDB_BUCKET",
+      value = "XION"
+    },
+    {
+      name  = "INPUT_HTTP_PORT",
+      value = var.telegraf_promrvc_container_port
     }
   ]
   secrets = [
     {
-      name      = "DATABASE_PASSWORD",
-      valueFrom = aws_secretsmanager_secret.mariadb_root_password.arn
-    },
-    {
-      name      = "INFLUXDB_ADMIN_TOKEN",
+      name      = "OUTPUT_INFLUXDB_TOKEN",
       valueFrom = aws_secretsmanager_secret.influxdb_admin_token.arn
     }
   ]
@@ -54,20 +46,20 @@ module "ui_container_definition" {
     options = {
       awslogs-region        = data.aws_region.current.name
       awslogs-group         = aws_cloudwatch_log_group.default.name
-      awslogs-stream-prefix = "ui"
+      awslogs-stream-prefix = "telegraf_promrvc"
     }
   }
 }
 
-resource "aws_ecs_task_definition" "ui" {
-  family                   = "${var.namespace}-ui"
-  container_definitions    = module.ui_container_definition.json_map_encoded_list
+resource "aws_ecs_task_definition" "telegraf_promrvc" {
+  family                   = "${var.namespace}-telegraf_promrvc"
+  container_definitions    = module.telegraf_promrvc_container_definition.json_map_encoded_list
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  cpu                      = var.ui_cpu
-  memory                   = var.ui_ram
+  cpu                      = var.telegraf_promrvc_cpu
+  memory                   = var.telegraf_promrvc_ram
   execution_role_arn       = aws_iam_role.execution.arn
-  task_role_arn            = aws_iam_role.ui_task_role.arn
+  task_role_arn            = aws_iam_role.telegraf_promrvc_task_role.arn
 
   runtime_platform {
     operating_system_family = "LINUX"
@@ -75,7 +67,7 @@ resource "aws_ecs_task_definition" "ui" {
   }
 
   volume {
-    name = "ui-certs"
+    name = "telegraf_promrvc-certs"
 
     efs_volume_configuration {
       file_system_id     = aws_efs_file_system.certbot.id
@@ -88,8 +80,8 @@ resource "aws_ecs_task_definition" "ui" {
   }
 }
 
-resource "aws_iam_role" "ui_task_role" {
-  name = "${var.namespace}-ui-task-role"
+resource "aws_iam_role" "telegraf_promrvc_task_role" {
+  name = "${var.namespace}-telegraf_promrvc-task-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -105,8 +97,8 @@ resource "aws_iam_role" "ui_task_role" {
   })
 }
 
-#resource "aws_iam_role_policy" "ui_task_role" {
-#  role = aws_iam_role.ui_task_role.name
+#resource "aws_iam_role_policy" "telegraf_promrvc_task_role" {
+#  role = aws_iam_role.telegraf_promrvc_task_role.name
 #  policy = jsonencode({
 #    Version = "2012-10-17"
 #    Statement = [
@@ -122,10 +114,10 @@ resource "aws_iam_role" "ui_task_role" {
 #  })
 #}
 
-resource "aws_ecs_service" "ui" {
-  name                               = "${var.namespace}-${var.stage}-ui"
+resource "aws_ecs_service" "telegraf_promrvc" {
+  name                               = "${var.namespace}-${var.stage}-promrcv"
   cluster                            = module.ecs_cluster.name
-  task_definition                    = aws_ecs_task_definition.ui.arn
+  task_definition                    = aws_ecs_task_definition.telegraf_promrvc.arn
   desired_count                      = 1
   launch_type                        = "FARGATE"
   deployment_maximum_percent         = 200
@@ -133,26 +125,26 @@ resource "aws_ecs_service" "ui" {
   network_configuration {
     subnets          = module.dynamic_subnets.public_subnet_ids
     assign_public_ip = true
-    security_groups  = [aws_security_group.ui-task.id]
+    security_groups  = [aws_security_group.telegraf_promrvc-task.id]
   }
 }
 
-resource "aws_security_group" "ui-task" {
-  name   = "${var.namespace}-${var.stage}-ui"
+resource "aws_security_group" "telegraf_promrvc-task" {
+  name   = "${var.namespace}-${var.stage}-telegraf_promrvc"
   vpc_id = module.vpc.vpc_id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "ui-vpc" {
-  security_group_id = aws_security_group.ui-task.id
-  from_port         = var.ui_container_port
-  to_port           = var.ui_container_port
+resource "aws_vpc_security_group_ingress_rule" "telegraf_promrvc-vpc" {
+  security_group_id = aws_security_group.telegraf_promrvc-task.id
+  from_port         = var.telegraf_promrvc_container_port
+  to_port           = var.telegraf_promrvc_container_port
   cidr_ipv4         = module.vpc.vpc_cidr_block
   ip_protocol       = "tcp"
   description       = "Inside VPC"
 }
 
-resource "aws_vpc_security_group_egress_rule" "ui-ecr" {
-  security_group_id = aws_security_group.ui-task.id
+resource "aws_vpc_security_group_egress_rule" "telegraf_promrvc-ecr" {
+  security_group_id = aws_security_group.telegraf_promrvc-task.id
   from_port         = 443
   to_port           = 443
   cidr_ipv4         = "0.0.0.0/0" # this could be narrowed down to ECR
@@ -160,17 +152,17 @@ resource "aws_vpc_security_group_egress_rule" "ui-ecr" {
   description       = "Access to ECR to pull container"
 }
 
-resource "aws_vpc_security_group_egress_rule" "ui-database" {
-  security_group_id = aws_security_group.ui-task.id
-  from_port         = var.mariadb_container_port
-  to_port           = var.mariadb_container_port
-  cidr_ipv4         = module.vpc.vpc_cidr_block
-  ip_protocol       = "tcp"
-  description       = "Database access"
-}
+#resource "aws_vpc_security_group_egress_rule" "telegraf_promrvc-database" {
+#  security_group_id = aws_security_group.telegraf_promrvc-task.id
+#  from_port         = var.mariadb_container_port
+#  to_port           = var.mariadb_container_port
+#  cidr_ipv4         = module.vpc.vpc_cidr_block
+#  ip_protocol       = "tcp"
+#  description       = "Database access"
+#}
 
-resource "aws_vpc_security_group_egress_rule" "ui-influxdb" {
-  security_group_id = aws_security_group.ui-task.id
+resource "aws_vpc_security_group_egress_rule" "telegraf_promrvc-influxdb" {
+  security_group_id = aws_security_group.telegraf_promrvc-task.id
   from_port         = var.influxdb_container_port
   to_port           = var.influxdb_container_port
   cidr_ipv4         = module.vpc.vpc_cidr_block
@@ -179,8 +171,8 @@ resource "aws_vpc_security_group_egress_rule" "ui-influxdb" {
 }
 
 # FIXME: close this down to just our EFS mount targets
-resource "aws_vpc_security_group_egress_rule" "ui-task-efs" {
-  security_group_id = aws_security_group.ui-task.id
+resource "aws_vpc_security_group_egress_rule" "telegraf_promrvc-task-efs" {
+  security_group_id = aws_security_group.telegraf_promrvc-task.id
   from_port         = 2049
   to_port           = 2049
   cidr_ipv4         = module.vpc.vpc_cidr_block

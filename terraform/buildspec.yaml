@@ -9,7 +9,8 @@ phases:
   build:
     on-failure: ABORT
     commands: |
-      docker build -t $REPO_URL_WITH_COMMIT_ID . -f ${dockerfile}
+      cd $(dirname ${dockerfile})
+      docker build -t $REPO_URL_WITH_COMMIT_ID . -f $(basename ${dockerfile})
       docker tag $REPO_URL_WITH_COMMIT_ID $REPO_URL_WITH_BRANCHNAME
       docker push $REPO_URL_WITH_BRANCHNAME
       docker push $REPO_URL_WITH_COMMIT_ID

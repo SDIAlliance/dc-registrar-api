@@ -43,6 +43,11 @@ variable "jupyter_lab_image_tag" {
   description = "Tag to use when accessing the Jupyter Lab ECR"
 }
 
+variable "telegraf_promrvc_image_tag" {
+  type        = string
+  description = "Tag to use when accessing the Telegraf Prometheus Remote Write Receiver ECR"
+}
+
 variable "mariadb_cpu" {
   type        = number
   description = "CPU value for the MariaDB ECS service"
@@ -105,7 +110,13 @@ variable "ui_container_port" {
 
 variable "jupyter_lab_container_port" {
   type        = number
-  description = "Port where UI listens"
+  description = "Port where Jupyter Lab listens"
+  default     = 80
+}
+
+variable "telegraf_promrvc_container_port" {
+  type        = number
+  description = "Port where Telegraf listens"
   default     = 80
 }
 
@@ -142,6 +153,18 @@ variable "jupyter_lab_cpu" {
 variable "jupyter_lab_ram" {
   type        = number
   description = "RAM in MB to use for the Jupyter Lab ECS service"
+  default     = 512
+}
+
+variable "telegraf_promrvc_cpu" {
+  type        = number
+  description = "CPU value for Telegraf"
+  default     = 256
+}
+
+variable "telegraf_promrvc_ram" {
+  type        = number
+  description = "RAM in MB to use for Telegraf"
   default     = 512
 }
 
