@@ -44,9 +44,30 @@ resource "aws_iam_role_policy" "codebuild" {
   policy = data.aws_iam_policy_document.codebuild.json
 }
 
+locals {
+  codebuild_projects = {
+    "${var.name}" = {
+      git_repo   = "https://github.com/SDIAlliance/nadiki-registrar.git"
+      ecr_repo   = module.ecr.repository_url_map["${var.namespace}/registrar"]
+      dockerfile = "Dockerfile-prod"
+    }
+    "ui" = {
+      git_repo   = "https://github.com/SDIAlliance/nadiki-ui.git"
+      ecr_repo   = module.ecr.repository_url_map["${var.namespace}/ui"]
+      dockerfile = "Dockerfile"
+    },
+    "jupyter-lab" = {
+      git_repo   = "https://github.com/SDIAlliance/nadiki-jupyter-lab.git"
+      ecr_repo   = module.ecr.repository_url_map["${var.namespace}/jupyter-lab"]
+      dockerfile = "Dockerfile"
+    }
+  }
+}
+
 resource "aws_codebuild_project" "default" {
-  name          = "${var.namespace}-codebuild"
-  description   = "Codebuild project for ${var.namespace}"
+  for_each      = toset(keys(local.codebuild_projects))
+  name          = "${var.namespace}-${each.key}-codebuild"
+  description   = "Codebuild project for ${local.codebuild_projects[each.key].git_repo}"
   build_timeout = 5
   service_role  = aws_iam_role.codebuild.arn
 
@@ -64,15 +85,15 @@ resource "aws_codebuild_project" "default" {
   logs_config {
     cloudwatch_logs {
       group_name  = "/aws/codebuild/${var.namespace}"
-      stream_name = var.name
+      stream_name = each.key
     }
   }
 
   source {
     type            = "GITHUB"
-    location        = "https://github.com/SDIAlliance/nadiki-registrar.git"
+    location        = local.codebuild_projects[each.key].git_repo
     git_clone_depth = 1
-    buildspec       = templatefile("buildspec.yaml", { repo_url = module.ecr.repository_url_map["${var.namespace}/registrar"], region = data.aws_region.current.name, account_id = data.aws_caller_identity.default.account_id })
+    buildspec       = templatefile("buildspec.yaml", { repo_url = local.codebuild_projects[each.key].ecr_repo, account_id = data.aws_caller_identity.default.account_id, dockerfile = local.codebuild_projects[each.key].dockerfile })
   }
 
   source_version = "main"

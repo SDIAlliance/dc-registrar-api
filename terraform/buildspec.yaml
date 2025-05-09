@@ -3,9 +3,13 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.eu-central-1.amazonaws.com
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.eu-central-1.amazonaws.com
+      - export REPO_URL_WITH_BRANCHNAME=${repo_url}:$CODEBUILD_SOURCE_VERSION
+      - export REPO_URL_WITH_COMMIT_ID=${repo_url}:$(git log --abbrev-commit -1 --pretty=format:%h)
   build:
     on-failure: ABORT
     commands: |
-      docker build -t ${repo_url} .
-      docker push ${repo_url}
+      docker build -t $REPO_URL_WITH_COMMIT_ID . -f ${dockerfile}
+      docker tag $REPO_URL_WITH_COMMIT_ID $REPO_URL_WITH_BRANCHNAME
+      docker push $REPO_URL_WITH_BRANCHNAME
+      docker push $REPO_URL_WITH_COMMIT_ID

@@ -38,6 +38,11 @@ variable "ui_image_tag" {
   description = "Tag to use when accessing the UI ECR"
 }
 
+variable "jupyter_lab_image_tag" {
+  type        = string
+  description = "Tag to use when accessing the Jupyter Lab ECR"
+}
+
 variable "mariadb_cpu" {
   type        = number
   description = "CPU value for the MariaDB ECS service"
@@ -74,7 +79,6 @@ variable "ui_ram" {
   default     = 512
 }
 
-
 variable "internal_domain_name" {
   type        = string
   description = "DNS zone to use for service discovery"
@@ -94,6 +98,12 @@ variable "registrar_container_port" {
 }
 
 variable "ui_container_port" {
+  type        = number
+  description = "Port where UI listens"
+  default     = 80
+}
+
+variable "jupyter_lab_container_port" {
   type        = number
   description = "Port where UI listens"
   default     = 80
@@ -120,6 +130,18 @@ variable "influxdb_cpu" {
 variable "influxdb_ram" {
   type        = number
   description = "RAM in MB to use for the InfluxDB ECS service"
+  default     = 512
+}
+
+variable "jupyter_lab_cpu" {
+  type        = number
+  description = "CPU value for the Jupyter Lab ECS service"
+  default     = 256
+}
+
+variable "jupyter_lab_ram" {
+  type        = number
+  description = "RAM in MB to use for the Jupyter Lab ECS service"
   default     = 512
 }
 

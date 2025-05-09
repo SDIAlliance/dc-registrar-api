@@ -32,6 +32,10 @@ locals {
     {
       id   = aws_security_group.ui-task.id
       port = var.ui_container_port
+    },
+    {
+      id   = aws_security_group.jupyter-lab-task.id
+      port = var.jupyter_lab_container_port
     }
   ]
   client_cidr_blocks = try(jsondecode(file("client_cidr_blocks.json")), [])
