@@ -31,6 +31,12 @@ variable "container_command" {
 variable "extra_efs_mounts" {
   type        = map(object({ mount_point = string, file_system_id = string, access_point_id = string }))
   description = "Map of objects describing extra EFS mounts (in addition to our own EFS filesystem)"
+  default     = {}
+}
+
+variable "own_efs_volume_mount_point" {
+  type        = string
+  description = "If specified, an EFS volume is created and mounted under this directory"
 }
 
 variable "log_group_name" {
@@ -74,6 +80,7 @@ variable "runtime_platform_cpu_arch" {
 variable "service_discovery_registry_arn" {
   type        = string
   description = "ARN of the service discovery to register the service with"
+  default     = null
 }
 
 variable "subnet_ids" {
@@ -86,7 +93,8 @@ variable "vpc_id" {
   description = "VPC ID in which the subnets live"
 }
 
-variable "own_efs_volume_mount_point" {
-  type        = string
-  description = "If specified, an EFS volume is created and mounted under this directory"
+variable "create_service" {
+  type        = bool
+  description = "Whether to create the ECS service"
+  default     = true
 }

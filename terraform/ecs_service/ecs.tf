@@ -1,5 +1,5 @@
 locals {
-  efs_mounts = var.own_efs_volume_mount_point == null ? var.extra_efs_mounts : merge(var.extra_efs_mounts, { "${var.name}" = { file_system_id = aws_efs_file_system.default[0].id, mount_point = var.own_efs_volume_mount_point } })
+  efs_mounts = var.own_efs_volume_mount_point == null ? var.extra_efs_mounts : merge(var.extra_efs_mounts, { "${var.name}-efs" = { file_system_id = aws_efs_file_system.default[0].id, mount_point = var.own_efs_volume_mount_point, access_point_id = aws_efs_access_point.default[0].id } })
 }
 
 module "container_definition" {
@@ -10,7 +10,7 @@ module "container_definition" {
   container_image = var.container_image
   command         = var.container_command
 
-  mount_points = [for k, v in local.efs_mounts : { name = v.mount_point, sourceVolume = k }]
+  mount_points = [for k, v in local.efs_mounts : { containerPath = v.mount_point, sourceVolume = k }]
 
   log_configuration = {
     logDriver = "awslogs"
@@ -40,12 +40,12 @@ resource "aws_ecs_task_definition" "default" {
   dynamic "volume" {
     for_each = keys(local.efs_mounts)
     content {
-      name = "${volume}-efs"
+      name = volume.value
       efs_volume_configuration {
-        file_system_id     = local.efs_mounts[volume].file_system_id
+        file_system_id     = local.efs_mounts[volume.value].file_system_id
         transit_encryption = "ENABLED"
         authorization_config {
-          access_point_id = local.efs_mounts[volume].access_point_id
+          access_point_id = local.efs_mounts[volume.value].access_point_id
         }
       }
     }
@@ -53,14 +53,18 @@ resource "aws_ecs_task_definition" "default" {
 }
 
 resource "aws_ecs_service" "default" {
+  count                              = var.create_service ? 1 : 0
   name                               = "${var.namespace}-${var.stage}-${var.name}" # FIXME: use stage always or never
   cluster                            = var.ecs_cluster_name
   task_definition                    = aws_ecs_task_definition.default.arn
   desired_count                      = 1
   deployment_maximum_percent         = 100 # prevent more than one task from accessing the storage
   deployment_minimum_healthy_percent = 0
-  service_registries {
-    registry_arn = var.service_discovery_registry_arn
+  dynamic "service_registries" {
+    for_each = var.service_discovery_registry_arn == null ? [] : [var.service_discovery_registry_arn]
+    content {
+      registry_arn = service_registries
+    }
   }
   network_configuration {
     subnets          = var.subnet_ids

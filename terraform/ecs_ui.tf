@@ -78,11 +78,11 @@ resource "aws_ecs_task_definition" "ui" {
     name = "ui-certs"
 
     efs_volume_configuration {
-      file_system_id     = aws_efs_file_system.certbot.id
+      file_system_id     = module.certbot.efs_file_system_id
       transit_encryption = "ENABLED"
       authorization_config {
         # we need an access point with root privs in order to read the certificates
-        access_point_id = aws_efs_access_point.certbot.id
+        access_point_id = module.certbot.access_point_id
       }
     }
   }
