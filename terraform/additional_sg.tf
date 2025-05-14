@@ -34,7 +34,7 @@ locals {
       port = var.ui_container_port
     },
     {
-      id   = aws_security_group.jupyter-lab-task.id
+      id   = module.jupyter-lab.task_security_group_id
       port = var.jupyter_lab_container_port
     },
     {

@@ -59,8 +59,8 @@ resource "aws_ecs_service" "default" {
   cluster                            = var.ecs_cluster_name
   task_definition                    = aws_ecs_task_definition.default.arn
   desired_count                      = 1
-  deployment_maximum_percent         = 100 # prevent more than one task from accessing the storage
-  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = var.deployment_maximum_percent
+  deployment_minimum_healthy_percent = var.deployment_minimum_percent
   dynamic "service_registries" {
     for_each = aws_service_discovery_service.default.*
     content {
@@ -73,7 +73,7 @@ resource "aws_ecs_service" "default" {
     security_groups  = [aws_security_group.task.id]
   }
   capacity_provider_strategy {
-    capacity_provider = "FARGATE_SPOT"
+    capacity_provider = var.capacity_provider_strategy
     weight            = 1
   }
 }

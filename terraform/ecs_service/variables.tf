@@ -18,6 +18,22 @@ variable "ecs_cluster_name" {
   description = "Name of the ECS cluster"
 }
 
+variable "capacity_provider_strategy" {
+  type        = string
+  description = "Capacity provider strategy for the service"
+  default     = "FARGATE"
+}
+
+variable "deployment_minimum_percent" {
+  type    = number
+  default = 100
+}
+
+variable "deployment_maximum_percent" {
+  type    = number
+  default = 200
+}
+
 variable "container_image" {
   type        = string
   description = "Container image to use for this service"

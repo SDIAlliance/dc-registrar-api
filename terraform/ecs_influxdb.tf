@@ -1,13 +1,16 @@
 module "influxdb" {
-  source             = "./ecs_service"
-  name               = "influxdb"
-  namespace          = var.namespace
-  stage              = var.stage
-  vpc_id             = module.vpc.vpc_id
-  public_subnet_ids  = module.dynamic_subnets.public_subnet_ids
-  private_subnet_ids = module.dynamic_subnets.private_subnet_ids
-  ecs_cluster_name   = module.ecs_cluster.name
-  execution_role_arn = aws_iam_role.execution.arn
+  source                     = "./ecs_service"
+  name                       = "influxdb"
+  namespace                  = var.namespace
+  stage                      = var.stage
+  vpc_id                     = module.vpc.vpc_id
+  public_subnet_ids          = module.dynamic_subnets.public_subnet_ids
+  private_subnet_ids         = module.dynamic_subnets.private_subnet_ids
+  ecs_cluster_name           = module.ecs_cluster.name
+  capacity_provider_strategy = "FARGATE_SPOT"
+  deployment_maximum_percent = 100
+  deployment_minimum_percent = 0
+  execution_role_arn         = aws_iam_role.execution.arn
   #task_role_arn              = 
   container_image = "influxdb:2"
   #container_command          = 
