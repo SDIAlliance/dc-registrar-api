@@ -128,6 +128,12 @@ variable "environment" {
   default     = []
 }
 
+variable "secrets" {
+  type        = list(object({ name = string, valueFrom = string }))
+  description = "Secrets to pass to the container"
+  default     = []
+}
+
 variable "port_mappings" {
   type        = list(object({ name = string, containerPort = number }))
   description = "Port mappings for the service"

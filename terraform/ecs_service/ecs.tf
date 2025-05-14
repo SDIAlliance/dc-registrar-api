@@ -11,6 +11,7 @@ module "container_definition" {
   command         = var.container_command
   mount_points    = [for k, v in local.efs_mounts : { containerPath = v.mount_point, sourceVolume = k }]
   environment     = var.environment
+  secrets         = var.secrets
   port_mappings   = var.port_mappings
 
   log_configuration = {
