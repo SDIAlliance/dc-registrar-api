@@ -18,7 +18,7 @@
 locals {
   security_groups = [
     {
-      id   = aws_security_group.influxdb-task.id
+      id   = module.influxdb.task_security_group_id
       port = var.influxdb_container_port
     },
     #        {

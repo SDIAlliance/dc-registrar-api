@@ -7,7 +7,7 @@ resource "aws_efs_file_system" "default" {
 }
 
 resource "aws_efs_mount_target" "default" {
-  for_each        = var.own_efs_volume_mount_point != null ? toset(var.subnet_ids) : []
+  for_each        = var.own_efs_volume_mount_point != null ? toset(var.private_subnet_ids) : []
   file_system_id  = aws_efs_file_system.default[0].id
   security_groups = [aws_security_group.efs[0].id]
   subnet_id       = each.key

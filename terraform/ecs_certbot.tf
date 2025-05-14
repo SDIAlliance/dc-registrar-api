@@ -1,19 +1,21 @@
 module "certbot" {
-  source                     = "./ecs_service"
-  name                       = "certbot"
-  namespace                  = var.namespace
-  stage                      = var.stage
-  vpc_id                     = module.vpc.vpc_id
-  subnet_ids                 = module.dynamic_subnets.private_subnet_ids
-  ecs_cluster_name           = module.ecs_cluster.name
-  execution_role_arn         = aws_iam_role.execution.arn
-  task_role_arn              = aws_iam_role.certbot_task_role.arn
-  container_image            = "certbot/dns-route53"
-  container_command          = ["certonly", "--dns-route53", "-m", var.cert_admin_email, "--agree-tos", "-n", "-d", "DOMAIN_GOES_HERE"]
-  log_group_name             = aws_cloudwatch_log_group.default.name
-  runtime_platform_cpu_arch  = "ARM64"
-  own_efs_volume_mount_point = "/etc/letsencrypt"
-  create_service             = false
+  source                        = "./ecs_service"
+  name                          = "certbot"
+  namespace                     = var.namespace
+  stage                         = var.stage
+  vpc_id                        = module.vpc.vpc_id
+  public_subnet_ids             = module.dynamic_subnets.private_subnet_ids
+  private_subnet_ids            = module.dynamic_subnets.private_subnet_ids
+  ecs_cluster_name              = module.ecs_cluster.name
+  execution_role_arn            = aws_iam_role.execution.arn
+  task_role_arn                 = aws_iam_role.certbot_task_role.arn
+  container_image               = "certbot/dns-route53"
+  container_command             = ["certonly", "--dns-route53", "-m", var.cert_admin_email, "--agree-tos", "-n", "-d", "DOMAIN_GOES_HERE"]
+  log_group_name                = aws_cloudwatch_log_group.default.name
+  runtime_platform_cpu_arch     = "ARM64"
+  own_efs_volume_mount_point    = "/etc/letsencrypt"
+  make_own_efs_available_to_vpc = true
+  create_service                = false
 }
 
 resource "aws_iam_role" "certbot_task_role" {

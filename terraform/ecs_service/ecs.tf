@@ -9,8 +9,9 @@ module "container_definition" {
   container_name  = var.name
   container_image = var.container_image
   command         = var.container_command
-
-  mount_points = [for k, v in local.efs_mounts : { containerPath = v.mount_point, sourceVolume = k }]
+  mount_points    = [for k, v in local.efs_mounts : { containerPath = v.mount_point, sourceVolume = k }]
+  environment     = var.environment
+  port_mappings   = var.port_mappings
 
   log_configuration = {
     logDriver = "awslogs"
@@ -61,18 +62,38 @@ resource "aws_ecs_service" "default" {
   deployment_maximum_percent         = 100 # prevent more than one task from accessing the storage
   deployment_minimum_healthy_percent = 0
   dynamic "service_registries" {
-    for_each = var.service_discovery_registry_arn == null ? [] : [var.service_discovery_registry_arn]
+    for_each = aws_service_discovery_service.default.*
     content {
-      registry_arn = service_registries
+      registry_arn = aws_service_discovery_service.default[0].arn
     }
   }
   network_configuration {
-    subnets          = var.subnet_ids
+    subnets          = var.public_subnet_ids
     assign_public_ip = true
     security_groups  = [aws_security_group.task.id]
   }
   capacity_provider_strategy {
     capacity_provider = "FARGATE_SPOT"
     weight            = 1
+  }
+}
+
+resource "aws_service_discovery_service" "default" {
+  count = var.service_discovery_namespace_id != null ? 1 : 0
+  name  = var.name
+
+  dns_config {
+    namespace_id = var.service_discovery_namespace_id
+
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
   }
 }

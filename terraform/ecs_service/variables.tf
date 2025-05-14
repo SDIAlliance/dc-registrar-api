@@ -26,6 +26,7 @@ variable "container_image" {
 variable "container_command" {
   type        = list(string)
   description = "Command to execute in the container"
+  default     = null
 }
 
 variable "extra_efs_mounts" {
@@ -37,6 +38,12 @@ variable "extra_efs_mounts" {
 variable "own_efs_volume_mount_point" {
   type        = string
   description = "If specified, an EFS volume is created and mounted under this directory"
+}
+
+variable "make_own_efs_available_to_vpc" {
+  type        = bool
+  description = "If true, the created EFS access points will be available for the whole VPC, otherwise only for this service"
+  default     = false
 }
 
 variable "log_group_name" {
@@ -64,6 +71,7 @@ variable "execution_role_arn" {
 variable "task_role_arn" {
   type        = string
   description = "ARN of the task role"
+  default     = null
 }
 
 variable "runtime_platform_os_family" {
@@ -77,15 +85,14 @@ variable "runtime_platform_cpu_arch" {
   description = "CPU architecture of the runtime platform"
 }
 
-variable "service_discovery_registry_arn" {
-  type        = string
-  description = "ARN of the service discovery to register the service with"
-  default     = null
+variable "public_subnet_ids" {
+  type        = list(string)
+  description = "List of public subnet IDs to use for the service"
 }
 
-variable "subnet_ids" {
+variable "private_subnet_ids" {
   type        = list(string)
-  description = "List of subnet IDs to use for the service"
+  description = "List of private subnet IDs to use for the EFS"
 }
 
 variable "vpc_id" {
@@ -97,4 +104,22 @@ variable "create_service" {
   type        = bool
   description = "Whether to create the ECS service"
   default     = true
+}
+
+variable "environment" {
+  type        = list(object({ name = string, value = string }))
+  description = "Environment variables to pass to the container"
+  default     = []
+}
+
+variable "port_mappings" {
+  type        = list(object({ name = string, containerPort = number }))
+  description = "Port mappings for the service"
+  default     = []
+}
+
+variable "service_discovery_namespace_id" {
+  type        = string
+  description = "ID of the namespace to use for service discovery"
+  default     = null
 }
