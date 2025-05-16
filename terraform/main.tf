@@ -103,35 +103,35 @@ module "dns_updater" {
       hosted_zone_id   = aws_route53_zone.default.id
       dns_name         = "registrar.${var.public_zone_name}"
       dns_ttl          = 60 # keep it short because deployments will change the IP
-      ecs_service_name = aws_ecs_service.registrar.name
+      ecs_service_name = module.registrar.ecs_service_name
       ecs_cluster_name = module.ecs_cluster.name
     },
     {
       hosted_zone_id   = aws_route53_zone.default.id
       dns_name         = "influxdb.${var.public_zone_name}"
       dns_ttl          = 60 # keep it short because deployments will change the IP
-      ecs_service_name = aws_ecs_service.influxdb.name
+      ecs_service_name = module.influxdb.ecs_service_name
       ecs_cluster_name = module.ecs_cluster.name
     },
     {
       hosted_zone_id   = aws_route53_zone.default.id
       dns_name         = "app.${var.public_zone_name}"
       dns_ttl          = 60 # keep it short because deployments will change the IP
-      ecs_service_name = aws_ecs_service.ui.name
+      ecs_service_name = module.ui.ecs_service_name
       ecs_cluster_name = module.ecs_cluster.name
     },
     {
       hosted_zone_id   = aws_route53_zone.default.id
       dns_name         = "jupyter.${var.public_zone_name}"
       dns_ttl          = 60 # keep it short because deployments will change the IP
-      ecs_service_name = aws_ecs_service.jupyter-lab.name
+      ecs_service_name = module.jupyter-lab.ecs_service_name
       ecs_cluster_name = module.ecs_cluster.name
     },
     {
       hosted_zone_id   = aws_route53_zone.default.id
       dns_name         = "promrcv.${var.public_zone_name}"
       dns_ttl          = 60 # keep it short because deployments will change the IP
-      ecs_service_name = aws_ecs_service.telegraf_promrvc.name
+      ecs_service_name = module.telegraf_promrcv.ecs_service_name
       ecs_cluster_name = module.ecs_cluster.name
     }
   ]

@@ -18,7 +18,7 @@
 locals {
   security_groups = [
     {
-      id   = aws_security_group.influxdb-task.id
+      id   = module.influxdb.task_security_group_id
       port = var.influxdb_container_port
     },
     #        {
@@ -26,20 +26,20 @@ locals {
     #            port = var.mariadb_container_port
     #        },
     {
-      id   = aws_security_group.registrar-task.id
+      id   = module.registrar.task_security_group_id
       port = var.registrar_container_port
     },
     {
-      id   = aws_security_group.ui-task.id
+      id   = module.ui.task_security_group_id
       port = var.ui_container_port
     },
     {
-      id   = aws_security_group.jupyter-lab-task.id
+      id   = module.jupyter-lab.task_security_group_id
       port = var.jupyter_lab_container_port
     },
     {
-      id   = aws_security_group.telegraf_promrvc-task.id
-      port = var.telegraf_promrvc_container_port
+      id   = module.telegraf_promrcv.task_security_group_id
+      port = var.telegraf_promrcv_container_port
     }
   ]
   client_cidr_blocks = try(jsondecode(file("client_cidr_blocks.json")), [])
