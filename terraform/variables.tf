@@ -43,7 +43,7 @@ variable "jupyter_lab_image_tag" {
   description = "Tag to use when accessing the Jupyter Lab ECR"
 }
 
-variable "telegraf_promrvc_image_tag" {
+variable "telegraf_promrcv_image_tag" {
   type        = string
   description = "Tag to use when accessing the Telegraf Prometheus Remote Write Receiver ECR"
 }
@@ -114,7 +114,7 @@ variable "jupyter_lab_container_port" {
   default     = 80
 }
 
-variable "telegraf_promrvc_container_port" {
+variable "telegraf_promrcv_container_port" {
   type        = number
   description = "Port where Telegraf listens"
   default     = 80
@@ -156,13 +156,13 @@ variable "jupyter_lab_ram" {
   default     = 512
 }
 
-variable "telegraf_promrvc_cpu" {
+variable "telegraf_promrcv_cpu" {
   type        = number
   description = "CPU value for Telegraf"
   default     = 256
 }
 
-variable "telegraf_promrvc_ram" {
+variable "telegraf_promrcv_ram" {
   type        = number
   description = "RAM in MB to use for Telegraf"
   default     = 512
