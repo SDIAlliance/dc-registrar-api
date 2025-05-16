@@ -39,6 +39,12 @@ variable "container_image" {
   description = "Container image to use for this service"
 }
 
+variable "container_entrypoint" {
+  type        = list(string)
+  description = "Entrypoint for the container"
+  default     = null
+}
+
 variable "container_command" {
   type        = list(string)
   description = "Command to execute in the container"
@@ -54,6 +60,7 @@ variable "extra_efs_mounts" {
 variable "own_efs_volume_mount_point" {
   type        = string
   description = "If specified, an EFS volume is created and mounted under this directory"
+  default     = null
 }
 
 variable "make_own_efs_available_to_vpc" {

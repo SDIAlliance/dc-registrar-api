@@ -16,6 +16,8 @@ module "influxdb" {
   #container_command          = 
   log_group_name                 = aws_cloudwatch_log_group.default.name
   runtime_platform_cpu_arch      = "ARM64"
+  cpu                            = var.influxdb_cpu
+  ram                            = var.influxdb_ram
   own_efs_volume_mount_point     = "/var/lib/influxdb2"
   create_service                 = true
   extra_efs_mounts               = { "certbot" : { "mount_point" : "/etc/letsencrypt", file_system_id = module.certbot.efs_file_system_id, access_point_id = module.certbot.access_point_id } }

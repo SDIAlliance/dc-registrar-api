@@ -44,6 +44,7 @@ resource "aws_security_group" "efs" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "efs-nfs-in" {
+  count                        = var.own_efs_volume_mount_point != null ? 1 : 0
   security_group_id            = aws_security_group.efs[0].id
   from_port                    = 2049
   to_port                      = 2049
@@ -54,6 +55,7 @@ resource "aws_vpc_security_group_ingress_rule" "efs-nfs-in" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "efs-nfs-out" {
+  count             = var.own_efs_volume_mount_point != null ? 1 : 0
   security_group_id = aws_security_group.efs[0].id
   from_port         = -1
   to_port           = -1

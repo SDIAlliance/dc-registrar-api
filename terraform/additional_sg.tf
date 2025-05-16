@@ -26,7 +26,7 @@ locals {
     #            port = var.mariadb_container_port
     #        },
     {
-      id   = aws_security_group.registrar-task.id
+      id   = module.registrar.task_security_group_id
       port = var.registrar_container_port
     },
     {

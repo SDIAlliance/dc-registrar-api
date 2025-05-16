@@ -9,6 +9,7 @@ module "container_definition" {
   container_name  = var.name
   container_image = var.container_image
   command         = var.container_command
+  entrypoint      = var.container_entrypoint
   mount_points    = [for k, v in local.efs_mounts : { containerPath = v.mount_point, sourceVolume = k }]
   environment     = var.environment
   secrets         = var.secrets

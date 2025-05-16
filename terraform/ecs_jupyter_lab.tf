@@ -13,6 +13,8 @@ module "jupyter-lab" {
   #container_command          = 
   log_group_name             = aws_cloudwatch_log_group.default.name
   runtime_platform_cpu_arch  = "X86_64"
+  cpu                        = var.jupyter_lab_cpu
+  ram                        = var.jupyter_lab_ram
   own_efs_volume_mount_point = "/home/jupyterlab"
   create_service             = true
   extra_efs_mounts           = { "certbot" : { "mount_point" : "/etc/letsencrypt", file_system_id = module.certbot.efs_file_system_id, access_point_id = module.certbot.access_point_id } }
