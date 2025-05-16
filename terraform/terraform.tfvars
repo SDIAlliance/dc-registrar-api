@@ -15,3 +15,7 @@ influxdb_container_port         = 8443 # change this because we use TLS
 ui_container_port               = 443
 jupyter_lab_container_port      = 8443
 telegraf_promrvc_container_port = 8443
+influxdb_cpu                    = 4096
+influxdb_ram                    = 8192
+telegraf_promrvc_cpu            = 1024
+telegraf_promrvc_ram            = 2048
