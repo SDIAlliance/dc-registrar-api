@@ -117,7 +117,7 @@ module "dns_updater" {
       hosted_zone_id   = aws_route53_zone.default.id
       dns_name         = "app.${var.public_zone_name}"
       dns_ttl          = 60 # keep it short because deployments will change the IP
-      ecs_service_name = aws_ecs_service.ui.name
+      ecs_service_name = module.ui.ecs_service_name
       ecs_cluster_name = module.ecs_cluster.name
     },
     {

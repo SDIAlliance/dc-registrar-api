@@ -30,7 +30,7 @@ locals {
       port = var.registrar_container_port
     },
     {
-      id   = aws_security_group.ui-task.id
+      id   = module.ui.task_security_group_id
       port = var.ui_container_port
     },
     {
