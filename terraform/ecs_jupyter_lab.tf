@@ -58,3 +58,12 @@ resource "aws_vpc_security_group_egress_rule" "jupyter-lab-influxdb" {
   ip_protocol       = "tcp"
   description       = "InfluxDB access"
 }
+
+resource "aws_vpc_security_group_ingress_rule" "jupyter-world" {
+  security_group_id = module.jupyter-lab.task_security_group_id
+  from_port         = 8443
+  to_port           = 8443
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "tcp"
+  description       = "Jupyter Access from everywhere"
+}
