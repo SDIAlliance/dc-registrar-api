@@ -127,13 +127,13 @@ module "dns_updater" {
       ecs_service_name = module.jupyter-lab.ecs_service_name
       ecs_cluster_name = module.ecs_cluster.name
     },
-#    {
-#      hosted_zone_id   = aws_route53_zone.default.id
-#      dns_name         = "promrcv.${var.public_zone_name}"
-#      dns_ttl          = 60 # keep it short because deployments will change the IP
-#      ecs_service_name = module.telegraf_promrcv.ecs_service_name
-#      ecs_cluster_name = module.ecs_cluster.name
-#    }
+    #    {
+    #      hosted_zone_id   = aws_route53_zone.default.id
+    #      dns_name         = "promrcv.${var.public_zone_name}"
+    #      dns_ttl          = 60 # keep it short because deployments will change the IP
+    #      ecs_service_name = module.telegraf_promrcv.ecs_service_name
+    #      ecs_cluster_name = module.ecs_cluster.name
+    #    }
   ]
 }
 
@@ -148,7 +148,7 @@ resource "aws_route53_zone" "default" {
 }
 
 resource "aws_eip" "default" {
-  domain   = "vpc"
+  domain = "vpc"
   tags = {
     Name = "${var.namespace}-${var.stage}-eip"
   }

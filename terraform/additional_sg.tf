@@ -37,10 +37,10 @@ locals {
       id   = module.jupyter-lab.task_security_group_id
       port = var.jupyter_lab_container_port
     },
-#    {
-#      id   = module.telegraf_promrcv.task_security_group_id
-#      port = var.telegraf_promrcv_container_port
-#    }
+    #    {
+    #      id   = module.telegraf_promrcv.task_security_group_id
+    #      port = var.telegraf_promrcv_container_port
+    #    }
   ]
   client_cidr_blocks = try(jsondecode(file("client_cidr_blocks.json")), [])
   client_rules       = setproduct(local.security_groups, local.client_cidr_blocks)

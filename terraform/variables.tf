@@ -72,6 +72,18 @@ variable "registrar_ram" {
   default     = 512
 }
 
+variable "timeplus_proton_cpu" {
+  type        = number
+  description = "CPU value for the Timeplus Proton ECS service"
+  default     = 256
+}
+
+variable "timeplus_proton_ram" {
+  type        = number
+  description = "RAM in MB to use for the Timeplus Proton ECS service"
+  default     = 512
+}
+
 variable "ui_cpu" {
   type        = number
   description = "CPU value for the UI ECS service"
@@ -100,6 +112,18 @@ variable "registrar_container_port" {
   type        = number
   description = "Port where Registrar listens"
   default     = 443
+}
+
+variable "timeplus_proton_container_http_port" {
+  type        = number
+  description = "HTTP port for Timeplus Proton"
+  default     = 3218
+}
+
+variable "timeplus_proton_container_tcp_port" {
+  type        = number
+  description = "Streaming port for Timeplus Proton"
+  default     = 8463
 }
 
 variable "ui_container_port" {

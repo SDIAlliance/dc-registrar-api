@@ -19,3 +19,5 @@ influxdb_cpu                    = 4096
 influxdb_ram                    = 8192
 telegraf_promrcv_cpu            = 1024
 telegraf_promrcv_ram            = 2048
+timeplus_proton_cpu             = 1024
+timeplus_proton_ram             = 2048
