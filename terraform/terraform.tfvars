@@ -21,3 +21,5 @@ telegraf_promrcv_cpu            = 1024
 telegraf_promrcv_ram            = 2048
 timeplus_proton_cpu             = 1024
 timeplus_proton_ram             = 2048
+siec_scraper_ami_id             = "ami-08aa372c213609089" # Amazon Linux 2023 AMI x86_64
+siec_scraper_instance_type      = "t3.micro"

@@ -215,3 +215,12 @@ variable "influxdb_org" {
   default     = "Leitmotiv"
   description = "InfluxDB organization to authenticate with"
 }
+
+variable "siec_scraper_instance_type" {
+  type    = string
+  default = "t3.micro"
+}
+
+variable "siec_scraper_ami_id" {
+  type = string
+}

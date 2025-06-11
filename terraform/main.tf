@@ -146,10 +146,3 @@ resource "aws_service_discovery_private_dns_namespace" "default" {
 resource "aws_route53_zone" "default" {
   name = var.public_zone_name
 }
-
-resource "aws_eip" "default" {
-  domain = "vpc"
-  tags = {
-    Name = "${var.namespace}-${var.stage}-eip"
-  }
-}
