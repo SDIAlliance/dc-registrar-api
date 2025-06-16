@@ -19,7 +19,7 @@ module "registrar" {
   #own_efs_volume_mount_point =
   create_service   = true
   extra_efs_mounts = { "certbot" : { "mount_point" : "/etc/letsencrypt", file_system_id = module.certbot.efs_file_system_id, access_point_id = module.certbot.access_point_id } }
-  #service_discovery_namespace_id = aws_service_discovery_private_dns_namespace.default.id
+  service_discovery_namespace_id = aws_service_discovery_private_dns_namespace.default.id
   environment = [
     {
       name  = "DATABASE_HOST",
