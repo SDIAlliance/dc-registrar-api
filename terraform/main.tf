@@ -27,7 +27,7 @@ module "ecr" {
   namespace              = var.namespace
   stage                  = var.stage
   name                   = var.name
-  image_names            = ["${var.namespace}/mariadb", "${var.namespace}/registrar", "${var.namespace}/ui", "${var.namespace}/jupyter-lab", "${var.namespace}/telegraf-prometheus-remote-write-receiver"]
+  image_names            = ["${var.namespace}/mariadb", "${var.namespace}/registrar", "${var.namespace}/ui", "${var.namespace}/jupyter-lab", "${var.namespace}/telegraf-siec"]
   image_tag_mutability   = "MUTABLE"
   principals_full_access = ["arn:aws:iam::${data.aws_caller_identity.default.account_id}:root"]
 }

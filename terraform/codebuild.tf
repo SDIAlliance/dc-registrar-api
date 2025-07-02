@@ -60,11 +60,6 @@ locals {
       git_repo   = "https://github.com/SDIAlliance/nadiki-jupyter-lab.git"
       ecr_repo   = module.ecr.repository_url_map["${var.namespace}/jupyter-lab"]
       dockerfile = "Dockerfile"
-    },
-    "telegraf-prometheus-remote-write-receiver" = {
-      git_repo   = "https://github.com/SDIAlliance/nadiki-registrar.git"
-      ecr_repo   = module.ecr.repository_url_map["${var.namespace}/telegraf-prometheus-remote-write-receiver"]
-      dockerfile = "telegraf-prometheus-remote-write-receiver/Dockerfile"
     }
   }
 }

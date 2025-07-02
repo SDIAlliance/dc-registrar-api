@@ -43,3 +43,12 @@ module "influxdb" {
     }
   ]
 }
+
+resource "aws_vpc_security_group_ingress_rule" "influxdb-world" {
+  security_group_id = module.influxdb.task_security_group_id
+  from_port         = 8443
+  to_port           = 8443
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "tcp"
+  description       = "InfluxDB access from everywhere"
+}

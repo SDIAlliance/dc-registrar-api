@@ -49,11 +49,17 @@ resource "aws_iam_role_policy" "siec" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_secretsmanager_secret.xion-ip-to-server-mapping.arn
+          aws_secretsmanager_secret.xion-ip-to-server-mapping.arn,
+          aws_secretsmanager_secret.influxdb_admin_token.arn
         ]
       },
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "siec" {
+  role       = aws_iam_role.siec.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly"
 }
 
 resource "aws_iam_instance_profile" "siec" {
@@ -62,7 +68,15 @@ resource "aws_iam_instance_profile" "siec" {
 }
 
 locals {
-  user_data_params = {}
+  user_data_params = {
+    influxdb_token_secret_arn = aws_secretsmanager_secret.influxdb_admin_token.arn
+    server_id_mapping_secret_arn = aws_secretsmanager_secret.xion-ip-to-server-mapping.arn
+    influxdb_url = "https://influxdb.${var.internal_domain_name}:${var.influxdb_container_port}"
+    timeplus_proton_host = "timeplus_proton.${var.internal_domain_name}"
+    aws_region = data.aws_region.current.name
+    aws_account_id = data.aws_caller_identity.default.account_id
+    repo_url = "${module.ecr.repository_url_map["${var.namespace}/telegraf-siec"]}:latest"
+  }
 }
 
 resource "aws_instance" "siec" {
@@ -76,6 +90,9 @@ resource "aws_instance" "siec" {
   vpc_security_group_ids = [aws_security_group.ec2.id]
   tags = {
     Name = "${var.namespace}-${var.stage}-siec-scraoer"
+  }
+  lifecycle {
+    ignore_changes = [ user_data ]
   }
 }
 
