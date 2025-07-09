@@ -9,12 +9,14 @@ from nadiki_registrar.models.base_model_ import Model
 from nadiki_registrar.models.cpu import CPU
 from nadiki_registrar.models.fpga import FPGA
 from nadiki_registrar.models.gpu import GPU
+from nadiki_registrar.models.metric_mapping_object import MetricMappingObject
 from nadiki_registrar.models.storage_device import StorageDevice
 from nadiki_registrar import util
 
 from nadiki_registrar.models.cpu import CPU  # noqa: E501
 from nadiki_registrar.models.fpga import FPGA  # noqa: E501
 from nadiki_registrar.models.gpu import GPU  # noqa: E501
+from nadiki_registrar.models.metric_mapping_object import MetricMappingObject  # noqa: E501
 from nadiki_registrar.models.storage_device import StorageDevice  # noqa: E501
 
 class ServerCreate(Model):
@@ -23,7 +25,7 @@ class ServerCreate(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, facility_id=None, rack_id=None, rated_power=None, total_cpu_sockets=2, installed_cpus=None, number_of_psus=2, total_installed_memory=None, number_of_memory_units=None, storage_devices=None, installed_gpus=None, installed_fpgas=None, product_passport=None, cooling_type='air', description=None):  # noqa: E501
+    def __init__(self, facility_id=None, rack_id=None, rated_power=None, total_cpu_sockets=2, installed_cpus=None, number_of_psus=2, total_installed_memory=None, number_of_memory_units=None, storage_devices=None, installed_gpus=None, installed_fpgas=None, product_passport=None, cooling_type='air', description=None, metric_mapping=None):  # noqa: E501
         """ServerCreate - a model defined in OpenAPI
 
         :param facility_id: The facility_id of this ServerCreate.  # noqa: E501
@@ -54,6 +56,8 @@ class ServerCreate(Model):
         :type cooling_type: str
         :param description: The description of this ServerCreate.  # noqa: E501
         :type description: str
+        :param metric_mapping: The metric_mapping of this ServerCreate.  # noqa: E501
+        :type metric_mapping: MetricMappingObject
         """
         self.openapi_types = {
             'facility_id': str,
@@ -69,7 +73,8 @@ class ServerCreate(Model):
             'installed_fpgas': List[FPGA],
             'product_passport': object,
             'cooling_type': str,
-            'description': str
+            'description': str,
+            'metric_mapping': MetricMappingObject
         }
 
         self.attribute_map = {
@@ -86,7 +91,8 @@ class ServerCreate(Model):
             'installed_fpgas': 'installed_fpgas',
             'product_passport': 'product_passport',
             'cooling_type': 'cooling_type',
-            'description': 'description'
+            'description': 'description',
+            'metric_mapping': 'metric_mapping'
         }
 
         self._facility_id = facility_id
@@ -103,6 +109,7 @@ class ServerCreate(Model):
         self._product_passport = product_passport
         self._cooling_type = cooling_type
         self._description = description
+        self._metric_mapping = metric_mapping
 
     @classmethod
     def from_dict(cls, dikt) -> 'ServerCreate':
@@ -450,3 +457,24 @@ class ServerCreate(Model):
         """
 
         self._description = description
+
+    @property
+    def metric_mapping(self):
+        """Gets the metric_mapping of this ServerCreate.
+
+
+        :return: The metric_mapping of this ServerCreate.
+        :rtype: MetricMappingObject
+        """
+        return self._metric_mapping
+
+    @metric_mapping.setter
+    def metric_mapping(self, metric_mapping):
+        """Sets the metric_mapping of this ServerCreate.
+
+
+        :param metric_mapping: The metric_mapping of this ServerCreate.
+        :type metric_mapping: MetricMappingObject
+        """
+
+        self._metric_mapping = metric_mapping

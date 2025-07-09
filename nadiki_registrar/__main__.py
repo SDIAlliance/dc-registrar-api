@@ -12,9 +12,8 @@ def main():
                 arguments={'title': 'Facility Registry API'},
                 pythonic_params=True)
 
-    #app.run(port=8080)
-    return app
+    app.run(port=8080)
 
 
 if __name__ == '__main__':
-    main().run(port=8080)
+    main()

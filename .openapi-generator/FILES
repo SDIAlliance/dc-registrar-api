@@ -26,6 +26,9 @@ nadiki_registrar/models/list_facilities200_response.py
 nadiki_registrar/models/list_racks200_response.py
 nadiki_registrar/models/list_servers200_response.py
 nadiki_registrar/models/location.py
+nadiki_registrar/models/metric_mapping_configuration.py
+nadiki_registrar/models/metric_mapping_object.py
+nadiki_registrar/models/metric_mapping_object_server_power_consumption.py
 nadiki_registrar/models/rack_create.py
 nadiki_registrar/models/rack_response.py
 nadiki_registrar/models/rack_response_all_of.py

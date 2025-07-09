@@ -9,6 +9,7 @@ from nadiki_registrar.models.base_model_ import Model
 from nadiki_registrar.models.cpu import CPU
 from nadiki_registrar.models.fpga import FPGA
 from nadiki_registrar.models.gpu import GPU
+from nadiki_registrar.models.metric_mapping_object import MetricMappingObject
 from nadiki_registrar.models.server_time_series_config import ServerTimeSeriesConfig
 from nadiki_registrar.models.storage_device import StorageDevice
 from nadiki_registrar import util
@@ -16,6 +17,7 @@ from nadiki_registrar import util
 from nadiki_registrar.models.cpu import CPU  # noqa: E501
 from nadiki_registrar.models.fpga import FPGA  # noqa: E501
 from nadiki_registrar.models.gpu import GPU  # noqa: E501
+from nadiki_registrar.models.metric_mapping_object import MetricMappingObject  # noqa: E501
 from nadiki_registrar.models.server_time_series_config import ServerTimeSeriesConfig  # noqa: E501
 from nadiki_registrar.models.storage_device import StorageDevice  # noqa: E501
 
@@ -25,7 +27,7 @@ class ServerResponse(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, facility_id=None, rack_id=None, rated_power=None, total_cpu_sockets=2, installed_cpus=None, number_of_psus=2, total_installed_memory=None, number_of_memory_units=None, storage_devices=None, installed_gpus=None, installed_fpgas=None, product_passport=None, cooling_type='air', description=None, id=None, time_series_config=None, created_at=None, updated_at=None):  # noqa: E501
+    def __init__(self, facility_id=None, rack_id=None, rated_power=None, total_cpu_sockets=2, installed_cpus=None, number_of_psus=2, total_installed_memory=None, number_of_memory_units=None, storage_devices=None, installed_gpus=None, installed_fpgas=None, product_passport=None, cooling_type='air', description=None, metric_mapping=None, id=None, time_series_config=None, created_at=None, updated_at=None):  # noqa: E501
         """ServerResponse - a model defined in OpenAPI
 
         :param facility_id: The facility_id of this ServerResponse.  # noqa: E501
@@ -56,6 +58,8 @@ class ServerResponse(Model):
         :type cooling_type: str
         :param description: The description of this ServerResponse.  # noqa: E501
         :type description: str
+        :param metric_mapping: The metric_mapping of this ServerResponse.  # noqa: E501
+        :type metric_mapping: MetricMappingObject
         :param id: The id of this ServerResponse.  # noqa: E501
         :type id: str
         :param time_series_config: The time_series_config of this ServerResponse.  # noqa: E501
@@ -80,6 +84,7 @@ class ServerResponse(Model):
             'product_passport': object,
             'cooling_type': str,
             'description': str,
+            'metric_mapping': MetricMappingObject,
             'id': str,
             'time_series_config': ServerTimeSeriesConfig,
             'created_at': datetime,
@@ -101,6 +106,7 @@ class ServerResponse(Model):
             'product_passport': 'product_passport',
             'cooling_type': 'cooling_type',
             'description': 'description',
+            'metric_mapping': 'metric_mapping',
             'id': 'id',
             'time_series_config': 'timeSeriesConfig',
             'created_at': 'createdAt',
@@ -121,6 +127,7 @@ class ServerResponse(Model):
         self._product_passport = product_passport
         self._cooling_type = cooling_type
         self._description = description
+        self._metric_mapping = metric_mapping
         self._id = id
         self._time_series_config = time_series_config
         self._created_at = created_at
@@ -472,6 +479,27 @@ class ServerResponse(Model):
         """
 
         self._description = description
+
+    @property
+    def metric_mapping(self):
+        """Gets the metric_mapping of this ServerResponse.
+
+
+        :return: The metric_mapping of this ServerResponse.
+        :rtype: MetricMappingObject
+        """
+        return self._metric_mapping
+
+    @metric_mapping.setter
+    def metric_mapping(self, metric_mapping):
+        """Sets the metric_mapping of this ServerResponse.
+
+
+        :param metric_mapping: The metric_mapping of this ServerResponse.
+        :type metric_mapping: MetricMappingObject
+        """
+
+        self._metric_mapping = metric_mapping
 
     @property
     def id(self):

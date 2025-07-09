@@ -15,7 +15,7 @@ class ServerTimeSeriesDataPointTags(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, facility_id=None, rack_id=None, server_id=None, country_code=None):  # noqa: E501
+    def __init__(self, facility_id=None, rack_id=None, server_id=None, country_code=None, device_name=None):  # noqa: E501
         """ServerTimeSeriesDataPointTags - a model defined in OpenAPI
 
         :param facility_id: The facility_id of this ServerTimeSeriesDataPointTags.  # noqa: E501
@@ -26,25 +26,30 @@ class ServerTimeSeriesDataPointTags(Model):
         :type server_id: str
         :param country_code: The country_code of this ServerTimeSeriesDataPointTags.  # noqa: E501
         :type country_code: str
+        :param device_name: The device_name of this ServerTimeSeriesDataPointTags.  # noqa: E501
+        :type device_name: str
         """
         self.openapi_types = {
             'facility_id': str,
             'rack_id': str,
             'server_id': str,
-            'country_code': str
+            'country_code': str,
+            'device_name': str
         }
 
         self.attribute_map = {
             'facility_id': 'facility_id',
             'rack_id': 'rack_id',
             'server_id': 'server_id',
-            'country_code': 'country_code'
+            'country_code': 'country_code',
+            'device_name': 'device_name'
         }
 
         self._facility_id = facility_id
         self._rack_id = rack_id
         self._server_id = server_id
         self._country_code = country_code
+        self._device_name = device_name
 
     @classmethod
     def from_dict(cls, dikt) -> 'ServerTimeSeriesDataPointTags':
@@ -156,3 +161,26 @@ class ServerTimeSeriesDataPointTags(Model):
             raise ValueError("Invalid value for `country_code`, must not be `None`")  # noqa: E501
 
         self._country_code = country_code
+
+    @property
+    def device_name(self):
+        """Gets the device_name of this ServerTimeSeriesDataPointTags.
+
+        Device name when multiple devices are mapped to a single target metric  # noqa: E501
+
+        :return: The device_name of this ServerTimeSeriesDataPointTags.
+        :rtype: str
+        """
+        return self._device_name
+
+    @device_name.setter
+    def device_name(self, device_name):
+        """Sets the device_name of this ServerTimeSeriesDataPointTags.
+
+        Device name when multiple devices are mapped to a single target metric  # noqa: E501
+
+        :param device_name: The device_name of this ServerTimeSeriesDataPointTags.
+        :type device_name: str
+        """
+
+        self._device_name = device_name
