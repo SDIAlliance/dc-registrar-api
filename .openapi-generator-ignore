@@ -22,10 +22,11 @@
 # Then explicitly reverse the ignore rule for a single file:
 #!docs/README.md
 
-README
+README.md
 requirements.txt
 nadiki_registrar/controllers/facility_api_spec_other_controller.py
 nadiki_registrar/controllers/rack_api_spec_other_controller.py
 nadiki_registrar/controllers/server_api_spec_other_controller.py
+nadiki_registrar/controllers/security_controller_.py
 tox.ini
 .gitignore
