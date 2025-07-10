@@ -47,3 +47,9 @@ docker build -t nadiki_registrar .
 # starting up a container
 docker run -p 8080:8080 nadiki_registrar
 ```
+
+## Running with compose with local mysql
+
+```bash
+docker compose watch
+```

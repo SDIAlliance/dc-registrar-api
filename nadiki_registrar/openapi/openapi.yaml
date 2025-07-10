@@ -4,98 +4,98 @@ info:
   title: Facility Registry API
   version: 1.0.0
 servers:
-- description: Registry API v1
-  url: https://api.registry.example.com/v1
+  - description: Registry API v1
+    url: https://api.registry.example.com/v1
 tags:
-- description: |
-    The following metrics are supported for streaming time series data. When registering a facility, you will receive the endpoint information as well as labels for Prometheus.
+  - description: |
+      The following metrics are supported for streaming time series data. When registering a facility, you will receive the endpoint information as well as labels for Prometheus.
 
-    ## Energy Metrics
-    - `heatpump_power_consumption_joules`: Heat pump electricity consumption
-    - `office_energy_use_joules`: Office electricity consumption
-    - `total_generator_energy_joules`: Generator energy output
-    - `grid_transformers_energy_joules`: Transformer energy output
-    - `onsite_renewable_energy_joules`: On-site renewable energy production
-    - `it_power_usage_level1_joules`: IT power at UPS output
-    - `it_power_usage_level2_joules`: IT power at PDU output
-    - `renewable_energy_certificates_joules`: Green energy certificates
-    - `grid_emission_factor_grams`: The current grid emission factor (g/CO2-eq per kWh)
-    - `backup_emission_factor_grams`: The current backup power emission factor (g/CO2-eq per kWh)
-    - `electricity_source`: 1 for grid; 2 for backup generators
-    - `pue_1_ratio`: Power usage effectiveness measured from the output of the UPS systems for IT load
-    - `pue_2_ratio`: Power usage effectiveness measured from the output of the PDU systems for IT load
+      ## Energy Metrics
+      - `heatpump_power_consumption_joules`: Heat pump electricity consumption
+      - `office_energy_use_joules`: Office electricity consumption
+      - `total_generator_energy_joules`: Generator energy output
+      - `grid_transformers_energy_joules`: Transformer energy output
+      - `onsite_renewable_energy_joules`: On-site renewable energy production
+      - `it_power_usage_level1_joules`: IT power at UPS output
+      - `it_power_usage_level2_joules`: IT power at PDU output
+      - `renewable_energy_certificates_joules`: Green energy certificates
+      - `grid_emission_factor_grams`: The current grid emission factor (g/CO2-eq per kWh)
+      - `backup_emission_factor_grams`: The current backup power emission factor (g/CO2-eq per kWh)
+      - `electricity_source`: 1 for grid; 2 for backup generators
+      - `pue_1_ratio`: Power usage effectiveness measured from the output of the UPS systems for IT load
+      - `pue_2_ratio`: Power usage effectiveness measured from the output of the PDU systems for IT load
 
-    ## Water Usage Metrics
-    - `dc_water_usage_cubic_meters`: Data center water consumption
-    - `office_water_usage_cubic_meters`: Office water consumption
+      ## Water Usage Metrics
+      - `dc_water_usage_cubic_meters`: Data center water consumption
+      - `office_water_usage_cubic_meters`: Office water consumption
 
-    ## Operational Metrics
-    - `generator_load_factor_ratio`: Generator load factor (0-1)
-  name: Supported Time Series Metrics for Facilities
-  x-displayName: Supported Time Series Metrics for Facilities
-- name: facility-api.spec_other
-  x-displayName: other
-- description: |
-    The following metrics are supported for streaming time series data:
+      ## Operational Metrics
+      - `generator_load_factor_ratio`: Generator load factor (0-1)
+    name: Supported Time Series Metrics for Facilities
+    x-displayName: Supported Time Series Metrics for Facilities
+  - name: facility-api.spec_other
+    x-displayName: other
+  - description: |
+      The following metrics are supported for streaming time series data:
 
-    ## Energy Metrics
-    - `pdu_N_energy_consumption_joules`: PDU energy consumption readings
-      - Multiple metrics exist based on the number of PDUs in the rack
-      - Example for a rack with 2 PDUs:
-        - `pdu_1_energy_consumption_joules`
-        - `pdu_2_energy_consumption_joules`
+      ## Energy Metrics
+      - `pdu_N_energy_consumption_joules`: PDU energy consumption readings
+        - Multiple metrics exist based on the number of PDUs in the rack
+        - Example for a rack with 2 PDUs:
+          - `pdu_1_energy_consumption_joules`
+          - `pdu_2_energy_consumption_joules`
 
-    ## Temperature Metrics
-    - `inlet_temperature_celsius`: Inlet cooling temperature
-    - `outlet_temperature_celsius`: Outlet cooling temperature
-  name: Supported Time Series Metrics for Racks
-  x-displayName: Supported Time Series Metrics for Racks
-- name: rack-api.spec_other
-  x-displayName: other
-- description: |
-    The following metrics are supported for streaming time series data:
+      ## Temperature Metrics
+      - `inlet_temperature_celsius`: Inlet cooling temperature
+      - `outlet_temperature_celsius`: Outlet cooling temperature
+    name: Supported Time Series Metrics for Racks
+    x-displayName: Supported Time Series Metrics for Racks
+  - name: rack-api.spec_other
+    x-displayName: other
+  - description: |
+      The following metrics are supported for streaming time series data:
 
-    ## Energy Metrics
-    - `cpu_energy_consumption_joules`: CPU energy consumption via RAPL
-    - `server_energy_consumption_joules`: Total server energy consumption via IPMI
-  name: Supported Time Series Metrics for Servers
-  x-displayName: Supported Time Series Metrics for Servers
-- name: server-api.spec_other
-  x-displayName: other
+      ## Energy Metrics
+      - `cpu_energy_consumption_joules`: CPU energy consumption via RAPL
+      - `server_energy_consumption_joules`: Total server energy consumption via IPMI
+    name: Supported Time Series Metrics for Servers
+    x-displayName: Supported Time Series Metrics for Servers
+  - name: server-api.spec_other
+    x-displayName: other
 paths:
   /facilities:
     get:
       description: Retrieve a list of all registered facilities
       operationId: list_facilities
       parameters:
-      - description: Maximum number of facilities to return
-        explode: true
-        in: query
-        name: limit
-        required: false
-        schema:
-          default: 20
-          type: integer
-        style: form
-      - description: Number of facilities to skip
-        explode: true
-        in: query
-        name: offset
-        required: false
-        schema:
-          default: 0
-          type: integer
-        style: form
+        - description: Maximum number of facilities to return
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 20
+            type: integer
+          style: form
+        - description: Number of facilities to skip
+          explode: true
+          in: query
+          name: offset
+          required: false
+          schema:
+            default: 0
+            type: integer
+          style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/listFacilities_200_response'
+                $ref: "#/components/schemas/listFacilities_200_response"
           description: List of facilities
       summary: List all facilities
       tags:
-      - facility-api.spec_other
+        - facility-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.facility_api_spec_other_controller
     post:
       description: Create a new facility entry in the registry
@@ -104,38 +104,38 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FacilityCreate'
+              $ref: "#/components/schemas/FacilityCreate"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FacilityResponse'
+                $ref: "#/components/schemas/FacilityResponse"
           description: Facility successfully created
         "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Invalid input
       summary: Register a new facility
       tags:
-      - facility-api.spec_other
+        - facility-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.facility_api_spec_other_controller
   /facilities/{facilityId}:
     delete:
       description: Remove a facility from the registry
       operationId: delete_facility
       parameters:
-      - description: Unique facility identifier
-        explode: false
-        in: path
-        name: facilityId
-        required: true
-        schema:
-          type: string
-        style: simple
+        - description: Unique facility identifier
+          explode: false
+          in: path
+          name: facilityId
+          required: true
+          schema:
+            type: string
+          style: simple
       responses:
         "204":
           description: Facility successfully deleted
@@ -143,123 +143,123 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Facility not found
       summary: Delete facility
       tags:
-      - facility-api.spec_other
+        - facility-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.facility_api_spec_other_controller
     get:
       description: Retrieve detailed information about a specific facility
       operationId: get_facility
       parameters:
-      - description: Unique facility identifier
-        explode: false
-        in: path
-        name: facilityId
-        required: true
-        schema:
-          type: string
-        style: simple
+        - description: Unique facility identifier
+          explode: false
+          in: path
+          name: facilityId
+          required: true
+          schema:
+            type: string
+          style: simple
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FacilityResponse'
+                $ref: "#/components/schemas/FacilityResponse"
           description: Facility details
         "404":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Facility not found
       summary: Get facility details
       tags:
-      - facility-api.spec_other
+        - facility-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.facility_api_spec_other_controller
     put:
       description: Update all facility information
       operationId: update_facility
       parameters:
-      - description: Unique facility identifier
-        explode: false
-        in: path
-        name: facilityId
-        required: true
-        schema:
-          type: string
-        style: simple
+        - description: Unique facility identifier
+          explode: false
+          in: path
+          name: facilityId
+          required: true
+          schema:
+            type: string
+          style: simple
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FacilityUpdate'
+              $ref: "#/components/schemas/FacilityUpdate"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FacilityResponse'
+                $ref: "#/components/schemas/FacilityResponse"
           description: Facility successfully updated
         "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Invalid input
         "404":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Facility not found
       summary: Update facility
       tags:
-      - facility-api.spec_other
+        - facility-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.facility_api_spec_other_controller
   /racks:
     get:
       description: Retrieve a list of all registered racks
       operationId: list_racks
       parameters:
-      - description: Maximum number of racks to return
-        explode: true
-        in: query
-        name: limit
-        required: false
-        schema:
-          default: 20
-          type: integer
-        style: form
-      - description: Number of racks to skip
-        explode: true
-        in: query
-        name: offset
-        required: false
-        schema:
-          default: 0
-          type: integer
-        style: form
-      - description: Filter racks by facility ID
-        explode: true
-        in: query
-        name: facility_id
-        required: false
-        schema:
-          type: string
-        style: form
+        - description: Maximum number of racks to return
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 20
+            type: integer
+          style: form
+        - description: Number of racks to skip
+          explode: true
+          in: query
+          name: offset
+          required: false
+          schema:
+            default: 0
+            type: integer
+          style: form
+        - description: Filter racks by facility ID
+          explode: true
+          in: query
+          name: facility_id
+          required: false
+          schema:
+            type: string
+          style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/listRacks_200_response'
+                $ref: "#/components/schemas/listRacks_200_response"
           description: List of racks
       summary: List all racks
       tags:
-      - rack-api.spec_other
+        - rack-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.rack_api_spec_other_controller
     post:
       description: Create a new rack entry in the registry
@@ -268,38 +268,38 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RackCreate'
+              $ref: "#/components/schemas/RackCreate"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RackResponse'
+                $ref: "#/components/schemas/RackResponse"
           description: Rack successfully created
         "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Invalid input
       summary: Register a new rack
       tags:
-      - rack-api.spec_other
+        - rack-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.rack_api_spec_other_controller
   /racks/{rackId}:
     delete:
       description: Remove a rack from the registry
       operationId: delete_rack
       parameters:
-      - description: "Unique rack identifier (format RACK-[FACILITY_ID]-[RACK_ID])"
-        explode: false
-        in: path
-        name: rackId
-        required: true
-        schema:
-          type: string
-        style: simple
+        - description: "Unique rack identifier (format RACK-[FACILITY_ID]-[RACK_ID])"
+          explode: false
+          in: path
+          name: rackId
+          required: true
+          schema:
+            type: string
+          style: simple
       responses:
         "204":
           description: Rack successfully deleted
@@ -307,131 +307,131 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Rack not found
       summary: Delete rack
       tags:
-      - rack-api.spec_other
+        - rack-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.rack_api_spec_other_controller
     get:
       description: Retrieve detailed information about a specific rack
       operationId: get_rack
       parameters:
-      - description: "Unique rack identifier (format RACK-[FACILITY_ID]-[RACK_ID])"
-        explode: false
-        in: path
-        name: rackId
-        required: true
-        schema:
-          type: string
-        style: simple
+        - description: "Unique rack identifier (format RACK-[FACILITY_ID]-[RACK_ID])"
+          explode: false
+          in: path
+          name: rackId
+          required: true
+          schema:
+            type: string
+          style: simple
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RackResponse'
+                $ref: "#/components/schemas/RackResponse"
           description: Rack details
         "404":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Rack not found
       summary: Get rack details
       tags:
-      - rack-api.spec_other
+        - rack-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.rack_api_spec_other_controller
     put:
       description: Update all rack information
       operationId: update_rack
       parameters:
-      - description: "Unique rack identifier (format RACK-[FACILITY_ID]-[RACK_ID])"
-        explode: false
-        in: path
-        name: rackId
-        required: true
-        schema:
-          type: string
-        style: simple
+        - description: "Unique rack identifier (format RACK-[FACILITY_ID]-[RACK_ID])"
+          explode: false
+          in: path
+          name: rackId
+          required: true
+          schema:
+            type: string
+          style: simple
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RackUpdate'
+              $ref: "#/components/schemas/RackUpdate"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RackResponse'
+                $ref: "#/components/schemas/RackResponse"
           description: Rack successfully updated
         "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Invalid input
         "404":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Rack not found
       summary: Update rack
       tags:
-      - rack-api.spec_other
+        - rack-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.rack_api_spec_other_controller
   /servers:
     get:
       description: Retrieve a list of all registered servers
       operationId: list_servers
       parameters:
-      - description: Maximum number of servers to return
-        explode: true
-        in: query
-        name: limit
-        required: false
-        schema:
-          default: 20
-          type: integer
-        style: form
-      - description: Number of servers to skip
-        explode: true
-        in: query
-        name: offset
-        required: false
-        schema:
-          default: 0
-          type: integer
-        style: form
-      - description: Filter servers by facility ID
-        explode: true
-        in: query
-        name: facility_id
-        required: false
-        schema:
-          type: string
-        style: form
-      - description: Filter servers by rack ID
-        explode: true
-        in: query
-        name: rack_id
-        required: false
-        schema:
-          type: string
-        style: form
+        - description: Maximum number of servers to return
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 20
+            type: integer
+          style: form
+        - description: Number of servers to skip
+          explode: true
+          in: query
+          name: offset
+          required: false
+          schema:
+            default: 0
+            type: integer
+          style: form
+        - description: Filter servers by facility ID
+          explode: true
+          in: query
+          name: facility_id
+          required: false
+          schema:
+            type: string
+          style: form
+        - description: Filter servers by rack ID
+          explode: true
+          in: query
+          name: rack_id
+          required: false
+          schema:
+            type: string
+          style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/listServers_200_response'
+                $ref: "#/components/schemas/listServers_200_response"
           description: List of servers
       summary: List all servers
       tags:
-      - server-api.spec_other
+        - server-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.server_api_spec_other_controller
     post:
       description: Create a new server entry in the registry
@@ -440,38 +440,38 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServerCreate'
+              $ref: "#/components/schemas/ServerCreate"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServerResponse'
+                $ref: "#/components/schemas/ServerResponse"
           description: Server successfully created
         "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Invalid input
       summary: Register a new server
       tags:
-      - server-api.spec_other
+        - server-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.server_api_spec_other_controller
   /servers/{serverId}:
     delete:
       description: Remove a server from the registry
       operationId: delete_server
       parameters:
-      - description: "Unique server identifier (format SERVER-[FACILITY_ID]-[RACK_ID]-[SERVER_ID])"
-        explode: false
-        in: path
-        name: serverId
-        required: true
-        schema:
-          type: string
-        style: simple
+        - description: "Unique server identifier (format SERVER-[FACILITY_ID]-[RACK_ID]-[SERVER_ID])"
+          explode: false
+          in: path
+          name: serverId
+          required: true
+          schema:
+            type: string
+          style: simple
       responses:
         "204":
           description: Server successfully deleted
@@ -479,83 +479,88 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Server not found
       summary: Delete server
       tags:
-      - server-api.spec_other
+        - server-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.server_api_spec_other_controller
     get:
       description: Retrieve detailed information about a specific server
       operationId: get_server
       parameters:
-      - description: "Unique server identifier (format SERVER-[FACILITY_ID]-[RACK_ID]-[SERVER_ID])"
-        explode: false
-        in: path
-        name: serverId
-        required: true
-        schema:
-          type: string
-        style: simple
+        - description: "Unique server identifier (format SERVER-[FACILITY_ID]-[RACK_ID]-[SERVER_ID])"
+          explode: false
+          in: path
+          name: serverId
+          required: true
+          schema:
+            type: string
+          style: simple
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServerResponse'
+                $ref: "#/components/schemas/ServerResponse"
           description: Server details
         "404":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Server not found
       summary: Get server details
       tags:
-      - server-api.spec_other
+        - server-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.server_api_spec_other_controller
     put:
       description: Update all server information
       operationId: update_server
       parameters:
-      - description: "Unique server identifier (format SERVER-[FACILITY_ID]-[RACK_ID]-[SERVER_ID])"
-        explode: false
-        in: path
-        name: serverId
-        required: true
-        schema:
-          type: string
-        style: simple
+        - description: "Unique server identifier (format SERVER-[FACILITY_ID]-[RACK_ID]-[SERVER_ID])"
+          explode: false
+          in: path
+          name: serverId
+          required: true
+          schema:
+            type: string
+          style: simple
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServerUpdate'
+              $ref: "#/components/schemas/ServerUpdate"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServerResponse'
+                $ref: "#/components/schemas/ServerResponse"
           description: Server successfully updated
         "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Invalid input
         "404":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
           description: Server not found
       summary: Update server
       tags:
-      - server-api.spec_other
+        - server-api.spec_other
       x-openapi-router-controller: nadiki_registrar.controllers.server_api_spec_other_controller
 components:
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
+      x-basicInfoFunc: app.basic_auth
   schemas:
     Location:
       example:
@@ -577,8 +582,8 @@ components:
           title: longitude
           type: number
       required:
-      - latitude
-      - longitude
+        - latitude
+        - longitude
       title: Location
       type: object
     FacilityCreate:
@@ -589,12 +594,12 @@ components:
         designPue: 1.7386281
         description: description
         coolingFluids:
-        - amount: 7.0614014
-          gwpFactor: 9.301444
-          type: type
-        - amount: 7.0614014
-          gwpFactor: 9.301444
-          type: type
+          - amount: 7.0614014
+            gwpFactor: 9.301444
+            type: type
+          - amount: 7.0614014
+            gwpFactor: 9.301444
+            type: type
         totalSpace: 1.4894159
         gridPowerFeeds: 1
         lifetimeFacility: 1
@@ -608,7 +613,7 @@ components:
         embeddedGhgEmissionsAssets: 5.637377
       properties:
         location:
-          $ref: '#/components/schemas/Location'
+          $ref: "#/components/schemas/Location"
         embeddedGhgEmissionsFacility:
           description: Embodied carbon emissions from facility construction (CO2-eq)
           format: float
@@ -633,7 +638,7 @@ components:
           type: integer
         coolingFluids:
           items:
-            $ref: '#/components/schemas/FacilityCreate_coolingFluids_inner'
+            $ref: "#/components/schemas/FacilityCreate_coolingFluids_inner"
           title: coolingFluids
           type: array
         maintenanceHoursGenerator:
@@ -663,10 +668,10 @@ components:
           default: 3
           description: Certified/rated tier level
           enum:
-          - 1
-          - 2
-          - 3
-          - 4
+            - 1
+            - 2
+            - 3
+            - 4
           title: tierLevel
           type: integer
         whiteSpaceFloors:
@@ -690,45 +695,45 @@ components:
           title: description
           type: string
       required:
-      - location
+        - location
       title: FacilityCreate
       type: object
     FacilityUpdate:
       allOf:
-      - $ref: '#/components/schemas/FacilityCreate'
-      - required:
-        - location
-        type: object
+        - $ref: "#/components/schemas/FacilityCreate"
+        - required:
+            - location
+          type: object
       title: FacilityUpdate
     FacilityTimeSeriesDataPoint:
       properties:
         measurement:
           description: Name of the Influx measurement
           enum:
-          - facility
-          - rack
-          - server
+            - facility
+            - rack
+            - server
           title: measurement
           type: string
         field:
           description: Metric name with unit suffix
           enum:
-          - heatpump_power_consumption_joules
-          - office_energy_use_joules
-          - dc_water_usage_cubic_meters
-          - office_water_usage_cubic_meters
-          - total_generator_energy_joules
-          - generator_load_factor_ratio
-          - grid_transformers_energy_joules
-          - onsite_renewable_energy_joules
-          - it_power_usage_level1_joules
-          - it_power_usage_level2_joules
-          - renewable_energy_certificates_joules
-          - grid_emission_factor_grams
-          - backup_emission_factor_grams
-          - electricity_source
-          - pue_1_ratio
-          - pue_2_ratio
+            - heatpump_power_consumption_joules
+            - office_energy_use_joules
+            - dc_water_usage_cubic_meters
+            - office_water_usage_cubic_meters
+            - total_generator_energy_joules
+            - generator_load_factor_ratio
+            - grid_transformers_energy_joules
+            - onsite_renewable_energy_joules
+            - it_power_usage_level1_joules
+            - it_power_usage_level2_joules
+            - renewable_energy_certificates_joules
+            - grid_emission_factor_grams
+            - backup_emission_factor_grams
+            - electricity_source
+            - pue_1_ratio
+            - pue_2_ratio
           title: field
           type: string
         granularitySeconds:
@@ -737,12 +742,12 @@ components:
           title: granularitySeconds
           type: integer
         tags:
-          $ref: '#/components/schemas/FacilityTimeSeriesDataPoint_tags'
+          $ref: "#/components/schemas/FacilityTimeSeriesDataPoint_tags"
       required:
-      - field
-      - granularitySeconds
-      - measurement
-      - tags
+        - field
+        - granularitySeconds
+        - measurement
+        - tags
       title: FacilityTimeSeriesDataPoint
       type: object
     FacilityTimeSeriesConfig:
@@ -770,21 +775,21 @@ components:
         dataPoints:
           description: List of time series metrics available for streaming
           items:
-            $ref: '#/components/schemas/FacilityTimeSeriesDataPoint'
+            $ref: "#/components/schemas/FacilityTimeSeriesDataPoint"
           title: dataPoints
           type: array
       required:
-      - bucket
-      - dataPoints
-      - endpoint
-      - org
-      - token
+        - bucket
+        - dataPoints
+        - endpoint
+        - org
+        - token
       title: FacilityTimeSeriesConfig
       type: object
     FacilityResponse:
       allOf:
-      - $ref: '#/components/schemas/FacilityCreate'
-      - $ref: '#/components/schemas/FacilityResponse_allOf'
+        - $ref: "#/components/schemas/FacilityCreate"
+        - $ref: "#/components/schemas/FacilityResponse_allOf"
       title: FacilityResponse
     Error:
       properties:
@@ -801,8 +806,8 @@ components:
           title: details
           type: object
       required:
-      - code
-      - message
+        - code
+        - message
       title: Error
       type: object
     RackCreate:
@@ -852,28 +857,29 @@ components:
           title: description
           type: string
       required:
-      - facility_id
+        - facility_id
       title: RackCreate
       type: object
     RackUpdate:
       allOf:
-      - $ref: '#/components/schemas/RackCreate'
-      - required:
-        - facility_id
-        type: object
+        - $ref: "#/components/schemas/RackCreate"
+        - required:
+            - facility_id
+          type: object
       title: RackUpdate
     RackTimeSeriesDataPoint:
       properties:
         measurement:
           description: Name of the Influx measurement
           enum:
-          - facility
-          - rack
-          - server
+            - facility
+            - rack
+            - server
           title: measurement
           type: string
         field:
-          description: "Prometheus metric name with unit suffix. For PDU metrics,\
+          description:
+            "Prometheus metric name with unit suffix. For PDU metrics,\
             \ \nthe name must follow the pattern 'pdu_N_energy_consumption_joules'\
             \ \nwhere N is the PDU number (1 to number_of_pdus)\n"
           pattern: "/^(pdu_[1-9][0-9]*_energy_consumption_joules|inlet_temperature_celsius|outlet_temperature_celsius)$/"
@@ -885,12 +891,12 @@ components:
           title: granularitySeconds
           type: integer
         tags:
-          $ref: '#/components/schemas/RackTimeSeriesDataPoint_tags'
+          $ref: "#/components/schemas/RackTimeSeriesDataPoint_tags"
       required:
-      - field
-      - granularitySeconds
-      - measurement
-      - tags
+        - field
+        - granularitySeconds
+        - measurement
+        - tags
       title: RackTimeSeriesDataPoint
       type: object
     RackTimeSeriesConfig:
@@ -918,21 +924,21 @@ components:
         dataPoints:
           description: List of time series metrics available for streaming
           items:
-            $ref: '#/components/schemas/RackTimeSeriesDataPoint'
+            $ref: "#/components/schemas/RackTimeSeriesDataPoint"
           title: dataPoints
           type: array
       required:
-      - bucket
-      - dataPoints
-      - endpoint
-      - org
-      - token
+        - bucket
+        - dataPoints
+        - endpoint
+        - org
+        - token
       title: RackTimeSeriesConfig
       type: object
     RackResponse:
       allOf:
-      - $ref: '#/components/schemas/RackCreate'
-      - $ref: '#/components/schemas/RackResponse_allOf'
+        - $ref: "#/components/schemas/RackCreate"
+        - $ref: "#/components/schemas/RackResponse_allOf"
       title: RackResponse
     CPU:
       example:
@@ -948,8 +954,8 @@ components:
           title: type
           type: string
       required:
-      - type
-      - vendor
+        - type
+        - vendor
       title: CPU
       type: object
     GPU:
@@ -966,8 +972,8 @@ components:
           title: type
           type: string
       required:
-      - type
-      - vendor
+        - type
+        - vendor
       title: GPU
       type: object
     FPGA:
@@ -984,8 +990,8 @@ components:
           title: type
           type: string
       required:
-      - type
-      - vendor
+        - type
+        - vendor
       title: FPGA
       type: object
     StorageDevice:
@@ -1006,16 +1012,16 @@ components:
         type:
           description: Type of storage device
           enum:
-          - NVMe
-          - SSD
-          - HDD
-          - Other
+            - NVMe
+            - SSD
+            - HDD
+            - Other
           title: type
           type: string
       required:
-      - capacity
-      - type
-      - vendor
+        - capacity
+        - type
+        - vendor
       title: StorageDevice
       type: object
     ServerCreate:
@@ -1023,33 +1029,33 @@ components:
         number_of_psus: 1
         rated_power: 0.8008282
         installed_gpus:
-        - vendor: vendor
-          type: type
-        - vendor: vendor
-          type: type
+          - vendor: vendor
+            type: type
+          - vendor: vendor
+            type: type
         description: description
         total_cpu_sockets: 1
         storage_devices:
-        - vendor: vendor
-          type: NVMe
-          capacity: 2.302136
-        - vendor: vendor
-          type: NVMe
-          capacity: 2.302136
+          - vendor: vendor
+            type: NVMe
+            capacity: 2.302136
+          - vendor: vendor
+            type: NVMe
+            capacity: 2.302136
         total_installed_memory: 5
         cooling_type: air
         rack_id: rack_id
         installed_fpgas:
-        - vendor: vendor
-          type: type
-        - vendor: vendor
-          type: type
+          - vendor: vendor
+            type: type
+          - vendor: vendor
+            type: type
         product_passport: "{}"
         installed_cpus:
-        - vendor: vendor
-          type: type
-        - vendor: vendor
-          type: type
+          - vendor: vendor
+            type: type
+          - vendor: vendor
+            type: type
         facility_id: facility_id
         number_of_memory_units: 5
       properties:
@@ -1075,7 +1081,7 @@ components:
         installed_cpus:
           description: Array of installed CPUs
           items:
-            $ref: '#/components/schemas/CPU'
+            $ref: "#/components/schemas/CPU"
           title: installed_cpus
           type: array
         number_of_psus:
@@ -1095,19 +1101,19 @@ components:
         storage_devices:
           description: Array of installed storage devices
           items:
-            $ref: '#/components/schemas/StorageDevice'
+            $ref: "#/components/schemas/StorageDevice"
           title: storage_devices
           type: array
         installed_gpus:
           description: Array of installed GPUs
           items:
-            $ref: '#/components/schemas/GPU'
+            $ref: "#/components/schemas/GPU"
           title: installed_gpus
           type: array
         installed_fpgas:
           description: Array of installed FPGAs
           items:
-            $ref: '#/components/schemas/FPGA'
+            $ref: "#/components/schemas/FPGA"
           title: installed_fpgas
           type: array
         product_passport:
@@ -1118,11 +1124,11 @@ components:
           default: air
           description: Type of cooling system used for this server
           enum:
-          - direct-to-chip
-          - immersion
-          - back-door-liquid
-          - back-door-fan
-          - air
+            - direct-to-chip
+            - immersion
+            - back-door-liquid
+            - back-door-fan
+            - air
           title: cooling_type
           type: string
         description:
@@ -1130,28 +1136,28 @@ components:
           title: description
           type: string
       required:
-      - cooling_type
-      - facility_id
-      - rack_id
+        - cooling_type
+        - facility_id
+        - rack_id
       title: ServerCreate
       type: object
     ServerUpdate:
       allOf:
-      - $ref: '#/components/schemas/ServerCreate'
-      - required:
-        - cooling_type
-        - facility_id
-        - rack_id
-        type: object
+        - $ref: "#/components/schemas/ServerCreate"
+        - required:
+            - cooling_type
+            - facility_id
+            - rack_id
+          type: object
       title: ServerUpdate
     ServerTimeSeriesDataPoint:
       properties:
         measurement:
           description: Name of the Influx measurement
           enum:
-          - facility
-          - rack
-          - server
+            - facility
+            - rack
+            - server
           title: measurement
           type: string
         field:
@@ -1165,12 +1171,12 @@ components:
           title: granularitySeconds
           type: integer
         tags:
-          $ref: '#/components/schemas/ServerTimeSeriesDataPoint_tags'
+          $ref: "#/components/schemas/ServerTimeSeriesDataPoint_tags"
       required:
-      - field
-      - granularitySeconds
-      - measurement
-      - tags
+        - field
+        - granularitySeconds
+        - measurement
+        - tags
       title: ServerTimeSeriesDataPoint
       type: object
     ServerTimeSeriesConfig:
@@ -1198,21 +1204,21 @@ components:
         dataPoints:
           description: List of time series metrics available for streaming
           items:
-            $ref: '#/components/schemas/ServerTimeSeriesDataPoint'
+            $ref: "#/components/schemas/ServerTimeSeriesDataPoint"
           title: dataPoints
           type: array
       required:
-      - bucket
-      - dataPoints
-      - endpoint
-      - org
-      - token
+        - bucket
+        - dataPoints
+        - endpoint
+        - org
+        - token
       title: ServerTimeSeriesConfig
       type: object
     ServerResponse:
       allOf:
-      - $ref: '#/components/schemas/ServerCreate'
-      - $ref: '#/components/schemas/ServerResponse_allOf'
+        - $ref: "#/components/schemas/ServerCreate"
+        - $ref: "#/components/schemas/ServerResponse_allOf"
       title: ServerResponse
     listFacilities_200_response:
       example:
@@ -1220,12 +1226,12 @@ components:
         offset: 1
         limit: 6
         items:
-        - null
-        - null
+          - null
+          - null
       properties:
         items:
           items:
-            $ref: '#/components/schemas/FacilityResponse'
+            $ref: "#/components/schemas/FacilityResponse"
           title: items
           type: array
         total:
@@ -1248,12 +1254,12 @@ components:
         offset: 1
         limit: 6
         items:
-        - null
-        - null
+          - null
+          - null
       properties:
         items:
           items:
-            $ref: '#/components/schemas/RackResponse'
+            $ref: "#/components/schemas/RackResponse"
           title: items
           type: array
         total:
@@ -1276,12 +1282,12 @@ components:
         offset: 1
         limit: 6
         items:
-        - null
-        - null
+          - null
+          - null
       properties:
         items:
           items:
-            $ref: '#/components/schemas/ServerResponse'
+            $ref: "#/components/schemas/ServerResponse"
           title: items
           type: array
         total:
@@ -1319,8 +1325,8 @@ components:
           title: gwpFactor
           type: number
       required:
-      - amount
-      - type
+        - amount
+        - type
       title: FacilityCreate_coolingFluids_inner
       type: object
     FacilityTimeSeriesDataPoint_tags:
@@ -1334,8 +1340,8 @@ components:
           title: country_code
           type: string
       required:
-      - country_code
-      - facility_id
+        - country_code
+        - facility_id
       title: FacilityTimeSeriesDataPoint_tags
       type: object
     FacilityResponse_allOf:
@@ -1351,7 +1357,7 @@ components:
           title: countryCode
           type: string
         timeSeriesConfig:
-          $ref: '#/components/schemas/FacilityTimeSeriesConfig'
+          $ref: "#/components/schemas/FacilityTimeSeriesConfig"
         createdAt:
           format: date-time
           title: createdAt
@@ -1361,10 +1367,10 @@ components:
           title: updatedAt
           type: string
       required:
-      - countryCode
-      - id
-      - location
-      - timeSeriesConfig
+        - countryCode
+        - id
+        - location
+        - timeSeriesConfig
       title: FacilityResponse_allOf
       type: object
       example: null
@@ -1383,9 +1389,9 @@ components:
           title: country_code
           type: string
       required:
-      - country_code
-      - facility_id
-      - rack_id
+        - country_code
+        - facility_id
+        - rack_id
       title: RackTimeSeriesDataPoint_tags
       type: object
     RackResponse_allOf:
@@ -1396,7 +1402,7 @@ components:
           title: id
           type: string
         timeSeriesConfig:
-          $ref: '#/components/schemas/RackTimeSeriesConfig'
+          $ref: "#/components/schemas/RackTimeSeriesConfig"
         createdAt:
           format: date-time
           title: createdAt
@@ -1406,9 +1412,9 @@ components:
           title: updatedAt
           type: string
       required:
-      - facility_id
-      - id
-      - timeSeriesConfig
+        - facility_id
+        - id
+        - timeSeriesConfig
       title: RackResponse_allOf
       type: object
       example: null
@@ -1431,10 +1437,10 @@ components:
           title: country_code
           type: string
       required:
-      - country_code
-      - facility_id
-      - rack_id
-      - server_id
+        - country_code
+        - facility_id
+        - rack_id
+        - server_id
       title: ServerTimeSeriesDataPoint_tags
       type: object
     ServerResponse_allOf:
@@ -1445,7 +1451,7 @@ components:
           title: id
           type: string
         timeSeriesConfig:
-          $ref: '#/components/schemas/ServerTimeSeriesConfig'
+          $ref: "#/components/schemas/ServerTimeSeriesConfig"
         createdAt:
           format: date-time
           title: createdAt
@@ -1455,97 +1461,100 @@ components:
           title: updatedAt
           type: string
       required:
-      - id
-      - timeSeriesConfig
+        - id
+        - timeSeriesConfig
       title: ServerResponse_allOf
       type: object
       example: null
   x-supported-facility-timeseries-metrics:
     description: List of all supported time series metrics for facility monitoring
     metrics:
-    - name: heatpump_power_consumption_joules
-      unit: Energy
-      description: Amount of electricity used by the heat pump to generate heat
-    - name: office_energy_use_joules
-      unit: Energy
-      description: Amount of electricity used by the office
-    - name: dc_water_usage_cubic_meters
-      unit: Length
-      description: Amount of fresh water used by the DC (m3)
-    - name: office_water_usage_cubic_meters
-      unit: Length
-      description: Amount of fresh water used by the office (m3)
-    - name: total_generator_energy_joules
-      unit: Energy
-      description: Total energy output of the generators running
-    - name: generator_load_factor_ratio
-      unit: Percent
-      description: Average load factor of all generators running
-    - name: grid_transformers_energy_joules
-      unit: Energy
-      description: Sum of energy output of all transformers
-    - name: onsite_renewable_energy_joules
-      unit: Energy
-      description: Sum of energy produced of all on-site renewable energy sources
-    - name: it_power_usage_level1_joules
-      unit: Energy
-      description: Sum of power usage measured at UPS systems output
-    - name: it_power_usage_level2_joules
-      unit: Energy
-      description: Sum of power usage measured at PDU outputs in each rack
-    - name: renewable_energy_certificates_joules
-      unit: Energy
-      description: Energy covered by annually matched green energy certificates
-    - name: grid_emission_factor_grams
-      unit: Mass
-      description: The current grid emission factor (g/CO2-eq per kWh)
-    - name: backup_emission_factor_grams
-      unit: Mass
-      description: The current backup power emission factor (g/CO2-eq per kWh)
-    - name: electricity_source
-      unit: Value
-      description: 1 for grid; 2 for backup generators
-    - name: pue_1_ratio
-      unit: Percent
-      description: Power usage effectiveness measured from the output of the UPS systems
-        for IT load
-    - name: pue_2_ratio
-      unit: Percent
-      description: Power usage effectiveness measured from the output of the PDU systems
-        for IT load
+      - name: heatpump_power_consumption_joules
+        unit: Energy
+        description: Amount of electricity used by the heat pump to generate heat
+      - name: office_energy_use_joules
+        unit: Energy
+        description: Amount of electricity used by the office
+      - name: dc_water_usage_cubic_meters
+        unit: Length
+        description: Amount of fresh water used by the DC (m3)
+      - name: office_water_usage_cubic_meters
+        unit: Length
+        description: Amount of fresh water used by the office (m3)
+      - name: total_generator_energy_joules
+        unit: Energy
+        description: Total energy output of the generators running
+      - name: generator_load_factor_ratio
+        unit: Percent
+        description: Average load factor of all generators running
+      - name: grid_transformers_energy_joules
+        unit: Energy
+        description: Sum of energy output of all transformers
+      - name: onsite_renewable_energy_joules
+        unit: Energy
+        description: Sum of energy produced of all on-site renewable energy sources
+      - name: it_power_usage_level1_joules
+        unit: Energy
+        description: Sum of power usage measured at UPS systems output
+      - name: it_power_usage_level2_joules
+        unit: Energy
+        description: Sum of power usage measured at PDU outputs in each rack
+      - name: renewable_energy_certificates_joules
+        unit: Energy
+        description: Energy covered by annually matched green energy certificates
+      - name: grid_emission_factor_grams
+        unit: Mass
+        description: The current grid emission factor (g/CO2-eq per kWh)
+      - name: backup_emission_factor_grams
+        unit: Mass
+        description: The current backup power emission factor (g/CO2-eq per kWh)
+      - name: electricity_source
+        unit: Value
+        description: 1 for grid; 2 for backup generators
+      - name: pue_1_ratio
+        unit: Percent
+        description:
+          Power usage effectiveness measured from the output of the UPS systems
+          for IT load
+      - name: pue_2_ratio
+        unit: Percent
+        description:
+          Power usage effectiveness measured from the output of the PDU systems
+          for IT load
   x-supported-rack-timeseries-metrics:
     description: List of all supported time series metrics for rack monitoring
     metrics:
-    - name: pdu_N_energy_consumption_joules
-      unit: Energy
-      description: "Energy consumption reading from PDU number N. \nMultiple metrics\
-        \ will exist based on number_of_pdus, \ne.g., pdu_1_energy_consumption_joules,\
-        \ pdu_2_energy_consumption_joules\n"
-    - name: inlet_temperature_celsius
-      unit: Temperature
-      description: Measurement of inlet cooling temperature (water or air)
-    - name: outlet_temperature_celsius
-      unit: Temperature
-      description: Measurement of outlet cooling temperature (water or air)
+      - name: pdu_N_energy_consumption_joules
+        unit: Energy
+        description:
+          "Energy consumption reading from PDU number N. \nMultiple metrics\
+          \ will exist based on number_of_pdus, \ne.g., pdu_1_energy_consumption_joules,\
+          \ pdu_2_energy_consumption_joules\n"
+      - name: inlet_temperature_celsius
+        unit: Temperature
+        description: Measurement of inlet cooling temperature (water or air)
+      - name: outlet_temperature_celsius
+        unit: Temperature
+        description: Measurement of outlet cooling temperature (water or air)
   x-supported-server-timeseries-metrics:
     description: List of all supported time series metrics for server monitoring
     metrics:
-    - name: cpu_energy_consumption_joules
-      unit: Energy
-      description: Total energy consumption of all CPUs measured via RAPL
-    - name: server_energy_consumption_joules
-      unit: Energy
-      description: Total energy consumption of the server measured via IPMI
+      - name: cpu_energy_consumption_joules
+        unit: Energy
+        description: Total energy consumption of all CPUs measured via RAPL
+      - name: server_energy_consumption_joules
+        unit: Energy
+        description: Total energy consumption of the server measured via IPMI
 x-tagGroups:
-- name: Facility Registry API
-  tags:
-  - Supported Time Series Metrics for Facilities
-  - facility-api.spec_other
-- name: Rack Registry API
-  tags:
-  - Supported Time Series Metrics for Racks
-  - rack-api.spec_other
-- name: Server Registry API
-  tags:
-  - Supported Time Series Metrics for Servers
-  - server-api.spec_other
+  - name: Facility Registry API
+    tags:
+      - Supported Time Series Metrics for Facilities
+      - facility-api.spec_other
+  - name: Rack Registry API
+    tags:
+      - Supported Time Series Metrics for Racks
+      - rack-api.spec_other
+  - name: Server Registry API
+    tags:
+      - Supported Time Series Metrics for Servers
+      - server-api.spec_other
