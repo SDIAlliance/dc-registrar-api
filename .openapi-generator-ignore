@@ -28,5 +28,6 @@ nadiki_registrar/controllers/facility_api_spec_other_controller.py
 nadiki_registrar/controllers/rack_api_spec_other_controller.py
 nadiki_registrar/controllers/server_api_spec_other_controller.py
 nadiki_registrar/controllers/security_controller_.py
+nadiki_registrar/__main__.py
 tox.ini
 .gitignore
