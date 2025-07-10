@@ -46,6 +46,14 @@ module "registrar" {
     {
       name      = "INFLUXDB_ADMIN_TOKEN",
       valueFrom = aws_secretsmanager_secret.influxdb_admin_token.arn
+    },
+    {
+      name      = "AUTH_USER",
+      valueFrom = "${aws_secretsmanager_secret.registrar_basic_auth_credentials.arn}:AUTH_USER::"
+    },
+    {
+      name      = "AUTH_PASSWORD",
+      valueFrom = "${aws_secretsmanager_secret.registrar_basic_auth_credentials.arn}:AUTH_PASSWORD::"
     }
   ]
   port_mappings = [
@@ -72,4 +80,13 @@ resource "aws_vpc_security_group_egress_rule" "registrar-influxdb" {
   cidr_ipv4         = module.vpc.vpc_cidr_block
   ip_protocol       = "tcp"
   description       = "InfluxDB access"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "registrar-world" {
+  security_group_id = module.registrar.task_security_group_id
+  from_port         = 443
+  to_port           = 443
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "tcp"
+  description       = "HTTPS access from everywhere"
 }

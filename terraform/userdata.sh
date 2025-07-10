@@ -14,11 +14,9 @@ docker run \
     -e OUTPUT_INFLUXDB_TOKEN=$influxdb_token \
     -e OUTPUT_INFLUXDB_ORGANIZATION=Leitmotiv \
     -e VM_TIMEZONE=UTC \
-    -e TAG_FACILITY_ID=XION \
+    -e TAG_FACILITY_ID=FACILITY-DEU-011 \
     -e TAG_COUNTRY_CODE=DEU \
-    -e TAG_RACK_ID=rack-1 \
-    -e PROTON_HOST=${timeplus_proton_host} \
+    -e TAG_RACK_ID=RACK-FACILITY-DEU-011-004 \
     -e AWS_REGION=${aws_region} \
     -e TZ=utc \
     -d ${repo_url}
-

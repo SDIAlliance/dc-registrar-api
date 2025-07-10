@@ -89,7 +89,7 @@ resource "aws_instance" "siec" {
   user_data              = templatefile("userdata.sh", local.user_data_params)
   vpc_security_group_ids = [aws_security_group.ec2.id]
   tags = {
-    Name = "${var.namespace}-${var.stage}-siec-scraoer"
+    Name = "${var.namespace}-${var.stage}-siec-scraper"
   }
   lifecycle {
     ignore_changes = [ user_data ]

@@ -65,7 +65,8 @@ resource "aws_iam_role_policy" "execution-secrets" {
         Sid    = "AllowRootPassword"
         Resource = [
           aws_secretsmanager_secret.mariadb_root_password.arn,
-          aws_secretsmanager_secret.influxdb_admin_token.arn
+          aws_secretsmanager_secret.influxdb_admin_token.arn,
+          aws_secretsmanager_secret.registrar_basic_auth_credentials.arn
         ]
       },
       {
@@ -90,6 +91,10 @@ resource "aws_secretsmanager_secret" "mariadb_root_password" {
 
 resource "aws_secretsmanager_secret" "influxdb_admin_token" {
   name = "${var.namespace}-${var.stage}-influxdb-admin-token"
+}
+
+resource "aws_secretsmanager_secret" "registrar_basic_auth_credentials" {
+  name = "${var.namespace}-${var.stage}-registrar-basic-auth-credentials"
 }
 
 resource "aws_cloudwatch_log_group" "default" {
