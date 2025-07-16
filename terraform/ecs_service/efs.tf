@@ -29,3 +29,12 @@ resource "aws_efs_access_point" "default" {
     gid = 0
   }
 }
+
+resource "aws_efs_backup_policy" "default" {
+  count          = var.enable_efs_backups && var.own_efs_volume_mount_point != null ? 1 : 0
+  file_system_id = aws_efs_file_system.default[0].id
+
+  backup_policy {
+    status = "ENABLED"
+  }
+}

@@ -152,3 +152,9 @@ variable "service_discovery_namespace_id" {
   description = "ID of the namespace to use for service discovery"
   default     = null
 }
+
+variable "enable_efs_backups" {
+  default     = true
+  type        = bool
+  description = "Whether to enable backups of the EFS file system with the default policy"
+}
