@@ -122,7 +122,14 @@ def create_facility(facility_create=None):  # noqa: E501
 
                 auth_api = influxdb_client.authorizations_api()
                 # why is it not possible to add a description to a token through the Python API? It is possible with the REST API...
-                auth = auth_api.create_authorization(org_id=org_id, permissions=[Permission(action="write", resource=PermissionResource(id=bucket.id, type="buckets"))])
+                auth = auth_api.create_authorization(
+                    org_id      = org_id,
+                    description = f"Ingestion token for bucket {facility.toString()}",
+                    permissions = [
+                        Permission(action="write", resource=PermissionResource(id=bucket.id, type="buckets")),
+                        Permission(action="read", resource=PermissionResource(id=bucket.id, type="buckets"))
+                    ]
+                )
                 conn.execute(update(facilities).values({"f_influxdb_token": auth.token}).where(facilities.c.f_id == id))
 
                 # insert the weak entities (cooling fluids and time series configs)
