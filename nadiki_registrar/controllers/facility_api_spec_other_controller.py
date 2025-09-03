@@ -102,7 +102,7 @@ def create_facility(facility_create=None):  # noqa: E501
                     "f_white_space": facility_create.white_space,
                     "f_description": facility_create.description,
                     "f_country_code": country_code,
-                    "f_influxdb_endpoint": INFLUXDB_ENDPOINT_URL,
+                    "f_influxdb_endpoint": INFLUXDB_EXTERNAL_ENDPOINT_URL,
                     "f_influxdb_org": INFLUXDB_ORG,
                     "f_influxdb_token": "TBD",
                     "f_created_at": func.now(),
