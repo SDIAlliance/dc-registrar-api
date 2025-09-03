@@ -36,6 +36,10 @@ module "registrar" {
     {
       name  = "INFLUXDB_ENDPOINT_URL",
       value = "https://influxdb.${var.internal_domain_name}:${var.influxdb_container_port}"
+    },
+    {
+      name  = "INFLUXDB_EXTERNAL_ENDPOINT_URL",
+      value = "https://influxdb.${var.public_zone_name}:${var.influxdb_container_port}"
     }
   ]
   secrets = [
