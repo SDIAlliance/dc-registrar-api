@@ -216,7 +216,17 @@ def list_servers(limit=None, offset=None, facility_id=None, rack_id=None):  # no
 
     result = []
     with engine.connect() as conn:
-        servers_result = conn.execute(select(servers.join(racks, servers.c.s_r_id == racks.c.r_id).join(facilities, racks.c.r_f_id == facilities.c.f_id)).limit(limit).offset(offset))
+
+        stmt = select(servers.join(racks, servers.c.s_r_id == racks.c.r_id).join(facilities, racks.c.r_f_id == facilities.c.f_id))
+        if facility_id != None:
+            facility = FacilityId.fromString(facility_id)
+            stmt = stmt.where(racks.c.r_f_id == facility.number)
+        if rack_id != None:
+            rack = RackId.fromString(rack_id)
+            stmt = stmt.where(racks.c.r_id == rack.number)
+        stmt = stmt.limit(limit).offset(offset)
+
+        servers_result = conn.execute(stmt)
         
         for x in servers_result:
             servers_timeseries_configs_result = conn.execute(select(servers_timeseries_configs).where(servers_timeseries_configs.c.stc_s_id == x.s_id))

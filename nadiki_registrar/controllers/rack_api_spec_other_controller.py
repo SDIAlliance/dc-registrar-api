@@ -172,7 +172,12 @@ def list_racks(limit=None, offset=None, facility_id=None):  # noqa: E501
     """
 
     with engine.connect() as conn:
-        racks_result = conn.execute(select(racks.join(facilities, racks.c.r_f_id == facilities.c.f_id)).limit(limit).offset(offset))
+        stmt = select(racks.join(facilities, racks.c.r_f_id == facilities.c.f_id))
+        if facility_id != None:
+            facility = FacilityId.fromString(facility_id)
+            stmt = stmt.where(facilities.c.f_id == facility.number)
+        stmt = stmt.limit(limit).offset(offset)
+        racks_result = conn.execute(stmt)
 
         results = []
         for row in racks_result:

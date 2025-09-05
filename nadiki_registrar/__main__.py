@@ -3,7 +3,9 @@
 import connexion
 
 from nadiki_registrar import encoder
+from dotenv import load_dotenv
 
+load_dotenv()
 
 def main():
     app = connexion.App(__name__, specification_dir='./openapi/')
