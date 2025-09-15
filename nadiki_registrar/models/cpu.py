@@ -15,26 +15,31 @@ class CPU(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, vendor=None, type=None):  # noqa: E501
+    def __init__(self, vendor=None, type=None, physical_core_count=None):  # noqa: E501
         """CPU - a model defined in OpenAPI
 
         :param vendor: The vendor of this CPU.  # noqa: E501
         :type vendor: str
         :param type: The type of this CPU.  # noqa: E501
         :type type: str
+        :param physical_core_count: The physical_core_count of this CPU.  # noqa: E501
+        :type physical_core_count: int
         """
         self.openapi_types = {
             'vendor': str,
-            'type': str
+            'type': str,
+            'physical_core_count': int
         }
 
         self.attribute_map = {
             'vendor': 'vendor',
-            'type': 'type'
+            'type': 'type',
+            'physical_core_count': 'physical_core_count'
         }
 
         self._vendor = vendor
         self._type = type
+        self._physical_core_count = physical_core_count
 
     @classmethod
     def from_dict(cls, dikt) -> 'CPU':
@@ -96,3 +101,26 @@ class CPU(Model):
             raise ValueError("Invalid value for `type`, must not be `None`")  # noqa: E501
 
         self._type = type
+
+    @property
+    def physical_core_count(self):
+        """Gets the physical_core_count of this CPU.
+
+
+        :return: The physical_core_count of this CPU.
+        :rtype: int
+        """
+        return self._physical_core_count
+
+    @physical_core_count.setter
+    def physical_core_count(self, physical_core_count):
+        """Sets the physical_core_count of this CPU.
+
+
+        :param physical_core_count: The physical_core_count of this CPU.
+        :type physical_core_count: int
+        """
+        if physical_core_count is not None and physical_core_count < 1:  # noqa: E501
+            raise ValueError("Invalid value for `physical_core_count`, must be a value greater than or equal to `1`")  # noqa: E501
+
+        self._physical_core_count = physical_core_count

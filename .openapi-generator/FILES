@@ -1,12 +1,9 @@
 .dockerignore
 .travis.yml
 Dockerfile
-README.md
 git_push.sh
 nadiki_registrar/__init__.py
-nadiki_registrar/__main__.py
 nadiki_registrar/controllers/__init__.py
-nadiki_registrar/controllers/security_controller_.py
 nadiki_registrar/encoder.py
 nadiki_registrar/models/__init__.py
 nadiki_registrar/models/base_model_.py

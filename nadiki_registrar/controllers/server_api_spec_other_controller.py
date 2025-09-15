@@ -20,6 +20,9 @@ from nadiki_registrar.models.server_time_series_data_point import ServerTimeSeri
 
 import json
 
+import urllib3
+import urllib.parse
+
 from sqlalchemy import create_engine, MetaData, Table, select, delete, insert, update, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
@@ -29,6 +32,13 @@ from nadiki_registrar.controllers.database import *
 from nadiki_registrar.controllers.identifiers import FacilityId
 from nadiki_registrar.controllers.identifiers import RackId
 from nadiki_registrar.controllers.identifiers import ServerId
+
+BASE_URL_FOR_BOAVIZTA = "https://api.boavizta.org/v1/"
+
+#
+# urllib3
+#
+http = urllib3.PoolManager()
 
 def create_server(server_create=None):  # noqa: E501
     """Register a new server
@@ -45,6 +55,15 @@ def create_server(server_create=None):  # noqa: E501
 
         rack_id = RackId.fromString(server_create.rack_id)
 
+        # get environmental impact assesment from Boavizta
+        boavizta = __get_boavizta_server_impact(
+            cpus                      = server_create.installed_cpus,
+            total_installed_memory_gb = server_create.total_installed_memory,
+            number_of_memory_units    = server_create.number_of_memory_units,
+            disks                     = server_create.storage_devices,
+            number_of_psus            = server_create.number_of_psus
+        )
+
         with engine.connect() as conn:
             conn.execute(insert(servers).values({
                 "s_r_id":                   rack_id.number,
@@ -56,6 +75,7 @@ def create_server(server_create=None):  # noqa: E501
                 "s_product_passport":       json.dumps(server_create.product_passport),
                 "s_cooling_type":           server_create.cooling_type,
                 "s_description":            server_create.description,
+                "s_boavizta_response":      json.dumps(boavizta),
                 "s_created_at":             func.now(),
                 "s_updated_at":             func.now(),
             }))
@@ -91,7 +111,8 @@ def create_server(server_create=None):  # noqa: E501
                 conn.execute(insert(servers_cpus).values({
                     "sc_s_id": id,
                     "sc_vendor": cpu.vendor,
-                    "sc_type": cpu.type
+                    "sc_type": cpu.type,
+                    "sc_physical_core_count": cpu.physical_core_count
                 }))
 
             for gpu in server_create.installed_gpus:
@@ -306,3 +327,29 @@ def update_server(server_id, server_update=None):  # noqa: E501
             conn.commit()
 
         return get_server(server_id)
+
+def __get_boavizta_server_impact(cpus : list, total_installed_memory_gb: int, number_of_memory_units: int , disks: list, number_of_psus: int):
+    request_data = {
+            "configuration": {
+                "cpu": {
+                    "units": len(cpus),
+                    "core_units": cpus[0].physical_core_count # assuming that all CPUs are equal
+                },
+                "ram": [{ "units": number_of_memory_units, "capacity": total_installed_memory_gb/number_of_memory_units}],
+                "disk": [
+                    {
+                        "units": 1,
+                        "capacity": disk.capacity,
+                        "manufacturer": disk.vendor,
+                        "type": disk.type
+                    }
+                for disk in disks],
+                "power_supply": {
+                    "units": number_of_psus
+                }
+            }
+    }
+    response = http.request("POST", BASE_URL_FOR_BOAVIZTA+"server/",
+        headers={"User-agent": "Nadiki Registrar https://github.com/SDIAlliance/nadiki-registrar", "Accept": "application/json", "Content-type": "application/json"},
+        json=request_data)
+    return response.json()
