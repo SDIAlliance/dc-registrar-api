@@ -18,6 +18,7 @@ from nadiki_registrar.models.storage_device import StorageDevice  # noqa: E501
 from nadiki_registrar.models.server_time_series_config import ServerTimeSeriesConfig  # noqa: E501
 from nadiki_registrar.models.server_time_series_data_point import ServerTimeSeriesDataPoint  # noqa: E501
 
+import math
 import json
 
 import urllib3
@@ -32,6 +33,10 @@ from nadiki_registrar.controllers.database import *
 from nadiki_registrar.controllers.identifiers import FacilityId
 from nadiki_registrar.controllers.identifiers import RackId
 from nadiki_registrar.controllers.identifiers import ServerId
+
+## for debug output
+#import http.client
+#http.client.HTTPConnection.debuglevel = 5
 
 BASE_URL_FOR_BOAVIZTA = "https://api.boavizta.org/v1/"
 
@@ -328,6 +333,22 @@ def update_server(server_id, server_update=None):  # noqa: E501
 
         return get_server(server_id)
 
+#
+# Call to Boavizta to get an assessment of a servers environmental impact. We store the resulting JSON document
+# because we do not know yet what we will need. 
+# 
+# Be warned that this is a very rough integration. Boavizta does not know about GPUs or FPGAs. Also, we do not
+# ask the user for the "family" ot their CPUs (e.g. Skylake), which would make the assessment more accurate. 
+# Using the precise CPU description as given by lscpu on Linux will usually not match what Boavizta expects
+# as the "name". Specifiying the vendor of the CPU does not seem to have an impact on the calculation,
+# but the documentation # is also a little bit unclear here (why is the manufacturer called "embedded" for CPUs???)
+#
+# Moreoever, we do not ask the user for the weight of their PSUs, the density of their storage
+# devices or the die_size of their CPUs, which would probably drive them away, so we pass all that we know
+# to Boavizta and hope for the best. Also, we would allow different CPUs to be specified whereas Boavizta
+# expects multiple identical CPUs. We now take our first CPU as the blueprint.
+#
+
 def __get_boavizta_server_impact(cpus : list, total_installed_memory_gb: int, number_of_memory_units: int , disks: list, number_of_psus: int):
     request_data = {
             "configuration": {
@@ -335,11 +356,11 @@ def __get_boavizta_server_impact(cpus : list, total_installed_memory_gb: int, nu
                     "units": len(cpus),
                     "core_units": cpus[0].physical_core_count # assuming that all CPUs are equal
                 },
-                "ram": [{ "units": number_of_memory_units, "capacity": total_installed_memory_gb/number_of_memory_units}],
+                "ram": [{ "units": number_of_memory_units, "capacity": math.ceil(total_installed_memory_gb/number_of_memory_units)}],
                 "disk": [
                     {
                         "units": 1,
-                        "capacity": disk.capacity,
+                        "capacity": math.ceil(disk.capacity),
                         "manufacturer": disk.vendor,
                         "type": disk.type
                     }
