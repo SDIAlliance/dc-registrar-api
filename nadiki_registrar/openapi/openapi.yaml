@@ -1453,6 +1453,9 @@ components:
           type: string
         timeSeriesConfig:
           $ref: '#/components/schemas/ServerTimeSeriesConfig'
+        boavizta_response:
+          title: boavizta_response
+          type: object
         createdAt:
           format: date-time
           title: createdAt

@@ -25,7 +25,7 @@ class ServerResponse(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, facility_id=None, rack_id=None, rated_power=None, total_cpu_sockets=2, installed_cpus=None, number_of_psus=2, total_installed_memory=None, number_of_memory_units=None, storage_devices=None, installed_gpus=None, installed_fpgas=None, product_passport=None, cooling_type='air', description=None, id=None, time_series_config=None, created_at=None, updated_at=None):  # noqa: E501
+    def __init__(self, facility_id=None, rack_id=None, rated_power=None, total_cpu_sockets=2, installed_cpus=None, number_of_psus=2, total_installed_memory=None, number_of_memory_units=None, storage_devices=None, installed_gpus=None, installed_fpgas=None, product_passport=None, cooling_type='air', description=None, id=None, time_series_config=None, boavizta_response=None, created_at=None, updated_at=None):  # noqa: E501
         """ServerResponse - a model defined in OpenAPI
 
         :param facility_id: The facility_id of this ServerResponse.  # noqa: E501
@@ -60,6 +60,8 @@ class ServerResponse(Model):
         :type id: str
         :param time_series_config: The time_series_config of this ServerResponse.  # noqa: E501
         :type time_series_config: ServerTimeSeriesConfig
+        :param boavizta_response: The boavizta_response of this ServerResponse.  # noqa: E501
+        :type boavizta_response: object
         :param created_at: The created_at of this ServerResponse.  # noqa: E501
         :type created_at: datetime
         :param updated_at: The updated_at of this ServerResponse.  # noqa: E501
@@ -82,6 +84,7 @@ class ServerResponse(Model):
             'description': str,
             'id': str,
             'time_series_config': ServerTimeSeriesConfig,
+            'boavizta_response': object,
             'created_at': datetime,
             'updated_at': datetime
         }
@@ -103,6 +106,7 @@ class ServerResponse(Model):
             'description': 'description',
             'id': 'id',
             'time_series_config': 'timeSeriesConfig',
+            'boavizta_response': 'boavizta_response',
             'created_at': 'createdAt',
             'updated_at': 'updatedAt'
         }
@@ -123,6 +127,7 @@ class ServerResponse(Model):
         self._description = description
         self._id = id
         self._time_series_config = time_series_config
+        self._boavizta_response = boavizta_response
         self._created_at = created_at
         self._updated_at = updated_at
 
@@ -520,6 +525,27 @@ class ServerResponse(Model):
             raise ValueError("Invalid value for `time_series_config`, must not be `None`")  # noqa: E501
 
         self._time_series_config = time_series_config
+
+    @property
+    def boavizta_response(self):
+        """Gets the boavizta_response of this ServerResponse.
+
+
+        :return: The boavizta_response of this ServerResponse.
+        :rtype: object
+        """
+        return self._boavizta_response
+
+    @boavizta_response.setter
+    def boavizta_response(self, boavizta_response):
+        """Sets the boavizta_response of this ServerResponse.
+
+
+        :param boavizta_response: The boavizta_response of this ServerResponse.
+        :type boavizta_response: object
+        """
+
+        self._boavizta_response = boavizta_response
 
     @property
     def created_at(self):

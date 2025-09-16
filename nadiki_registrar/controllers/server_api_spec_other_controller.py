@@ -204,6 +204,7 @@ def _create_server_response(row, servers_timeseries_configs, servers_cpus_result
         product_passport        = row.s_product_passport,
         cooling_type            = row.s_cooling_type,
         description             = row.s_description,
+        boavizta_response       = json.loads(row.s_boavizta_response),
         time_series_config      = ServerTimeSeriesConfig(
             endpoint    = row.f_influxdb_endpoint,
             org         = row.f_influxdb_org,
@@ -215,7 +216,7 @@ def _create_server_response(row, servers_timeseries_configs, servers_cpus_result
                 granularity_seconds = x.stc_granularity_seconds,
                 tags                = json.loads(x.stc_tags)) for x in servers_timeseries_configs]
         ),
-        installed_cpus          = [CPU(vendor=x.sc_vendor, type=x.sc_type) for x in servers_cpus_result],
+        installed_cpus          = [CPU(vendor=x.sc_vendor, type=x.sc_type, physical_core_count=x.sc_physical_core_count) for x in servers_cpus_result],
         installed_gpus          = [GPU(vendor=x.sg_vendor, type=x.sg_type) for x in servers_gpus_result],
         installed_fpgas         = [FPGA(vendor=x.sf_vendor, type=x.sf_type) for x in servers_fpgas_result],
         storage_devices         = [StorageDevice(vendor=x.sh_vendor, type=x.sh_type) for x in servers_storage_devices_result],
