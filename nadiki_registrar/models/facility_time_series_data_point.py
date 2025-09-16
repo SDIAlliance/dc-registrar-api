@@ -108,7 +108,7 @@ class FacilityTimeSeriesDataPoint(Model):
         :param field: The field of this FacilityTimeSeriesDataPoint.
         :type field: str
         """
-        allowed_values = ["heatpump_power_consumption_joules", "office_energy_use_joules", "dc_water_usage_cubic_meters", "office_water_usage_cubic_meters", "total_generator_energy_joules", "generator_load_factor_ratio", "grid_transformers_energy_joules", "onsite_renewable_energy_joules", "it_power_usage_level1_joules", "it_power_usage_level2_joules", "renewable_energy_certificates_joules", "grid_emission_factor_grams", "backup_emission_factor_grams", "electricity_source", "pue_1_ratio", "pue_2_ratio"]  # noqa: E501
+        allowed_values = ["heatpump_avg_watts", "office_avg_watts", "dc_water_usage_cubic_meters", "office_water_usage_cubic_meters", "total_generator_avg_watts", "generator_load_factor_ratio", "grid_transformers_avg_watts", "onsite_renewable_energy_avg_watts", "it_power_usage_level1_avg_watts", "it_power_usage_level2_avg_watts", "renewable_energy_certificates_watts", "grid_emission_factor_grams", "backup_emission_factor_grams", "electricity_source", "pue_1_ratio", "pue_2_ratio"]  # noqa: E501
         if field not in allowed_values:
             raise ValueError(
                 "Invalid value for `field` ({0}), must be one of {1}"

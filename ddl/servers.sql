@@ -18,6 +18,7 @@ CREATE TABLE servers (
     s_product_passport          JSON,
     s_cooling_type              VARCHAR(50),
     s_description               TEXT,
+    s_boavizta_response         JSON,
     s_created_at                TIMESTAMP NOT NULL,
     s_updated_at                TIMESTAMP NOT NULL,
     CONSTRAINT s_fk FOREIGN KEY fk (s_r_id) REFERENCES racks (r_id) ON DELETE CASCADE
@@ -27,6 +28,7 @@ CREATE TABLE servers_cpus (
     sc_s_id     INT UNSIGNED NOT NULL,
     sc_vendor   VARCHAR(255) NOT NULL,
     sc_type     VARCHAR(255) NOT NULL,
+    sc_physical_core_count INT UNSIGNED NOT NULL DEFAULT 1,
     CONSTRAINT sc_fk FOREIGN KEY fk (sc_s_id) REFERENCES servers (s_id) ON DELETE CASCADE
 ) WITH SYSTEM VERSIONING;
 

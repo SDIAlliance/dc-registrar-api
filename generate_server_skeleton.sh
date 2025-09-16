@@ -9,7 +9,7 @@ specdir=~/work/leitmotiv/nadiki-api
 docker run -v $specdir:/local -w /local redocly/cli join data-center-facility/facility-api.spec.yaml rack/rack-api.spec.yaml server/server-api.spec.yaml -o nadiki-api.yaml
 
 # hack: we need to patch the basic auth into the file before generating code
-sudo yq eval '
+yq eval '
   .components.securitySchemes.BasicAuth = {
     "type": "http",
     "scheme": "basic",

@@ -17,13 +17,15 @@ class ServerResponseAllOf(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, time_series_config=None, created_at=None, updated_at=None):  # noqa: E501
+    def __init__(self, id=None, time_series_config=None, boavizta_response=None, created_at=None, updated_at=None):  # noqa: E501
         """ServerResponseAllOf - a model defined in OpenAPI
 
         :param id: The id of this ServerResponseAllOf.  # noqa: E501
         :type id: str
         :param time_series_config: The time_series_config of this ServerResponseAllOf.  # noqa: E501
         :type time_series_config: ServerTimeSeriesConfig
+        :param boavizta_response: The boavizta_response of this ServerResponseAllOf.  # noqa: E501
+        :type boavizta_response: object
         :param created_at: The created_at of this ServerResponseAllOf.  # noqa: E501
         :type created_at: datetime
         :param updated_at: The updated_at of this ServerResponseAllOf.  # noqa: E501
@@ -32,6 +34,7 @@ class ServerResponseAllOf(Model):
         self.openapi_types = {
             'id': str,
             'time_series_config': ServerTimeSeriesConfig,
+            'boavizta_response': object,
             'created_at': datetime,
             'updated_at': datetime
         }
@@ -39,12 +42,14 @@ class ServerResponseAllOf(Model):
         self.attribute_map = {
             'id': 'id',
             'time_series_config': 'timeSeriesConfig',
+            'boavizta_response': 'boavizta_response',
             'created_at': 'createdAt',
             'updated_at': 'updatedAt'
         }
 
         self._id = id
         self._time_series_config = time_series_config
+        self._boavizta_response = boavizta_response
         self._created_at = created_at
         self._updated_at = updated_at
 
@@ -106,6 +111,27 @@ class ServerResponseAllOf(Model):
             raise ValueError("Invalid value for `time_series_config`, must not be `None`")  # noqa: E501
 
         self._time_series_config = time_series_config
+
+    @property
+    def boavizta_response(self):
+        """Gets the boavizta_response of this ServerResponseAllOf.
+
+
+        :return: The boavizta_response of this ServerResponseAllOf.
+        :rtype: object
+        """
+        return self._boavizta_response
+
+    @boavizta_response.setter
+    def boavizta_response(self, boavizta_response):
+        """Sets the boavizta_response of this ServerResponseAllOf.
+
+
+        :param boavizta_response: The boavizta_response of this ServerResponseAllOf.
+        :type boavizta_response: object
+        """
+
+        self._boavizta_response = boavizta_response
 
     @property
     def created_at(self):

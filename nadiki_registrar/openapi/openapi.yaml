@@ -6,8 +6,6 @@ info:
 servers:
 - description: Registry API v1
   url: https://api.registry.example.com/v1
-security:
-- BasicAuth: []
 tags:
 - description: |
     The following metrics are supported for streaming time series data. When registering a facility, you will receive the endpoint information as well as labels for Prometheus.
@@ -715,17 +713,17 @@ components:
         field:
           description: Metric name with unit suffix
           enum:
-          - heatpump_power_consumption_joules
-          - office_energy_use_joules
+          - heatpump_avg_watts
+          - office_avg_watts
           - dc_water_usage_cubic_meters
           - office_water_usage_cubic_meters
-          - total_generator_energy_joules
+          - total_generator_avg_watts
           - generator_load_factor_ratio
-          - grid_transformers_energy_joules
-          - onsite_renewable_energy_joules
-          - it_power_usage_level1_joules
-          - it_power_usage_level2_joules
-          - renewable_energy_certificates_joules
+          - grid_transformers_avg_watts
+          - onsite_renewable_energy_avg_watts
+          - it_power_usage_level1_avg_watts
+          - it_power_usage_level2_avg_watts
+          - renewable_energy_certificates_watts
           - grid_emission_factor_grams
           - backup_emission_factor_grams
           - electricity_source
@@ -940,6 +938,7 @@ components:
       example:
         vendor: vendor
         type: type
+        physical_core_count: 1
       properties:
         vendor:
           description: "CPU vendor (e.g., Intel, AMD)"
@@ -949,6 +948,10 @@ components:
           description: CPU type identifier
           title: type
           type: string
+        physical_core_count:
+          minimum: 1
+          title: physical_core_count
+          type: integer
       required:
       - type
       - vendor
@@ -994,7 +997,7 @@ components:
       example:
         vendor: vendor
         type: NVMe
-        capacity: 2.302136
+        capacity: 7.0614014
       properties:
         vendor:
           description: "Disk vendor (e.g., Samsung, Intel)"
@@ -1034,10 +1037,10 @@ components:
         storage_devices:
         - vendor: vendor
           type: NVMe
-          capacity: 2.302136
+          capacity: 7.0614014
         - vendor: vendor
           type: NVMe
-          capacity: 2.302136
+          capacity: 7.0614014
         total_installed_memory: 5
         cooling_type: air
         rack_id: rack_id
@@ -1050,10 +1053,12 @@ components:
         installed_cpus:
         - vendor: vendor
           type: type
+          physical_core_count: 1
         - vendor: vendor
           type: type
+          physical_core_count: 1
         facility_id: facility_id
-        number_of_memory_units: 5
+        number_of_memory_units: 2
       properties:
         facility_id:
           description: ID of the facility where the server is located
@@ -1448,6 +1453,9 @@ components:
           type: string
         timeSeriesConfig:
           $ref: '#/components/schemas/ServerTimeSeriesConfig'
+        boavizta_response:
+          title: boavizta_response
+          type: object
         createdAt:
           format: date-time
           title: createdAt
@@ -1462,11 +1470,6 @@ components:
       title: ServerResponse_allOf
       type: object
       example: null
-  securitySchemes:
-    BasicAuth:
-      scheme: basic
-      type: http
-      x-basicInfoFunc: nadiki_registrar.controllers.security_controller_.info_from_BasicAuth
   x-supported-facility-timeseries-metrics:
     description: List of all supported time series metrics for facility monitoring
     metrics:
