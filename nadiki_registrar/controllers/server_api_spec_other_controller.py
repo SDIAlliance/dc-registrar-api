@@ -204,7 +204,7 @@ def _create_server_response(row, servers_timeseries_configs, servers_cpus_result
         product_passport        = row.s_product_passport,
         cooling_type            = row.s_cooling_type,
         description             = row.s_description,
-        boavizta_response       = json.loads(row.s_boavizta_response or {}),
+        boavizta_response       = json.loads(row.s_boavizta_response or "{}"),
         time_series_config      = ServerTimeSeriesConfig(
             endpoint    = row.f_influxdb_endpoint,
             org         = row.f_influxdb_org,
