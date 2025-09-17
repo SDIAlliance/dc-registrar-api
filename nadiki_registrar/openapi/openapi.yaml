@@ -6,6 +6,8 @@ info:
 servers:
 - description: Registry API v1
   url: https://api.registry.example.com/v1
+security:
+- BasicAuth: []
 tags:
 - description: |
     The following metrics are supported for streaming time series data. When registering a facility, you will receive the endpoint information as well as labels for Prometheus.
@@ -1470,6 +1472,11 @@ components:
       title: ServerResponse_allOf
       type: object
       example: null
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+      x-basicInfoFunc: nadiki_registrar.controllers.security_controller_.info_from_BasicAuth
   x-supported-facility-timeseries-metrics:
     description: List of all supported time series metrics for facility monitoring
     metrics:

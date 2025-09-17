@@ -9,13 +9,13 @@ specdir=~/work/leitmotiv/nadiki-api
 docker run -v $specdir:/local -w /local redocly/cli join data-center-facility/facility-api.spec.yaml rack/rack-api.spec.yaml server/server-api.spec.yaml -o nadiki-api.yaml
 
 # hack: we need to patch the basic auth into the file before generating code
-yq eval '
+yq -i -y '
   .components.securitySchemes.BasicAuth = {
     "type": "http",
     "scheme": "basic",
     "x-basicInfoFunc": "nadiki_registrar.controllers.security_controller_.info_from_BasicAuth"
   } | .security = [{ "BasicAuth": []}]
-' -i ../nadiki-api/nadiki-api.yaml
+' ../nadiki-api/nadiki-api.yaml
 
 docker run --user $(id -u) --rm -v "${PWD}:/local/out" -v "${specdir}:/local/in" openapitools/openapi-generator-cli:v6.6.0 generate \
     -i /local/in/nadiki-api.yaml \
