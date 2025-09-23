@@ -19,3 +19,4 @@ servers_cpus                    = Table("servers_cpus",                     meta
 servers_gpus                    = Table("servers_gpus",                     meta, autoload_with=engine)
 servers_fpgas                   = Table("servers_fpgas",                    meta, autoload_with=engine)
 servers_storage_devices         = Table("servers_storage_devices",          meta, autoload_with=engine)
+servers_impact_assessment       = Table("servers_impact_assessment",        meta, autoload_with=engine)

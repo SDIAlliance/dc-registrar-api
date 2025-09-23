@@ -27,7 +27,7 @@ class ServerResponse(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, facility_id=None, rack_id=None, impact_assessment=None, rated_power=None, total_cpu_sockets=2, exptected_lifetime=3, installed_cpus=None, number_of_psus=2, total_installed_memory=None, number_of_memory_units=None, storage_devices=None, installed_gpus=None, installed_fpgas=None, product_passport=None, cooling_type='air', description=None, id=None, time_series_config=None, boavizta_response=None, created_at=None, updated_at=None):  # noqa: E501
+    def __init__(self, facility_id=None, rack_id=None, impact_assessment=None, rated_power=None, total_cpu_sockets=2, expected_lifetime=3, installed_cpus=None, number_of_psus=2, total_installed_memory=None, number_of_memory_units=None, storage_devices=None, installed_gpus=None, installed_fpgas=None, product_passport=None, cooling_type='air', description=None, id=None, time_series_config=None, boavizta_response=None, created_at=None, updated_at=None):  # noqa: E501
         """ServerResponse - a model defined in OpenAPI
 
         :param facility_id: The facility_id of this ServerResponse.  # noqa: E501
@@ -40,8 +40,8 @@ class ServerResponse(Model):
         :type rated_power: float
         :param total_cpu_sockets: The total_cpu_sockets of this ServerResponse.  # noqa: E501
         :type total_cpu_sockets: int
-        :param exptected_lifetime: The exptected_lifetime of this ServerResponse.  # noqa: E501
-        :type exptected_lifetime: int
+        :param expected_lifetime: The expected_lifetime of this ServerResponse.  # noqa: E501
+        :type expected_lifetime: int
         :param installed_cpus: The installed_cpus of this ServerResponse.  # noqa: E501
         :type installed_cpus: List[CPU]
         :param number_of_psus: The number_of_psus of this ServerResponse.  # noqa: E501
@@ -79,7 +79,7 @@ class ServerResponse(Model):
             'impact_assessment': ServerImpactAssessment,
             'rated_power': float,
             'total_cpu_sockets': int,
-            'exptected_lifetime': int,
+            'expected_lifetime': int,
             'installed_cpus': List[CPU],
             'number_of_psus': int,
             'total_installed_memory': int,
@@ -103,7 +103,7 @@ class ServerResponse(Model):
             'impact_assessment': 'impactAssessment',
             'rated_power': 'rated_power',
             'total_cpu_sockets': 'total_cpu_sockets',
-            'exptected_lifetime': 'exptected_lifetime',
+            'expected_lifetime': 'expected_lifetime',
             'installed_cpus': 'installed_cpus',
             'number_of_psus': 'number_of_psus',
             'total_installed_memory': 'total_installed_memory',
@@ -126,7 +126,7 @@ class ServerResponse(Model):
         self._impact_assessment = impact_assessment
         self._rated_power = rated_power
         self._total_cpu_sockets = total_cpu_sockets
-        self._exptected_lifetime = exptected_lifetime
+        self._expected_lifetime = expected_lifetime
         self._installed_cpus = installed_cpus
         self._number_of_psus = number_of_psus
         self._total_installed_memory = total_installed_memory
@@ -274,33 +274,31 @@ class ServerResponse(Model):
         self._total_cpu_sockets = total_cpu_sockets
 
     @property
-    def exptected_lifetime(self):
-        """Gets the exptected_lifetime of this ServerResponse.
+    def expected_lifetime(self):
+        """Gets the expected_lifetime of this ServerResponse.
 
         Expected lifetime of the server hardware  # noqa: E501
 
-        :return: The exptected_lifetime of this ServerResponse.
+        :return: The expected_lifetime of this ServerResponse.
         :rtype: int
         """
-        return self._exptected_lifetime
+        return self._expected_lifetime
 
-    @exptected_lifetime.setter
-    def exptected_lifetime(self, exptected_lifetime):
-        """Sets the exptected_lifetime of this ServerResponse.
+    @expected_lifetime.setter
+    def expected_lifetime(self, expected_lifetime):
+        """Sets the expected_lifetime of this ServerResponse.
 
         Expected lifetime of the server hardware  # noqa: E501
 
-        :param exptected_lifetime: The exptected_lifetime of this ServerResponse.
-        :type exptected_lifetime: int
+        :param expected_lifetime: The expected_lifetime of this ServerResponse.
+        :type expected_lifetime: int
         """
-        if exptected_lifetime is None:
-            raise ValueError("Invalid value for `exptected_lifetime`, must not be `None`")  # noqa: E501
-        if exptected_lifetime is not None and exptected_lifetime > 20:  # noqa: E501
-            raise ValueError("Invalid value for `exptected_lifetime`, must be a value less than or equal to `20`")  # noqa: E501
-        if exptected_lifetime is not None and exptected_lifetime < 1:  # noqa: E501
-            raise ValueError("Invalid value for `exptected_lifetime`, must be a value greater than or equal to `1`")  # noqa: E501
+        if expected_lifetime is not None and expected_lifetime > 20:  # noqa: E501
+            raise ValueError("Invalid value for `expected_lifetime`, must be a value less than or equal to `20`")  # noqa: E501
+        if expected_lifetime is not None and expected_lifetime < 1:  # noqa: E501
+            raise ValueError("Invalid value for `expected_lifetime`, must be a value greater than or equal to `1`")  # noqa: E501
 
-        self._exptected_lifetime = exptected_lifetime
+        self._expected_lifetime = expected_lifetime
 
     @property
     def installed_cpus(self):

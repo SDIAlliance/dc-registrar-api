@@ -15,7 +15,7 @@ class ServerImpactAssessment(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, climate_change=0, primary_energy_use=0, ozone_depletion=0, human_toxicity=0, photochemical_oxidant_formation=0, particulate_matter_formation=0, ionizing_radiation=0, terrestrial_acidification=0, freshwater_eutrophication=0, marine_eutrophication=0, terrestrial_ecotoxicity=0, freshwater_ecotoxicity=0, marine_ecotoxicity=0, agricultural_land_occupation=0, urban_land_occupation=0, natural_land_transformation=0, abiotic_depletion_potential=0):  # noqa: E501
+    def __init__(self, climate_change=None, primary_energy_use=None, ozone_depletion=None, human_toxicity=None, photochemical_oxidant_formation=None, particulate_matter_formation=None, ionizing_radiation=None, terrestrial_acidification=None, freshwater_eutrophication=None, marine_eutrophication=None, terrestrial_ecotoxicity=None, freshwater_ecotoxicity=None, marine_ecotoxicity=None, agricultural_land_occupation=None, urban_land_occupation=None, natural_land_transformation=None, abiotic_depletion_potential=None):  # noqa: E501
         """ServerImpactAssessment - a model defined in OpenAPI
 
         :param climate_change: The climate_change of this ServerImpactAssessment.  # noqa: E501

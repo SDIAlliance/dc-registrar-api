@@ -1111,119 +1111,102 @@ components:
         agricultural_land_occupation: 1.0246457
       properties:
         climate_change:
-          default: 0
           description: "Climate change impact in kg CO2 eq. If left blank, will be\
             \ retrieved from Boavizta API according to server specifications."
           format: float
           title: climate_change
           type: number
         primary_energy_use:
-          default: 0
           description: "Energy used to manufacture the server (kWh). If left blank,\
             \ will be retrieved from Boavizta API according to server specifications."
           format: float
           title: primary_energy_use
           type: number
         ozone_depletion:
-          default: 0
           description: "Ozone depletion impact in kg CFC-11 eq. If left blank, will\
             \ be retrieved from Boavizta API according to server specifications."
           format: float
           title: ozone_depletion
           type: number
         human_toxicity:
-          default: 0
           description: "Human toxicity impact in kg 1,4-DB eq. If left blank, will\
             \ be retrieved from Boavizta API according to server specifications."
           format: float
           title: human_toxicity
           type: number
         photochemical_oxidant_formation:
-          default: 0
           description: "Photochemical oxidant formation impact in kg NMVOC. If left\
             \ blank, will be retrieved from Boavizta API according to server specifications."
           format: float
           title: photochemical_oxidant_formation
           type: number
         particulate_matter_formation:
-          default: 0
           description: "Particulate matter formation impact in kg PM10 eq. If left\
             \ blank, will be retrieved from Boavizta API according to server specifications."
           format: float
           title: particulate_matter_formation
           type: number
         ionizing_radiation:
-          default: 0
           description: "Ionizing radiation impact in kg U235 eq. If left blank, will\
             \ be retrieved from Boavizta API according to server specifications."
           format: float
           title: ionizing_radiation
           type: number
         terrestrial_acidification:
-          default: 0
           description: "Terrestrial acidification impact in kg SO2 eq. If left blank,\
             \ will be retrieved from Boavizta API according to server specifications."
           format: float
           title: terrestrial_acidification
           type: number
         freshwater_eutrophication:
-          default: 0
           description: "Freshwater eutrophication impact in kg P eq. If left blank,\
             \ will be retrieved from Boavizta API according to server specifications."
           format: float
           title: freshwater_eutrophication
           type: number
         marine_eutrophication:
-          default: 0
           description: "Marine eutrophication impact in kg N eq. If left blank, will\
             \ be retrieved from Boavizta API according to server specifications."
           format: float
           title: marine_eutrophication
           type: number
         terrestrial_ecotoxicity:
-          default: 0
           description: "Terrestrial ecotoxicity impact in kg 1,4-DB eq. If left blank,\
             \ will be retrieved from Boavizta API according to server specifications."
           format: float
           title: terrestrial_ecotoxicity
           type: number
         freshwater_ecotoxicity:
-          default: 0
           description: "Freshwater ecotoxicity impact in kg 1,4-DB eq. If left blank,\
             \ will be retrieved from Boavizta API according to server specifications."
           format: float
           title: freshwater_ecotoxicity
           type: number
         marine_ecotoxicity:
-          default: 0
           description: "Marine ecotoxicity impact in kg 1,4-DB eq. If left blank,\
             \ will be retrieved from Boavizta API according to server specifications."
           format: float
           title: marine_ecotoxicity
           type: number
         agricultural_land_occupation:
-          default: 0
           description: "Agricultural land occupation impact in m2a. If left blank,\
             \ will be retrieved from Boavizta API according to server specifications."
           format: float
           title: agricultural_land_occupation
           type: number
         urban_land_occupation:
-          default: 0
           description: "Urban land occupation impact in m2a. If left blank, will be\
             \ retrieved from Boavizta API according to server specifications."
           format: float
           title: urban_land_occupation
           type: number
         natural_land_transformation:
-          default: 0
           description: "Natural land transformation impact in m2. If left blank, will\
             \ be retrieved from Boavizta API according to server specifications."
           format: float
           title: natural_land_transformation
           type: number
         abiotic_depletion_potential:
-          default: 0
           description: "Resource depletion in kgSbeq. If left blank, will be retrieved\
             \ from Boavizta API according to server specifications."
           format: float
@@ -1331,7 +1314,6 @@ components:
           type: type
         description: description
         total_cpu_sockets: 1
-        exptected_lifetime: 10
         impactAssessment:
           abiotic_depletion_potential: 7.4577446
           photochemical_oxidant_formation: 5.637377
@@ -1357,6 +1339,7 @@ components:
         - vendor: vendor
           type: NVMe
           capacity: 9.018348
+        expected_lifetime: 10
         total_installed_memory: 6
         cooling_type: air
         rack_id: rack_id
@@ -1397,12 +1380,12 @@ components:
           minimum: 1
           title: total_cpu_sockets
           type: integer
-        exptected_lifetime:
+        expected_lifetime:
           default: 3
           description: Expected lifetime of the server hardware
           maximum: 20
           minimum: 1
-          title: exptected_lifetime
+          title: expected_lifetime
           type: integer
         installed_cpus:
           description: Array of installed CPUs
