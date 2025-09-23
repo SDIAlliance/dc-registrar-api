@@ -13,6 +13,7 @@ from nadiki_registrar import util
 
 from nadiki_registrar.models.facility_time_series_config import FacilityTimeSeriesConfig  # noqa: E501
 from nadiki_registrar.models.facility_create_cooling_fluids_inner import FacilityCreateCoolingFluidsInner  # noqa: E501
+from nadiki_registrar.models.facility_impact_assessment import FacilityImpactAssessment  # noqa: E501
 from nadiki_registrar.models.facility_time_series_data_point import FacilityTimeSeriesDataPoint  # noqa: E501
 from nadiki_registrar.models.location import Location  # noqa: E501
 
@@ -88,12 +89,9 @@ def create_facility(facility_create=None):  # noqa: E501
                 conn.execute(insert(facilities).values({
                     "f_geo_lon": facility_create.location.latitude,
                     "f_geo_lat": facility_create.location.longitude,
-                    "f_embedded_ghg_emissions_facility": facility_create.embedded_ghg_emissions_facility,
                     "f_lifetime_facility": facility_create.lifetime_facility,
-                    "f_embedded_ghg_emissions_assets": facility_create.embedded_ghg_emissions_assets,
-                    "f_lifetime_assets": facility_create.lifetime_assets,
-                    "f_maintenance_hours_generator": facility_create.maintenance_hours_generator,
                     "f_installed_capacity": facility_create.installed_capacity,
+                    "f_maintenance_hours_generator": facility_create.maintenance_hours_generator,
                     "f_grid_power_feeds": facility_create.grid_power_feeds,
                     "f_design_pue": facility_create.design_pue,
                     "f_tier_level": str(facility_create.tier_level), # MariaDB expects a string here
@@ -151,6 +149,12 @@ def create_facility(facility_create=None):  # noqa: E501
                             "facility_id": facility.toString()
                         })
                     }))
+                for field_name, value in facility_create.impact_assessment.to_dict().items():
+                    conn.execute(insert(facilities_impact_assessment).values({
+                        "fia_f_id": id,
+                        "fia_field_name": field_name,
+                        "fia_value": value
+                    }))
                 conn.commit()
             except IntegrityError as e:
                 return Error(code=400, message="A facility with this location already exists."), 400
@@ -197,28 +201,27 @@ def get_facility(facility_id):  # noqa: E501
         facilities_result = conn.execute(select(facilities).where(facilities.c.f_id == facility.number and facilities.c.f_country_code == facility.country_code))
         facilities_cooling_fluids_result = conn.execute(select(facilities_cooling_fluids).where(facilities_cooling_fluids.c.fcf_f_id == facility.number))
         facilities_timeseries_configs_result = conn.execute(select(facilities_timeseries_configs).where(facilities_timeseries_configs.c.ftc_f_id == facility.number))
-
+        facilities_impact_assessment_result = conn.execute(select(facilities_impact_assessment).where(facilities_impact_assessment.c.fia_f_id == facility.number))
 #        for row in facilities_cooling_fluids:
 
         if facilities_result.rowcount == 0:
             return Error(code=404, message="Facility Id not found"), 404
         else:
-            return _create_facility_response(next(facilities_result), facilities_cooling_fluids_result, facilities_timeseries_configs_result), 200
+            return _create_facility_response(next(facilities_result), facilities_cooling_fluids_result, facilities_timeseries_configs_result, facilities_impact_assessment_result), 200
 
     return "Nothing to see here", 404
 
-def _create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result):
+def _create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result, facilities_impact_assessment_result):
     facility = FacilityId(row.f_country_code, row.f_id)
+    impact_assessment_dict = {x.fia_field_name: x.fia_value for x in facilities_impact_assessment_result}
     resp = FacilityResponse(
         id                              = facility.toString(),
         country_code                    = row.f_country_code,
         location                        = Location(latitude=row.f_geo_lat, longitude=row.f_geo_lon),
-        embedded_ghg_emissions_facility = row.f_embedded_ghg_emissions_facility,
         lifetime_facility               = row.f_lifetime_facility,
-        embedded_ghg_emissions_assets   = row.f_embedded_ghg_emissions_assets,
-        lifetime_assets                 = row.f_lifetime_assets,
-        maintenance_hours_generator     = row.f_maintenance_hours_generator,
         installed_capacity              = row.f_installed_capacity,
+        impact_assessment               = FacilityImpactAssessment(**impact_assessment_dict),
+        maintenance_hours_generator     = row.f_maintenance_hours_generator,
         grid_power_feeds                = row.f_grid_power_feeds,
         design_pue                      = row.f_design_pue,
         tier_level                      = row.f_tier_level,
@@ -260,7 +263,8 @@ def list_facilities(limit=None, offset=None):  # noqa: E501
         for row in facilities_result:
             facilities_cooling_fluids_result = conn.execute(select(facilities_cooling_fluids).where(facilities_cooling_fluids.c.fcf_f_id == row.f_id))
             facilities_timeseries_configs_result = conn.execute(select(facilities_timeseries_configs).where(facilities_timeseries_configs.c.ftc_f_id == row.f_id))
-            results.append(_create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result))
+            facilities_impact_assessment_result = conn.execute(select(facilities_impact_assessment).where(facilities_impact_assessment.c.fia_f_id == row.f_id))
+            results.append(_create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result, facilities_impact_assessment_result))
 
         resp = ListFacilities200Response(items=results, total=facilities_result.rowcount)
         return resp, 200
@@ -293,12 +297,9 @@ def update_facility(facility_id, facility_update=None):  # noqa: E501
                 result = conn.execute(update(facilities).where(facilities.c.f_id == facility.number).values({
                     "f_geo_lon": facility_update.location.latitude,
                     "f_geo_lat": facility_update.location.longitude,
-                    "f_embedded_ghg_emissions_facility": facility_update.embedded_ghg_emissions_facility,
                     "f_lifetime_facility": facility_update.lifetime_facility,
-                    "f_embedded_ghg_emissions_assets": facility_update.embedded_ghg_emissions_assets,
-                    "f_lifetime_assets": facility_update.lifetime_assets,
-                    "f_maintenance_hours_generator": facility_update.maintenance_hours_generator,
                     "f_installed_capacity": facility_update.installed_capacity,
+                    "f_maintenance_hours_generator": facility_update.maintenance_hours_generator,
                     "f_grid_power_feeds": facility_update.grid_power_feeds,
                     "f_design_pue": facility_update.design_pue,
                     "f_tier_level": str(facility_update.tier_level), # MariaDB expects a string here
@@ -323,6 +324,13 @@ def update_facility(facility_id, facility_update=None):  # noqa: E501
                         "fcf_gwp_factor": x.gwp_factor
                     }))
 
+                for field_name, value in facility.impact_assessment.items():
+                    conn.execute(delete(facilities_impact_assessment).where(facilities_impact_assessment.c.fia_f_id == facility.number and facilities_impact_assessment.c.field_name == field_name))
+                    conn.execute(insert(facilities_impact_assessment).values({
+                        "fia_f_id": id,
+                        "fia_field_name": field_name,
+                        "fia_value": value
+                    }))
                 conn.commit()
             except IntegrityError as e:
                 return Error(code=400, message="A facility with this location already exists."), 400

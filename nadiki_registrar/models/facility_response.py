@@ -7,11 +7,13 @@ from typing import List, Dict  # noqa: F401
 
 from nadiki_registrar.models.base_model_ import Model
 from nadiki_registrar.models.facility_create_cooling_fluids_inner import FacilityCreateCoolingFluidsInner
+from nadiki_registrar.models.facility_impact_assessment import FacilityImpactAssessment
 from nadiki_registrar.models.facility_time_series_config import FacilityTimeSeriesConfig
 from nadiki_registrar.models.location import Location
 from nadiki_registrar import util
 
 from nadiki_registrar.models.facility_create_cooling_fluids_inner import FacilityCreateCoolingFluidsInner  # noqa: E501
+from nadiki_registrar.models.facility_impact_assessment import FacilityImpactAssessment  # noqa: E501
 from nadiki_registrar.models.facility_time_series_config import FacilityTimeSeriesConfig  # noqa: E501
 from nadiki_registrar.models.location import Location  # noqa: E501
 
@@ -21,25 +23,21 @@ class FacilityResponse(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, location=None, embedded_ghg_emissions_facility=None, lifetime_facility=15, embedded_ghg_emissions_assets=None, lifetime_assets=10, cooling_fluids=None, maintenance_hours_generator=None, installed_capacity=None, grid_power_feeds=3, design_pue=1.4, tier_level=3, white_space_floors=1, total_space=None, white_space=None, description=None, id=None, country_code=None, time_series_config=None, created_at=None, updated_at=None):  # noqa: E501
+    def __init__(self, location=None, installed_capacity=None, impact_assessment=None, lifetime_facility=20, cooling_fluids=None, maintenance_hours_generator=None, grid_power_feeds=3, design_pue=1.4, tier_level=3, white_space_floors=1, total_space=None, white_space=None, description=None, id=None, country_code=None, time_series_config=None, created_at=None, updated_at=None):  # noqa: E501
         """FacilityResponse - a model defined in OpenAPI
 
         :param location: The location of this FacilityResponse.  # noqa: E501
         :type location: Location
-        :param embedded_ghg_emissions_facility: The embedded_ghg_emissions_facility of this FacilityResponse.  # noqa: E501
-        :type embedded_ghg_emissions_facility: float
+        :param installed_capacity: The installed_capacity of this FacilityResponse.  # noqa: E501
+        :type installed_capacity: float
+        :param impact_assessment: The impact_assessment of this FacilityResponse.  # noqa: E501
+        :type impact_assessment: FacilityImpactAssessment
         :param lifetime_facility: The lifetime_facility of this FacilityResponse.  # noqa: E501
         :type lifetime_facility: int
-        :param embedded_ghg_emissions_assets: The embedded_ghg_emissions_assets of this FacilityResponse.  # noqa: E501
-        :type embedded_ghg_emissions_assets: float
-        :param lifetime_assets: The lifetime_assets of this FacilityResponse.  # noqa: E501
-        :type lifetime_assets: int
         :param cooling_fluids: The cooling_fluids of this FacilityResponse.  # noqa: E501
         :type cooling_fluids: List[FacilityCreateCoolingFluidsInner]
         :param maintenance_hours_generator: The maintenance_hours_generator of this FacilityResponse.  # noqa: E501
         :type maintenance_hours_generator: float
-        :param installed_capacity: The installed_capacity of this FacilityResponse.  # noqa: E501
-        :type installed_capacity: float
         :param grid_power_feeds: The grid_power_feeds of this FacilityResponse.  # noqa: E501
         :type grid_power_feeds: int
         :param design_pue: The design_pue of this FacilityResponse.  # noqa: E501
@@ -67,13 +65,11 @@ class FacilityResponse(Model):
         """
         self.openapi_types = {
             'location': Location,
-            'embedded_ghg_emissions_facility': float,
+            'installed_capacity': float,
+            'impact_assessment': FacilityImpactAssessment,
             'lifetime_facility': int,
-            'embedded_ghg_emissions_assets': float,
-            'lifetime_assets': int,
             'cooling_fluids': List[FacilityCreateCoolingFluidsInner],
             'maintenance_hours_generator': float,
-            'installed_capacity': float,
             'grid_power_feeds': int,
             'design_pue': float,
             'tier_level': int,
@@ -90,13 +86,11 @@ class FacilityResponse(Model):
 
         self.attribute_map = {
             'location': 'location',
-            'embedded_ghg_emissions_facility': 'embeddedGhgEmissionsFacility',
+            'installed_capacity': 'installedCapacity',
+            'impact_assessment': 'impactAssessment',
             'lifetime_facility': 'lifetimeFacility',
-            'embedded_ghg_emissions_assets': 'embeddedGhgEmissionsAssets',
-            'lifetime_assets': 'lifetimeAssets',
             'cooling_fluids': 'coolingFluids',
             'maintenance_hours_generator': 'maintenanceHoursGenerator',
-            'installed_capacity': 'installedCapacity',
             'grid_power_feeds': 'gridPowerFeeds',
             'design_pue': 'designPue',
             'tier_level': 'tierLevel',
@@ -112,13 +106,11 @@ class FacilityResponse(Model):
         }
 
         self._location = location
-        self._embedded_ghg_emissions_facility = embedded_ghg_emissions_facility
+        self._installed_capacity = installed_capacity
+        self._impact_assessment = impact_assessment
         self._lifetime_facility = lifetime_facility
-        self._embedded_ghg_emissions_assets = embedded_ghg_emissions_assets
-        self._lifetime_assets = lifetime_assets
         self._cooling_fluids = cooling_fluids
         self._maintenance_hours_generator = maintenance_hours_generator
-        self._installed_capacity = installed_capacity
         self._grid_power_feeds = grid_power_feeds
         self._design_pue = design_pue
         self._tier_level = tier_level
@@ -167,27 +159,50 @@ class FacilityResponse(Model):
         self._location = location
 
     @property
-    def embedded_ghg_emissions_facility(self):
-        """Gets the embedded_ghg_emissions_facility of this FacilityResponse.
+    def installed_capacity(self):
+        """Gets the installed_capacity of this FacilityResponse.
 
-        Embodied carbon emissions from facility construction (CO2-eq)  # noqa: E501
+        Installed/rated power capacity in watts (required for impact assessment scaling)  # noqa: E501
 
-        :return: The embedded_ghg_emissions_facility of this FacilityResponse.
+        :return: The installed_capacity of this FacilityResponse.
         :rtype: float
         """
-        return self._embedded_ghg_emissions_facility
+        return self._installed_capacity
 
-    @embedded_ghg_emissions_facility.setter
-    def embedded_ghg_emissions_facility(self, embedded_ghg_emissions_facility):
-        """Sets the embedded_ghg_emissions_facility of this FacilityResponse.
+    @installed_capacity.setter
+    def installed_capacity(self, installed_capacity):
+        """Sets the installed_capacity of this FacilityResponse.
 
-        Embodied carbon emissions from facility construction (CO2-eq)  # noqa: E501
+        Installed/rated power capacity in watts (required for impact assessment scaling)  # noqa: E501
 
-        :param embedded_ghg_emissions_facility: The embedded_ghg_emissions_facility of this FacilityResponse.
-        :type embedded_ghg_emissions_facility: float
+        :param installed_capacity: The installed_capacity of this FacilityResponse.
+        :type installed_capacity: float
+        """
+        if installed_capacity is None:
+            raise ValueError("Invalid value for `installed_capacity`, must not be `None`")  # noqa: E501
+
+        self._installed_capacity = installed_capacity
+
+    @property
+    def impact_assessment(self):
+        """Gets the impact_assessment of this FacilityResponse.
+
+
+        :return: The impact_assessment of this FacilityResponse.
+        :rtype: FacilityImpactAssessment
+        """
+        return self._impact_assessment
+
+    @impact_assessment.setter
+    def impact_assessment(self, impact_assessment):
+        """Sets the impact_assessment of this FacilityResponse.
+
+
+        :param impact_assessment: The impact_assessment of this FacilityResponse.
+        :type impact_assessment: FacilityImpactAssessment
         """
 
-        self._embedded_ghg_emissions_facility = embedded_ghg_emissions_facility
+        self._impact_assessment = impact_assessment
 
     @property
     def lifetime_facility(self):
@@ -209,58 +224,12 @@ class FacilityResponse(Model):
         :param lifetime_facility: The lifetime_facility of this FacilityResponse.
         :type lifetime_facility: int
         """
+        if lifetime_facility is None:
+            raise ValueError("Invalid value for `lifetime_facility`, must not be `None`")  # noqa: E501
         if lifetime_facility is not None and lifetime_facility < 1:  # noqa: E501
             raise ValueError("Invalid value for `lifetime_facility`, must be a value greater than or equal to `1`")  # noqa: E501
 
         self._lifetime_facility = lifetime_facility
-
-    @property
-    def embedded_ghg_emissions_assets(self):
-        """Gets the embedded_ghg_emissions_assets of this FacilityResponse.
-
-        Sum of GHG emissions embodied in assets  # noqa: E501
-
-        :return: The embedded_ghg_emissions_assets of this FacilityResponse.
-        :rtype: float
-        """
-        return self._embedded_ghg_emissions_assets
-
-    @embedded_ghg_emissions_assets.setter
-    def embedded_ghg_emissions_assets(self, embedded_ghg_emissions_assets):
-        """Sets the embedded_ghg_emissions_assets of this FacilityResponse.
-
-        Sum of GHG emissions embodied in assets  # noqa: E501
-
-        :param embedded_ghg_emissions_assets: The embedded_ghg_emissions_assets of this FacilityResponse.
-        :type embedded_ghg_emissions_assets: float
-        """
-
-        self._embedded_ghg_emissions_assets = embedded_ghg_emissions_assets
-
-    @property
-    def lifetime_assets(self):
-        """Gets the lifetime_assets of this FacilityResponse.
-
-        Expected average lifetime of assets in years  # noqa: E501
-
-        :return: The lifetime_assets of this FacilityResponse.
-        :rtype: int
-        """
-        return self._lifetime_assets
-
-    @lifetime_assets.setter
-    def lifetime_assets(self, lifetime_assets):
-        """Sets the lifetime_assets of this FacilityResponse.
-
-        Expected average lifetime of assets in years  # noqa: E501
-
-        :param lifetime_assets: The lifetime_assets of this FacilityResponse.
-        :type lifetime_assets: int
-        """
-        if lifetime_assets is not None and lifetime_assets < 1:  # noqa: E501
-            raise ValueError("Invalid value for `lifetime_assets`, must be a value greater than or equal to `1`")  # noqa: E501
-
-        self._lifetime_assets = lifetime_assets
 
     @property
     def cooling_fluids(self):
@@ -305,29 +274,6 @@ class FacilityResponse(Model):
         """
 
         self._maintenance_hours_generator = maintenance_hours_generator
-
-    @property
-    def installed_capacity(self):
-        """Gets the installed_capacity of this FacilityResponse.
-
-        Installed/rated power capacity (watts)  # noqa: E501
-
-        :return: The installed_capacity of this FacilityResponse.
-        :rtype: float
-        """
-        return self._installed_capacity
-
-    @installed_capacity.setter
-    def installed_capacity(self, installed_capacity):
-        """Sets the installed_capacity of this FacilityResponse.
-
-        Installed/rated power capacity (watts)  # noqa: E501
-
-        :param installed_capacity: The installed_capacity of this FacilityResponse.
-        :type installed_capacity: float
-        """
-
-        self._installed_capacity = installed_capacity
 
     @property
     def grid_power_feeds(self):

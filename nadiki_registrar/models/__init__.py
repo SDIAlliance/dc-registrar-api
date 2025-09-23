@@ -8,6 +8,7 @@ from nadiki_registrar.models.error import Error
 from nadiki_registrar.models.fpga import FPGA
 from nadiki_registrar.models.facility_create import FacilityCreate
 from nadiki_registrar.models.facility_create_cooling_fluids_inner import FacilityCreateCoolingFluidsInner
+from nadiki_registrar.models.facility_impact_assessment import FacilityImpactAssessment
 from nadiki_registrar.models.facility_response import FacilityResponse
 from nadiki_registrar.models.facility_response_all_of import FacilityResponseAllOf
 from nadiki_registrar.models.facility_time_series_config import FacilityTimeSeriesConfig
@@ -27,6 +28,7 @@ from nadiki_registrar.models.rack_time_series_data_point import RackTimeSeriesDa
 from nadiki_registrar.models.rack_time_series_data_point_tags import RackTimeSeriesDataPointTags
 from nadiki_registrar.models.rack_update import RackUpdate
 from nadiki_registrar.models.server_create import ServerCreate
+from nadiki_registrar.models.server_impact_assessment import ServerImpactAssessment
 from nadiki_registrar.models.server_response import ServerResponse
 from nadiki_registrar.models.server_response_all_of import ServerResponseAllOf
 from nadiki_registrar.models.server_time_series_config import ServerTimeSeriesConfig

@@ -583,55 +583,212 @@ components:
       - longitude
       title: Location
       type: object
+    FacilityImpactAssessment:
+      example:
+        photochemical_oxidant_formation: 7.0614014
+        water_depletion: 4.9652185
+        ozone_depletion: 5.637377
+        ionizing_radiation: 3.6160767
+        terrestrial_acidification: 2.027123
+        freshwater_ecotoxicity: 1.0246457
+        metal_depletion: 5.025005
+        freshwater_eutrophication: 4.145608
+        particulate_matter_formation: 9.301444
+        climate_change: 5.962134
+        marine_ecotoxicity: 1.4894159
+        natural_land_transformation: 1.1730742
+        urban_land_occupation: 7.4577446
+        terrestrial_ecotoxicity: 1.2315135
+        marine_eutrophication: 7.386282
+        human_toxicity: 2.302136
+        fossil_depletion: 9.965781
+        agricultural_land_occupation: 6.846853
+      properties:
+        climate_change:
+          default: 608571.43
+          description: Climate change impact in kg CO2 eq. Default derived for a 1
+            MW data center and scaled according to installedCapacity.
+          format: float
+          title: climate_change
+          type: number
+        ozone_depletion:
+          default: 4.94
+          description: Ozone depletion impact in kg CFC-11 eq. Default derived for
+            a 1 MW data center and scaled according to installedCapacity.
+          format: float
+          title: ozone_depletion
+          type: number
+        human_toxicity:
+          default: 2622857.14
+          description: "Human toxicity impact in kg 1,4-DB eq. Default derived for\
+            \ a 1 MW data center and scaled according to installedCapacity."
+          format: float
+          title: human_toxicity
+          type: number
+        photochemical_oxidant_formation:
+          default: 2194.29
+          description: Photochemical oxidant formation impact in kg NMVOC. Default
+            derived for a 1 MW data center and scaled according to installedCapacity.
+          format: float
+          title: photochemical_oxidant_formation
+          type: number
+        particulate_matter_formation:
+          default: 2302.86
+          description: Particulate matter formation impact in kg PM10 eq. Default
+            derived for a 1 MW data center and scaled according to installedCapacity.
+          format: float
+          title: particulate_matter_formation
+          type: number
+        ionizing_radiation:
+          default: 88000
+          description: Ionizing radiation impact in kg U235 eq. Default derived for
+            a 1 MW data center and scaled according to installedCapacity.
+          format: float
+          title: ionizing_radiation
+          type: number
+        terrestrial_acidification:
+          default: 4142.86
+          description: Terrestrial acidification impact in kg SO2 eq. Default derived
+            for a 1 MW data center and scaled according to installedCapacity.
+          format: float
+          title: terrestrial_acidification
+          type: number
+        freshwater_eutrophication:
+          default: 1257.14
+          description: Freshwater eutrophication impact in kg P eq. Default derived
+            for a 1 MW data center and scaled according to installedCapacity.
+          format: float
+          title: freshwater_eutrophication
+          type: number
+        marine_eutrophication:
+          default: 720
+          description: Marine eutrophication impact in kg N eq. Default derived for
+            a 1 MW data center and scaled according to installedCapacity.
+          format: float
+          title: marine_eutrophication
+          type: number
+        terrestrial_ecotoxicity:
+          default: 971.43
+          description: "Terrestrial ecotoxicity impact in kg 1,4-DB eq. Default derived\
+            \ for a 1 MW data center and scaled according to installedCapacity."
+          format: float
+          title: terrestrial_ecotoxicity
+          type: number
+        freshwater_ecotoxicity:
+          default: 29142.86
+          description: "Freshwater ecotoxicity impact in kg 1,4-DB eq. Default derived\
+            \ for a 1 MW data center and scaled according to installedCapacity."
+          format: float
+          title: freshwater_ecotoxicity
+          type: number
+        marine_ecotoxicity:
+          default: 33714.29
+          description: "Marine ecotoxicity impact in kg 1,4-DB eq. Default derived\
+            \ for a 1 MW data center and scaled according to installedCapacity."
+          format: float
+          title: marine_ecotoxicity
+          type: number
+        agricultural_land_occupation:
+          default: 70571.43
+          description: Agricultural land occupation impact in m2a. Default derived
+            for a 1 MW data center and scaled according to installedCapacity.
+          format: float
+          title: agricultural_land_occupation
+          type: number
+        urban_land_occupation:
+          default: 9000
+          description: Urban land occupation impact in m2a. Default derived for a
+            1 MW data center and scaled according to installedCapacity.
+          format: float
+          title: urban_land_occupation
+          type: number
+        natural_land_transformation:
+          default: 594.29
+          description: Natural land transformation impact in m2. Default derived for
+            a 1 MW data center and scaled according to installedCapacity.
+          format: float
+          title: natural_land_transformation
+          type: number
+        water_depletion:
+          default: 4485.71
+          description: Water depletion impact in m3. Default derived for a 1 MW data
+            center and scaled according to installedCapacity.
+          format: float
+          title: water_depletion
+          type: number
+        metal_depletion:
+          default: 734285.71
+          description: Metal depletion impact in kg Fe eq. Default derived for a 1
+            MW data center and scaled according to installedCapacity.
+          format: float
+          title: metal_depletion
+          type: number
+        fossil_depletion:
+          default: 1042857.1
+          description: Fossil depletion impact in kg oil eq. Default derived for a
+            1 MW data center and scaled according to installedCapacity.
+          format: float
+          title: fossil_depletion
+          type: number
+      title: FacilityImpactAssessment
+      type: object
     FacilityCreate:
       example:
-        embeddedGhgEmissionsFacility: 1.4658129
-        maintenanceHoursGenerator: 3.6160767
-        whiteSpace: 6.846853
-        designPue: 1.7386281
+        maintenanceHoursGenerator: 9.018348
+        whiteSpace: 6.778325
+        designPue: 1.3557196
         description: description
         coolingFluids:
-        - amount: 7.0614014
-          gwpFactor: 9.301444
+        - amount: 6.6835623
+          gwpFactor: 8.762042
           type: type
-        - amount: 7.0614014
-          gwpFactor: 9.301444
+        - amount: 6.6835623
+          gwpFactor: 8.762042
           type: type
-        totalSpace: 1.4894159
+        totalSpace: 2.8841622
         gridPowerFeeds: 1
+        impactAssessment:
+          photochemical_oxidant_formation: 7.0614014
+          water_depletion: 4.9652185
+          ozone_depletion: 5.637377
+          ionizing_radiation: 3.6160767
+          terrestrial_acidification: 2.027123
+          freshwater_ecotoxicity: 1.0246457
+          metal_depletion: 5.025005
+          freshwater_eutrophication: 4.145608
+          particulate_matter_formation: 9.301444
+          climate_change: 5.962134
+          marine_ecotoxicity: 1.4894159
+          natural_land_transformation: 1.1730742
+          urban_land_occupation: 7.4577446
+          terrestrial_ecotoxicity: 1.2315135
+          marine_eutrophication: 7.386282
+          human_toxicity: 2.302136
+          fossil_depletion: 9.965781
+          agricultural_land_occupation: 6.846853
         lifetimeFacility: 1
         whiteSpaceFloors: 1
-        installedCapacity: 2.027123
-        lifetimeAssets: 1
-        tierLevel: 1
+        installedCapacity: 1.4658129
+        tierLevel: 6
         location:
           latitude: -75.58509
           longitude: 36.988422
-        embeddedGhgEmissionsAssets: 5.637377
       properties:
         location:
           $ref: '#/components/schemas/Location'
-        embeddedGhgEmissionsFacility:
-          description: Embodied carbon emissions from facility construction (CO2-eq)
+        installedCapacity:
+          description: Installed/rated power capacity in watts (required for impact
+            assessment scaling)
           format: float
-          title: embeddedGhgEmissionsFacility
+          title: installedCapacity
           type: number
+        impactAssessment:
+          $ref: '#/components/schemas/FacilityImpactAssessment'
         lifetimeFacility:
-          default: 15
+          default: 20
           description: Expected lifetime of the facility in years
           minimum: 1
           title: lifetimeFacility
-          type: integer
-        embeddedGhgEmissionsAssets:
-          description: Sum of GHG emissions embodied in assets
-          format: float
-          title: embeddedGhgEmissionsAssets
-          type: number
-        lifetimeAssets:
-          default: 10
-          description: Expected average lifetime of assets in years
-          minimum: 1
-          title: lifetimeAssets
           type: integer
         coolingFluids:
           items:
@@ -642,11 +799,6 @@ components:
           description: Annual maintenance runtime hours for generators
           format: float
           title: maintenanceHoursGenerator
-          type: number
-        installedCapacity:
-          description: Installed/rated power capacity (watts)
-          format: float
-          title: installedCapacity
           type: number
         gridPowerFeeds:
           default: 3
@@ -692,6 +844,8 @@ components:
           title: description
           type: string
       required:
+      - installedCapacity
+      - lifetimeFacility
       - location
       title: FacilityCreate
       type: object
@@ -936,6 +1090,147 @@ components:
       - $ref: '#/components/schemas/RackCreate'
       - $ref: '#/components/schemas/RackResponse_allOf'
       title: RackResponse
+    ServerImpactAssessment:
+      example:
+        abiotic_depletion_potential: 7.4577446
+        photochemical_oxidant_formation: 5.637377
+        primary_energy_use: 6.0274563
+        ozone_depletion: 1.4658129
+        ionizing_radiation: 7.0614014
+        terrestrial_acidification: 9.301444
+        freshwater_ecotoxicity: 7.386282
+        freshwater_eutrophication: 3.6160767
+        particulate_matter_formation: 2.302136
+        climate_change: 0.8008282
+        marine_ecotoxicity: 1.2315135
+        natural_land_transformation: 6.846853
+        urban_land_occupation: 1.4894159
+        terrestrial_ecotoxicity: 4.145608
+        marine_eutrophication: 2.027123
+        human_toxicity: 5.962134
+        agricultural_land_occupation: 1.0246457
+      properties:
+        climate_change:
+          default: 0
+          description: "Climate change impact in kg CO2 eq. If left blank, will be\
+            \ retrieved from Boavizta API according to server specifications."
+          format: float
+          title: climate_change
+          type: number
+        primary_energy_use:
+          default: 0
+          description: "Energy used to manufacture the server (kWh). If left blank,\
+            \ will be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: primary_energy_use
+          type: number
+        ozone_depletion:
+          default: 0
+          description: "Ozone depletion impact in kg CFC-11 eq. If left blank, will\
+            \ be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: ozone_depletion
+          type: number
+        human_toxicity:
+          default: 0
+          description: "Human toxicity impact in kg 1,4-DB eq. If left blank, will\
+            \ be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: human_toxicity
+          type: number
+        photochemical_oxidant_formation:
+          default: 0
+          description: "Photochemical oxidant formation impact in kg NMVOC. If left\
+            \ blank, will be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: photochemical_oxidant_formation
+          type: number
+        particulate_matter_formation:
+          default: 0
+          description: "Particulate matter formation impact in kg PM10 eq. If left\
+            \ blank, will be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: particulate_matter_formation
+          type: number
+        ionizing_radiation:
+          default: 0
+          description: "Ionizing radiation impact in kg U235 eq. If left blank, will\
+            \ be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: ionizing_radiation
+          type: number
+        terrestrial_acidification:
+          default: 0
+          description: "Terrestrial acidification impact in kg SO2 eq. If left blank,\
+            \ will be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: terrestrial_acidification
+          type: number
+        freshwater_eutrophication:
+          default: 0
+          description: "Freshwater eutrophication impact in kg P eq. If left blank,\
+            \ will be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: freshwater_eutrophication
+          type: number
+        marine_eutrophication:
+          default: 0
+          description: "Marine eutrophication impact in kg N eq. If left blank, will\
+            \ be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: marine_eutrophication
+          type: number
+        terrestrial_ecotoxicity:
+          default: 0
+          description: "Terrestrial ecotoxicity impact in kg 1,4-DB eq. If left blank,\
+            \ will be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: terrestrial_ecotoxicity
+          type: number
+        freshwater_ecotoxicity:
+          default: 0
+          description: "Freshwater ecotoxicity impact in kg 1,4-DB eq. If left blank,\
+            \ will be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: freshwater_ecotoxicity
+          type: number
+        marine_ecotoxicity:
+          default: 0
+          description: "Marine ecotoxicity impact in kg 1,4-DB eq. If left blank,\
+            \ will be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: marine_ecotoxicity
+          type: number
+        agricultural_land_occupation:
+          default: 0
+          description: "Agricultural land occupation impact in m2a. If left blank,\
+            \ will be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: agricultural_land_occupation
+          type: number
+        urban_land_occupation:
+          default: 0
+          description: "Urban land occupation impact in m2a. If left blank, will be\
+            \ retrieved from Boavizta API according to server specifications."
+          format: float
+          title: urban_land_occupation
+          type: number
+        natural_land_transformation:
+          default: 0
+          description: "Natural land transformation impact in m2. If left blank, will\
+            \ be retrieved from Boavizta API according to server specifications."
+          format: float
+          title: natural_land_transformation
+          type: number
+        abiotic_depletion_potential:
+          default: 0
+          description: "Resource depletion in kgSbeq. If left blank, will be retrieved\
+            \ from Boavizta API according to server specifications."
+          format: float
+          title: abiotic_depletion_potential
+          type: number
+      title: ServerImpactAssessment
+      type: object
     CPU:
       example:
         vendor: vendor
@@ -999,7 +1294,7 @@ components:
       example:
         vendor: vendor
         type: NVMe
-        capacity: 7.0614014
+        capacity: 9.018348
       properties:
         vendor:
           description: "Disk vendor (e.g., Samsung, Intel)"
@@ -1028,7 +1323,7 @@ components:
     ServerCreate:
       example:
         number_of_psus: 1
-        rated_power: 0.8008282
+        rated_power: 1.1730742
         installed_gpus:
         - vendor: vendor
           type: type
@@ -1036,14 +1331,33 @@ components:
           type: type
         description: description
         total_cpu_sockets: 1
+        exptected_lifetime: 10
+        impactAssessment:
+          abiotic_depletion_potential: 7.4577446
+          photochemical_oxidant_formation: 5.637377
+          primary_energy_use: 6.0274563
+          ozone_depletion: 1.4658129
+          ionizing_radiation: 7.0614014
+          terrestrial_acidification: 9.301444
+          freshwater_ecotoxicity: 7.386282
+          freshwater_eutrophication: 3.6160767
+          particulate_matter_formation: 2.302136
+          climate_change: 0.8008282
+          marine_ecotoxicity: 1.2315135
+          natural_land_transformation: 6.846853
+          urban_land_occupation: 1.4894159
+          terrestrial_ecotoxicity: 4.145608
+          marine_eutrophication: 2.027123
+          human_toxicity: 5.962134
+          agricultural_land_occupation: 1.0246457
         storage_devices:
         - vendor: vendor
           type: NVMe
-          capacity: 7.0614014
+          capacity: 9.018348
         - vendor: vendor
           type: NVMe
-          capacity: 7.0614014
-        total_installed_memory: 5
+          capacity: 9.018348
+        total_installed_memory: 6
         cooling_type: air
         rack_id: rack_id
         installed_fpgas:
@@ -1060,7 +1374,7 @@ components:
           type: type
           physical_core_count: 1
         facility_id: facility_id
-        number_of_memory_units: 2
+        number_of_memory_units: 8
       properties:
         facility_id:
           description: ID of the facility where the server is located
@@ -1070,6 +1384,8 @@ components:
           description: ID of the rack where the server is installed
           title: rack_id
           type: string
+        impactAssessment:
+          $ref: '#/components/schemas/ServerImpactAssessment'
         rated_power:
           description: Rated power in kW
           format: float
@@ -1080,6 +1396,13 @@ components:
           description: Total number of CPU sockets
           minimum: 1
           title: total_cpu_sockets
+          type: integer
+        exptected_lifetime:
+          default: 3
+          description: Expected lifetime of the server hardware
+          maximum: 20
+          minimum: 1
+          title: exptected_lifetime
           type: integer
         installed_cpus:
           description: Array of installed CPUs
@@ -1140,6 +1463,7 @@ components:
           type: string
       required:
       - cooling_type
+      - exptected_lifetime
       - facility_id
       - rack_id
       title: ServerCreate
@@ -1309,8 +1633,8 @@ components:
       type: object
     FacilityCreate_coolingFluids_inner:
       example:
-        amount: 7.0614014
-        gwpFactor: 9.301444
+        amount: 6.6835623
+        gwpFactor: 8.762042
         type: type
       properties:
         type:

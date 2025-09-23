@@ -9,12 +9,14 @@ from nadiki_registrar.models.base_model_ import Model
 from nadiki_registrar.models.cpu import CPU
 from nadiki_registrar.models.fpga import FPGA
 from nadiki_registrar.models.gpu import GPU
+from nadiki_registrar.models.server_impact_assessment import ServerImpactAssessment
 from nadiki_registrar.models.storage_device import StorageDevice
 from nadiki_registrar import util
 
 from nadiki_registrar.models.cpu import CPU  # noqa: E501
 from nadiki_registrar.models.fpga import FPGA  # noqa: E501
 from nadiki_registrar.models.gpu import GPU  # noqa: E501
+from nadiki_registrar.models.server_impact_assessment import ServerImpactAssessment  # noqa: E501
 from nadiki_registrar.models.storage_device import StorageDevice  # noqa: E501
 
 class ServerUpdate(Model):
@@ -23,17 +25,21 @@ class ServerUpdate(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, facility_id=None, rack_id=None, rated_power=None, total_cpu_sockets=2, installed_cpus=None, number_of_psus=2, total_installed_memory=None, number_of_memory_units=None, storage_devices=None, installed_gpus=None, installed_fpgas=None, product_passport=None, cooling_type='air', description=None):  # noqa: E501
+    def __init__(self, facility_id=None, rack_id=None, impact_assessment=None, rated_power=None, total_cpu_sockets=2, exptected_lifetime=3, installed_cpus=None, number_of_psus=2, total_installed_memory=None, number_of_memory_units=None, storage_devices=None, installed_gpus=None, installed_fpgas=None, product_passport=None, cooling_type='air', description=None):  # noqa: E501
         """ServerUpdate - a model defined in OpenAPI
 
         :param facility_id: The facility_id of this ServerUpdate.  # noqa: E501
         :type facility_id: str
         :param rack_id: The rack_id of this ServerUpdate.  # noqa: E501
         :type rack_id: str
+        :param impact_assessment: The impact_assessment of this ServerUpdate.  # noqa: E501
+        :type impact_assessment: ServerImpactAssessment
         :param rated_power: The rated_power of this ServerUpdate.  # noqa: E501
         :type rated_power: float
         :param total_cpu_sockets: The total_cpu_sockets of this ServerUpdate.  # noqa: E501
         :type total_cpu_sockets: int
+        :param exptected_lifetime: The exptected_lifetime of this ServerUpdate.  # noqa: E501
+        :type exptected_lifetime: int
         :param installed_cpus: The installed_cpus of this ServerUpdate.  # noqa: E501
         :type installed_cpus: List[CPU]
         :param number_of_psus: The number_of_psus of this ServerUpdate.  # noqa: E501
@@ -58,8 +64,10 @@ class ServerUpdate(Model):
         self.openapi_types = {
             'facility_id': str,
             'rack_id': str,
+            'impact_assessment': ServerImpactAssessment,
             'rated_power': float,
             'total_cpu_sockets': int,
+            'exptected_lifetime': int,
             'installed_cpus': List[CPU],
             'number_of_psus': int,
             'total_installed_memory': int,
@@ -75,8 +83,10 @@ class ServerUpdate(Model):
         self.attribute_map = {
             'facility_id': 'facility_id',
             'rack_id': 'rack_id',
+            'impact_assessment': 'impactAssessment',
             'rated_power': 'rated_power',
             'total_cpu_sockets': 'total_cpu_sockets',
+            'exptected_lifetime': 'exptected_lifetime',
             'installed_cpus': 'installed_cpus',
             'number_of_psus': 'number_of_psus',
             'total_installed_memory': 'total_installed_memory',
@@ -91,8 +101,10 @@ class ServerUpdate(Model):
 
         self._facility_id = facility_id
         self._rack_id = rack_id
+        self._impact_assessment = impact_assessment
         self._rated_power = rated_power
         self._total_cpu_sockets = total_cpu_sockets
+        self._exptected_lifetime = exptected_lifetime
         self._installed_cpus = installed_cpus
         self._number_of_psus = number_of_psus
         self._total_installed_memory = total_installed_memory
@@ -166,6 +178,27 @@ class ServerUpdate(Model):
         self._rack_id = rack_id
 
     @property
+    def impact_assessment(self):
+        """Gets the impact_assessment of this ServerUpdate.
+
+
+        :return: The impact_assessment of this ServerUpdate.
+        :rtype: ServerImpactAssessment
+        """
+        return self._impact_assessment
+
+    @impact_assessment.setter
+    def impact_assessment(self, impact_assessment):
+        """Sets the impact_assessment of this ServerUpdate.
+
+
+        :param impact_assessment: The impact_assessment of this ServerUpdate.
+        :type impact_assessment: ServerImpactAssessment
+        """
+
+        self._impact_assessment = impact_assessment
+
+    @property
     def rated_power(self):
         """Gets the rated_power of this ServerUpdate.
 
@@ -212,6 +245,35 @@ class ServerUpdate(Model):
             raise ValueError("Invalid value for `total_cpu_sockets`, must be a value greater than or equal to `1`")  # noqa: E501
 
         self._total_cpu_sockets = total_cpu_sockets
+
+    @property
+    def exptected_lifetime(self):
+        """Gets the exptected_lifetime of this ServerUpdate.
+
+        Expected lifetime of the server hardware  # noqa: E501
+
+        :return: The exptected_lifetime of this ServerUpdate.
+        :rtype: int
+        """
+        return self._exptected_lifetime
+
+    @exptected_lifetime.setter
+    def exptected_lifetime(self, exptected_lifetime):
+        """Sets the exptected_lifetime of this ServerUpdate.
+
+        Expected lifetime of the server hardware  # noqa: E501
+
+        :param exptected_lifetime: The exptected_lifetime of this ServerUpdate.
+        :type exptected_lifetime: int
+        """
+        if exptected_lifetime is None:
+            raise ValueError("Invalid value for `exptected_lifetime`, must not be `None`")  # noqa: E501
+        if exptected_lifetime is not None and exptected_lifetime > 20:  # noqa: E501
+            raise ValueError("Invalid value for `exptected_lifetime`, must be a value less than or equal to `20`")  # noqa: E501
+        if exptected_lifetime is not None and exptected_lifetime < 1:  # noqa: E501
+            raise ValueError("Invalid value for `exptected_lifetime`, must be a value greater than or equal to `1`")  # noqa: E501
+
+        self._exptected_lifetime = exptected_lifetime
 
     @property
     def installed_cpus(self):
