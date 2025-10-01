@@ -1446,7 +1446,7 @@ components:
           type: string
       required:
       - cooling_type
-      - exptected_lifetime
+      - expected_lifetime
       - facility_id
       - rack_id
       title: ServerCreate

@@ -293,6 +293,8 @@ class ServerResponse(Model):
         :param expected_lifetime: The expected_lifetime of this ServerResponse.
         :type expected_lifetime: int
         """
+        if expected_lifetime is None:
+            raise ValueError("Invalid value for `expected_lifetime`, must not be `None`")  # noqa: E501
         if expected_lifetime is not None and expected_lifetime > 20:  # noqa: E501
             raise ValueError("Invalid value for `expected_lifetime`, must be a value less than or equal to `20`")  # noqa: E501
         if expected_lifetime is not None and expected_lifetime < 1:  # noqa: E501

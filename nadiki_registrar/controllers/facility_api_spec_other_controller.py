@@ -30,6 +30,7 @@ from nadiki_registrar.controllers.influxdb import influxdb_client
 from influxdb_client import BucketRetentionRules
 from influxdb_client import Permission
 from influxdb_client import PermissionResource
+from influxdb_client import TaskCreateRequest
 
 from nadiki_registrar.controllers.config import *
 from nadiki_registrar.controllers.database import *
@@ -116,7 +117,7 @@ def create_facility(facility_create=None):  # noqa: E501
                 bucket = bucket_api.create_bucket(bucket_name=facility.toString(), org=INFLUXDB_ORG, retention_rules=BucketRetentionRules(type="expire", every_seconds=INFLUXDB_EXPIRY_SECONDS))
 
                 org_api = influxdb_client.organizations_api()
-                org_id = [x.id for x in org_api.find_organizations() if x.name == "Leitmotiv"].pop()
+                org_id = [x.id for x in org_api.find_organizations() if x.name == INFLUXDB_ORG].pop()
 
                 auth_api = influxdb_client.authorizations_api()
                 # why is it not possible to add a description to a token through the Python API? It is possible with the REST API...
@@ -129,6 +130,22 @@ def create_facility(facility_create=None):  # noqa: E501
                     ]
                 )
                 conn.execute(update(facilities).values({"f_influxdb_token": auth.token}).where(facilities.c.f_id == id))
+
+                # create a task which generates the embodied metrics for this facility and its servers
+                with open('embodied_task.flux', 'r') as f:
+                    task_template = f.read()
+
+                task_flux = re.sub(r"%%FACILITY%%", facility.toString(), task_template)
+
+                tasks_api = influxdb_client.tasks_api()
+                tasks_api.create_task(
+                    task_create_request = TaskCreateRequest(
+                        description = f"Task to populate embodied carbon metrics for facility ${facility.toString()}",
+                        flux        = task_flux,
+                        org         = INFLUXDB_ORG,
+                        status      = "active"
+                    )
+                )
 
                 # insert the weak entities (cooling fluids and time series configs)
                 for x in facility_create.cooling_fluids:
