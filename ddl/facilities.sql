@@ -26,6 +26,8 @@ CREATE TABLE facilities (
     f_influxdb_endpoint                 VARCHAR(255) NOT NULL,
     f_influxdb_org                      VARCHAR(50) NOT NULL,
     f_influxdb_token                    VARCHAR(100) NOT NULL,
+    f_influxdb_auth_id                  VARCHAR(50) NOT NULL,
+    f_influxdb_task_id                  VARCHAR(50) NOT NULL,
     f_created_at                        TIMESTAMP NOT NULL,
     f_updated_at                        TIMESTAMP NOT NULL,
     UNIQUE (f_geo_lat, f_geo_lon)

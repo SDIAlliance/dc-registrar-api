@@ -21,6 +21,7 @@ import json
 import urllib3
 import urllib.parse
 import country_converter as coco
+import os
 
 from sqlalchemy import create_engine, MetaData, Table, select, delete, insert, update, text
 from sqlalchemy.exc import IntegrityError
@@ -31,6 +32,7 @@ from influxdb_client import BucketRetentionRules
 from influxdb_client import Permission
 from influxdb_client import PermissionResource
 from influxdb_client import TaskCreateRequest
+from influxdb_client import Authorization
 
 from nadiki_registrar.controllers.config import *
 from nadiki_registrar.controllers.database import *
@@ -104,6 +106,8 @@ def create_facility(facility_create=None):  # noqa: E501
                     "f_influxdb_endpoint": INFLUXDB_EXTERNAL_ENDPOINT_URL,
                     "f_influxdb_org": INFLUXDB_ORG,
                     "f_influxdb_token": "TBD",
+                    "f_influxdb_auth_id": "TBD",
+                    "f_influxdb_task_id": "TBD",
                     "f_created_at": func.now(),
                     "f_updated_at": func.now(),
                 }))
@@ -120,16 +124,32 @@ def create_facility(facility_create=None):  # noqa: E501
                 org_id = [x.id for x in org_api.find_organizations() if x.name == INFLUXDB_ORG].pop()
 
                 auth_api = influxdb_client.authorizations_api()
-                # why is it not possible to add a description to a token through the Python API? It is possible with the REST API...
                 auth = auth_api.create_authorization(
-                    org_id      = org_id,
-                    # description = f"Ingestion token for bucket {facility.toString()}", ## why is this parameter not supported???
-                    permissions = [
-                        Permission(action="write", resource=PermissionResource(id=bucket.id, type="buckets")),
-                        Permission(action="read", resource=PermissionResource(id=bucket.id, type="buckets"))
-                    ]
+                    authorization=Authorization(
+                        org_id      = org_id,
+                        # description = f"Ingestion token for bucket {facility.toString()}", ## why is this parameter not supported???
+                        permissions = [
+                            Permission(action="write", resource=PermissionResource(id=bucket.id, type="buckets")),
+                            Permission(action="read", resource=PermissionResource(id=bucket.id, type="buckets"))
+                        ],
+                        description = f"Token for facility {facility.toString()}"
+                    )
                 )
-                conn.execute(update(facilities).values({"f_influxdb_token": auth.token}).where(facilities.c.f_id == id))
+                conn.execute(update(facilities).values({"f_influxdb_token": auth.token, "f_influxdb_auth_id": auth.id}).where(facilities.c.f_id == id))
+
+                # update our basic auth credentials and URL in the InfluxDB secrets to enable call backs from InfluxDB tasks
+                # (kudos to ChatGPT for figuring this out, because there is no secrets API in the Python SDK)
+                body = {
+                    "REGISTRAR_URL": os.environ.get("REGISTRAR_EXTERNAL_ENDPOINT_URL"),
+                    "REGISTRAR_BASIC_AUTH_USERNAME": os.environ.get("AUTH_USER"),
+                    "REGISTRAR_BASIC_AUTH_PASSWORD": os.environ.get("AUTH_PASSWORD")
+                }
+                response = influxdb_client.api_client.call_api(
+                    f'/api/v2/orgs/{org_id}/secrets',
+                    'PATCH',
+                    header_params={"Authorization": f"Token {INFLUXDB_ADMIN_TOKEN}"},
+                    body=body
+                )
 
                 # create a task which generates the embodied metrics for this facility and its servers
                 with open('embodied_task.flux', 'r') as f:
@@ -138,7 +158,7 @@ def create_facility(facility_create=None):  # noqa: E501
                 task_flux = re.sub(r"%%FACILITY%%", facility.toString(), task_template)
 
                 tasks_api = influxdb_client.tasks_api()
-                tasks_api.create_task(
+                task = tasks_api.create_task(
                     task_create_request = TaskCreateRequest(
                         description = f"Task to populate embodied carbon metrics for facility ${facility.toString()}",
                         flux        = task_flux,
@@ -146,6 +166,8 @@ def create_facility(facility_create=None):  # noqa: E501
                         status      = "active"
                     )
                 )
+
+                conn.execute(update(facilities).values({"f_influxdb_task_id": task.id}).where(facilities.c.f_id == id))
 
                 # insert the weak entities (cooling fluids and time series configs)
                 for x in facility_create.cooling_fluids:
@@ -193,6 +215,16 @@ def delete_facility(facility_id):  # noqa: E501
     facility = FacilityId.fromString(facility_id)
 
     with engine.connect() as conn:
+        result = conn.execute(select(facilities).where(facilities.c.f_id == facility.number and facilities.c.f_country_code == facility.country_code))
+        facility_record = next(result)
+        # delete the influxdb task
+        tasks_api = influxdb_client.tasks_api()
+        tasks_api.delete_task(facility_record.f_influxdb_task_id)
+        # delete the auth token for this facility
+        auth_api = influxdb_client.authorizations_api()
+        auth_api.delete_authorization(facility_record.f_influxdb_auth_id)
+        # TBD: also delete the bucket from influx with all the data?
+
         result = conn.execute(delete(facilities).where(facilities.c.f_id == facility.number and facilities.c.f_country_code == facility.country_code))
         conn.commit()
         if result.rowcount == 1:

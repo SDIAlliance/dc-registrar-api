@@ -5,7 +5,7 @@ import "experimental"
 import "experimental/json"
 import "experimental/dynamic"
 import "array"
-import "experimental/dynamic"
+
 option task = { 
   name: "aggregate-embodied-%%FACILITY%%",
   every: 5m,
