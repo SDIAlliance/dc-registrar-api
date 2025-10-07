@@ -2,7 +2,8 @@ import "influxdata/influxdb/secrets"
 import "http"
 import "http/requests"
 import "experimental"
-import "experimental/json"
+import jsonx "experimental/json"
+import "json"
 import "experimental/dynamic"
 import "array"
 
@@ -25,7 +26,7 @@ registrarPassword = secrets.get(key: "REGISTRAR_BASIC_AUTH_PASSWORD")
 
 processJsonResponse = (t=<-, measurementName) => {
     res = t |> array.map(fn: (x) => {
-        ia = json.parse(data: dynamic.jsonEncode(v: x.impactAssessment))
+        ia = jsonx.parse(data: dynamic.jsonEncode(v: x.impactAssessment))
         return {ia with
             id: string(v: x["id"]),
             rack_id: if exists x.rack_id  then string(v: x.rack_id) else "",
@@ -52,8 +53,24 @@ x = requests.get(
 
 j = dynamic.jsonParse(data: x.body)
 
-array.filter(arr: dynamic.asArray(v: j.items), fn: (x) => exists x.impactAssessment.climate_change)
+// In case there are no servers, the code below would fail because array.from() requires at least one row
+// in order to derive a schema. The recommended workaround seems to be to insert a dymmat record and filter
+// it out later in the pipeline.
+//
+// I apologize to my future self for this mess!
+withAssessment = array.filter(arr: dynamic.asArray(v: j.items) |> array.concat(v: dynamic.asArray(v: dynamic.jsonParse(data: json.encode(v: [{
+        "impactAssessment":     {"climate_change": 0},
+        "expected_lifetime":    0,
+        "lifetimeFacility":     0,
+        "timeSeriesConfig":     {"dataPoints": [{"tags": {"country_code": "dummy"}}]},
+        "facility_id":          "dummy",
+        "rack_id":              "dummy",
+        "id":                   "dummy"
+        }])))), fn: (x) => exists x.impactAssessment.climate_change)
+
+withAssessment
 |> processJsonResponse(measurementName: "server_embodied")
+|> filter(fn: (r) => r.id != "dummy")
 |> to(bucket: "leitmotiv")
 
 y = requests.get(
@@ -67,4 +84,3 @@ array.filter(arr: [k], fn: (x) => exists x.impactAssessment)
 |> processJsonResponse(measurementName: "facility_embodied")
 |> drop(columns: ["facility_id", "rack_id"])
 |> to(bucket: "leitmotiv")
-
