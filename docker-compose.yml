@@ -34,6 +34,21 @@ services:
       - "18086:8086"
     networks:
       - nadiki
+    healthcheck:
+      test: ["CMD", "curl", "localhost:8086"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  influxdb-setup:
+    restart: no
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    image: influxdb:2
+    entrypoint: ["influx", "setup", "--host", "http://influxdb:8086", "--username", "leitmotiv", "--password", "leitmotiv", "--org", "Leitmotiv", "--bucket", "leitmotiv", "--token", "topsecrettoken", "-r", "0", "-f"]
+    networks:
+      - nadiki
   registrar:
     depends_on:
       mariadb:
@@ -50,7 +65,7 @@ services:
       INFLUXDB_ORG: Leitmotiv
       INFLUXDB_ENDPOINT_URL: http://influxdb:8086
       INFLUXDB_EXTERNAL_ENDPOINT_URL: http://localhost:18086
-      INFLUXDB_ADMIN_TOKEN: BoEK85UdB6iZQS6l-34ZlpGYvQz8fOVOOVVcWqNXFTWMqk1pZr0EFOHg5f9aEE9S05x5gEWZShD_9HnK_QxmlA==
+      INFLUXDB_ADMIN_TOKEN: topsecrettoken
       AUTH_USER: foo
       AUTH_PASSWORD: bar
       REGISTRAR_EXTERNAL_ENDPOINT_URL: http://registrar:8000
