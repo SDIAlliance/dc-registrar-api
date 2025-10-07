@@ -34,3 +34,25 @@ services:
       - "18086:8086"
     networks:
       - nadiki
+  registrar:
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    build:
+      dockerfile: Dockerfile-prod
+    command: -b 0.0.0.0 'nadiki_registrar.__main__:main()'
+    networks:
+      - nadiki
+    environment:
+      DATABASE_HOST: mariadb
+      DATABASE_USER: root
+      DATABASE_PASSWORD: toogood4u
+      INFLUXDB_ORG: Leitmotiv
+      INFLUXDB_ENDPOINT_URL: http://influxdb:8086
+      INFLUXDB_EXTERNAL_ENDPOINT_URL: http://localhost:18086
+      INFLUXDB_ADMIN_TOKEN: BoEK85UdB6iZQS6l-34ZlpGYvQz8fOVOOVVcWqNXFTWMqk1pZr0EFOHg5f9aEE9S05x5gEWZShD_9HnK_QxmlA==
+      AUTH_USER: foo
+      AUTH_PASSWORD: bar
+      REGISTRAR_EXTERNAL_ENDPOINT_URL: http://registrar:8000
+    ports:
+      - "8000:8000"
