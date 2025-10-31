@@ -14,7 +14,8 @@ python_dateutil >= 2.6.0
 setuptools >= 21.0.0
 Flask == 2.1.1
 
-sqlalchemy >= 2.0.0
+# sqlarlchemy 2.0.44 seems to have a dependecy which requires g++ which we do not have
+sqlalchemy >= 2.0.0, <= 2.0.43
 pymysql >= 1.1.1
 country_converter >= 1.3
 influxdb-client >= 1.48.0
