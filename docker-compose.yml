@@ -1,25 +1,73 @@
+networks:
+  nadiki:
 services:
   mariadb:
     image: mariadb:latest
     container_name: mariadb
+    ports:
+      - "33306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: my-secret-pw
-      MYSQL_DATABASE: nadiki-registrar
+      MYSQL_ROOT_PASSWORD: toogood4u
+    networks:
+      - nadiki
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       start_period: 10s
       interval: 10s
       timeout: 5s
       retries: 3
-  web:
-    build: .
-    ports:
-      - "8080:8080"
+  mariadb-setup:
+    restart: no
     depends_on:
       mariadb:
         condition: service_healthy
-    develop:
-      watch:
-        - action: sync
-          path: .
-          target: /usr/src/app
+    image: mariadb:latest
+    volumes:
+      - "./ddl:/ddl"
+    entrypoint: ["bash", "-c", "mariadb -h mariadb -u root -ptoogood4u -e 'CREATE DATABASE nadiki_registrar;\nuse nadiki_registrar;\n\\. /ddl/facilities.sql\n\\. /ddl/racks.sql\n\\. /ddl/servers.sql\n'"]
+    networks:
+      - nadiki
+  influxdb:
+    image: influxdb:2
+    container_name: influxdb
+    ports:
+      - "18086:8086"
+    networks:
+      - nadiki
+    healthcheck:
+      test: ["CMD", "curl", "localhost:8086"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  influxdb-setup:
+    restart: no
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    image: influxdb:2
+    entrypoint: ["influx", "setup", "--host", "http://influxdb:8086", "--username", "leitmotiv", "--password", "leitmotiv", "--org", "Leitmotiv", "--bucket", "leitmotiv", "--token", "topsecrettoken", "-r", "0", "-f"]
+    networks:
+      - nadiki
+  registrar:
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    build:
+      dockerfile: Dockerfile-prod
+    command: -b 0.0.0.0 'nadiki_registrar.__main__:main()'
+    networks:
+      - nadiki
+    environment:
+      DATABASE_HOST: mariadb
+      DATABASE_USER: root
+      DATABASE_PASSWORD: toogood4u
+      INFLUXDB_ORG: Leitmotiv
+      INFLUXDB_ENDPOINT_URL: http://influxdb:8086
+      INFLUXDB_EXTERNAL_ENDPOINT_URL: http://localhost:18086
+      INFLUXDB_ADMIN_TOKEN: topsecrettoken
+      AUTH_USER: foo
+      AUTH_PASSWORD: bar
+      REGISTRAR_EXTERNAL_ENDPOINT_URL: http://registrar:8000
+    ports:
+      - "8000:8000"

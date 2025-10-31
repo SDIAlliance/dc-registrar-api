@@ -13,6 +13,7 @@ from nadiki_registrar import util
 
 from nadiki_registrar.models.facility_time_series_config import FacilityTimeSeriesConfig  # noqa: E501
 from nadiki_registrar.models.facility_create_cooling_fluids_inner import FacilityCreateCoolingFluidsInner  # noqa: E501
+from nadiki_registrar.models.facility_impact_assessment import FacilityImpactAssessment  # noqa: E501
 from nadiki_registrar.models.facility_time_series_data_point import FacilityTimeSeriesDataPoint  # noqa: E501
 from nadiki_registrar.models.location import Location  # noqa: E501
 
@@ -20,6 +21,7 @@ import json
 import urllib3
 import urllib.parse
 import country_converter as coco
+import os
 
 from sqlalchemy import create_engine, MetaData, Table, select, delete, insert, update, text
 from sqlalchemy.exc import IntegrityError
@@ -29,6 +31,8 @@ from nadiki_registrar.controllers.influxdb import influxdb_client
 from influxdb_client import BucketRetentionRules
 from influxdb_client import Permission
 from influxdb_client import PermissionResource
+from influxdb_client import TaskCreateRequest
+from influxdb_client import Authorization
 
 from nadiki_registrar.controllers.config import *
 from nadiki_registrar.controllers.database import *
@@ -88,12 +92,9 @@ def create_facility(facility_create=None):  # noqa: E501
                 conn.execute(insert(facilities).values({
                     "f_geo_lon": facility_create.location.latitude,
                     "f_geo_lat": facility_create.location.longitude,
-                    "f_embedded_ghg_emissions_facility": facility_create.embedded_ghg_emissions_facility,
                     "f_lifetime_facility": facility_create.lifetime_facility,
-                    "f_embedded_ghg_emissions_assets": facility_create.embedded_ghg_emissions_assets,
-                    "f_lifetime_assets": facility_create.lifetime_assets,
-                    "f_maintenance_hours_generator": facility_create.maintenance_hours_generator,
                     "f_installed_capacity": facility_create.installed_capacity,
+                    "f_maintenance_hours_generator": facility_create.maintenance_hours_generator,
                     "f_grid_power_feeds": facility_create.grid_power_feeds,
                     "f_design_pue": facility_create.design_pue,
                     "f_tier_level": str(facility_create.tier_level), # MariaDB expects a string here
@@ -105,6 +106,8 @@ def create_facility(facility_create=None):  # noqa: E501
                     "f_influxdb_endpoint": INFLUXDB_EXTERNAL_ENDPOINT_URL,
                     "f_influxdb_org": INFLUXDB_ORG,
                     "f_influxdb_token": "TBD",
+                    "f_influxdb_auth_id": "TBD",
+                    "f_influxdb_task_id": "TBD",
                     "f_created_at": func.now(),
                     "f_updated_at": func.now(),
                 }))
@@ -118,19 +121,53 @@ def create_facility(facility_create=None):  # noqa: E501
                 bucket = bucket_api.create_bucket(bucket_name=facility.toString(), org=INFLUXDB_ORG, retention_rules=BucketRetentionRules(type="expire", every_seconds=INFLUXDB_EXPIRY_SECONDS))
 
                 org_api = influxdb_client.organizations_api()
-                org_id = [x.id for x in org_api.find_organizations() if x.name == "Leitmotiv"].pop()
+                org_id = [x.id for x in org_api.find_organizations() if x.name == INFLUXDB_ORG].pop()
 
                 auth_api = influxdb_client.authorizations_api()
-                # why is it not possible to add a description to a token through the Python API? It is possible with the REST API...
                 auth = auth_api.create_authorization(
-                    org_id      = org_id,
-                    # description = f"Ingestion token for bucket {facility.toString()}", ## why is this parameter not supported???
-                    permissions = [
-                        Permission(action="write", resource=PermissionResource(id=bucket.id, type="buckets")),
-                        Permission(action="read", resource=PermissionResource(id=bucket.id, type="buckets"))
-                    ]
+                    authorization=Authorization(
+                        org_id      = org_id,
+                        # description = f"Ingestion token for bucket {facility.toString()}", ## why is this parameter not supported???
+                        permissions = [
+                            Permission(action="write", resource=PermissionResource(id=bucket.id, type="buckets")),
+                            Permission(action="read", resource=PermissionResource(id=bucket.id, type="buckets"))
+                        ],
+                        description = f"Token for facility {facility.toString()}"
+                    )
                 )
-                conn.execute(update(facilities).values({"f_influxdb_token": auth.token}).where(facilities.c.f_id == id))
+                conn.execute(update(facilities).values({"f_influxdb_token": auth.token, "f_influxdb_auth_id": auth.id}).where(facilities.c.f_id == id))
+
+                # update our basic auth credentials and URL in the InfluxDB secrets to enable call backs from InfluxDB tasks
+                # (kudos to ChatGPT for figuring this out, because there is no secrets API in the Python SDK)
+                body = {
+                    "REGISTRAR_URL": os.environ.get("REGISTRAR_EXTERNAL_ENDPOINT_URL"),
+                    "REGISTRAR_BASIC_AUTH_USERNAME": os.environ.get("AUTH_USER"),
+                    "REGISTRAR_BASIC_AUTH_PASSWORD": os.environ.get("AUTH_PASSWORD")
+                }
+                response = influxdb_client.api_client.call_api(
+                    f'/api/v2/orgs/{org_id}/secrets',
+                    'PATCH',
+                    header_params={"Authorization": f"Token {INFLUXDB_ADMIN_TOKEN}"},
+                    body=body
+                )
+
+                # create a task which generates the embodied metrics for this facility and its servers
+                with open('embodied_task.flux', 'r') as f:
+                    task_template = f.read()
+
+                task_flux = re.sub(r"%%FACILITY%%", facility.toString(), task_template)
+
+                tasks_api = influxdb_client.tasks_api()
+                task = tasks_api.create_task(
+                    task_create_request = TaskCreateRequest(
+                        description = f"Task to populate embodied carbon metrics for facility ${facility.toString()}",
+                        flux        = task_flux,
+                        org         = INFLUXDB_ORG,
+                        status      = "active"
+                    )
+                )
+
+                conn.execute(update(facilities).values({"f_influxdb_task_id": task.id}).where(facilities.c.f_id == id))
 
                 # insert the weak entities (cooling fluids and time series configs)
                 for x in facility_create.cooling_fluids:
@@ -150,6 +187,12 @@ def create_facility(facility_create=None):  # noqa: E501
                             "country_code": country_code,
                             "facility_id": facility.toString()
                         })
+                    }))
+                for field_name, value in facility_create.impact_assessment.to_dict().items():
+                    conn.execute(insert(facilities_impact_assessment).values({
+                        "fia_f_id": id,
+                        "fia_field_name": field_name,
+                        "fia_value": value
                     }))
                 conn.commit()
             except IntegrityError as e:
@@ -172,6 +215,16 @@ def delete_facility(facility_id):  # noqa: E501
     facility = FacilityId.fromString(facility_id)
 
     with engine.connect() as conn:
+        result = conn.execute(select(facilities).where(facilities.c.f_id == facility.number and facilities.c.f_country_code == facility.country_code))
+        facility_record = next(result)
+        # delete the influxdb task
+        tasks_api = influxdb_client.tasks_api()
+        tasks_api.delete_task(facility_record.f_influxdb_task_id)
+        # delete the auth token for this facility
+        auth_api = influxdb_client.authorizations_api()
+        auth_api.delete_authorization(facility_record.f_influxdb_auth_id)
+        # TBD: also delete the bucket from influx with all the data?
+
         result = conn.execute(delete(facilities).where(facilities.c.f_id == facility.number and facilities.c.f_country_code == facility.country_code))
         conn.commit()
         if result.rowcount == 1:
@@ -197,28 +250,27 @@ def get_facility(facility_id):  # noqa: E501
         facilities_result = conn.execute(select(facilities).where(facilities.c.f_id == facility.number and facilities.c.f_country_code == facility.country_code))
         facilities_cooling_fluids_result = conn.execute(select(facilities_cooling_fluids).where(facilities_cooling_fluids.c.fcf_f_id == facility.number))
         facilities_timeseries_configs_result = conn.execute(select(facilities_timeseries_configs).where(facilities_timeseries_configs.c.ftc_f_id == facility.number))
-
+        facilities_impact_assessment_result = conn.execute(select(facilities_impact_assessment).where(facilities_impact_assessment.c.fia_f_id == facility.number))
 #        for row in facilities_cooling_fluids:
 
         if facilities_result.rowcount == 0:
             return Error(code=404, message="Facility Id not found"), 404
         else:
-            return _create_facility_response(next(facilities_result), facilities_cooling_fluids_result, facilities_timeseries_configs_result), 200
+            return _create_facility_response(next(facilities_result), facilities_cooling_fluids_result, facilities_timeseries_configs_result, facilities_impact_assessment_result), 200
 
     return "Nothing to see here", 404
 
-def _create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result):
+def _create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result, facilities_impact_assessment_result):
     facility = FacilityId(row.f_country_code, row.f_id)
+    impact_assessment_dict = {x.fia_field_name: x.fia_value for x in facilities_impact_assessment_result}
     resp = FacilityResponse(
         id                              = facility.toString(),
         country_code                    = row.f_country_code,
         location                        = Location(latitude=row.f_geo_lat, longitude=row.f_geo_lon),
-        embedded_ghg_emissions_facility = row.f_embedded_ghg_emissions_facility,
         lifetime_facility               = row.f_lifetime_facility,
-        embedded_ghg_emissions_assets   = row.f_embedded_ghg_emissions_assets,
-        lifetime_assets                 = row.f_lifetime_assets,
-        maintenance_hours_generator     = row.f_maintenance_hours_generator,
         installed_capacity              = row.f_installed_capacity,
+        impact_assessment               = FacilityImpactAssessment(**impact_assessment_dict),
+        maintenance_hours_generator     = row.f_maintenance_hours_generator,
         grid_power_feeds                = row.f_grid_power_feeds,
         design_pue                      = row.f_design_pue,
         tier_level                      = row.f_tier_level,
@@ -260,7 +312,8 @@ def list_facilities(limit=None, offset=None):  # noqa: E501
         for row in facilities_result:
             facilities_cooling_fluids_result = conn.execute(select(facilities_cooling_fluids).where(facilities_cooling_fluids.c.fcf_f_id == row.f_id))
             facilities_timeseries_configs_result = conn.execute(select(facilities_timeseries_configs).where(facilities_timeseries_configs.c.ftc_f_id == row.f_id))
-            results.append(_create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result))
+            facilities_impact_assessment_result = conn.execute(select(facilities_impact_assessment).where(facilities_impact_assessment.c.fia_f_id == row.f_id))
+            results.append(_create_facility_response(row, facilities_cooling_fluids_result, facilities_timeseries_configs_result, facilities_impact_assessment_result))
 
         resp = ListFacilities200Response(items=results, total=facilities_result.rowcount)
         return resp, 200
@@ -293,12 +346,9 @@ def update_facility(facility_id, facility_update=None):  # noqa: E501
                 result = conn.execute(update(facilities).where(facilities.c.f_id == facility.number).values({
                     "f_geo_lon": facility_update.location.latitude,
                     "f_geo_lat": facility_update.location.longitude,
-                    "f_embedded_ghg_emissions_facility": facility_update.embedded_ghg_emissions_facility,
                     "f_lifetime_facility": facility_update.lifetime_facility,
-                    "f_embedded_ghg_emissions_assets": facility_update.embedded_ghg_emissions_assets,
-                    "f_lifetime_assets": facility_update.lifetime_assets,
-                    "f_maintenance_hours_generator": facility_update.maintenance_hours_generator,
                     "f_installed_capacity": facility_update.installed_capacity,
+                    "f_maintenance_hours_generator": facility_update.maintenance_hours_generator,
                     "f_grid_power_feeds": facility_update.grid_power_feeds,
                     "f_design_pue": facility_update.design_pue,
                     "f_tier_level": str(facility_update.tier_level), # MariaDB expects a string here
@@ -323,6 +373,13 @@ def update_facility(facility_id, facility_update=None):  # noqa: E501
                         "fcf_gwp_factor": x.gwp_factor
                     }))
 
+                for field_name, value in facility.impact_assessment.items():
+                    conn.execute(delete(facilities_impact_assessment).where(facilities_impact_assessment.c.fia_f_id == facility.number and facilities_impact_assessment.c.field_name == field_name))
+                    conn.execute(insert(facilities_impact_assessment).values({
+                        "fia_f_id": id,
+                        "fia_field_name": field_name,
+                        "fia_value": value
+                    }))
                 conn.commit()
             except IntegrityError as e:
                 return Error(code=400, message="A facility with this location already exists."), 400

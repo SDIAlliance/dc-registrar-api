@@ -17,9 +17,11 @@ from nadiki_registrar.models.fpga import FPGA  # noqa: E501
 from nadiki_registrar.models.storage_device import StorageDevice  # noqa: E501
 from nadiki_registrar.models.server_time_series_config import ServerTimeSeriesConfig  # noqa: E501
 from nadiki_registrar.models.server_time_series_data_point import ServerTimeSeriesDataPoint  # noqa: E501
+from nadiki_registrar.models.server_impact_assessment import ServerImpactAssessment  # noqa: E501
 
 import math
 import json
+import sys
 
 import urllib3
 import urllib.parse
@@ -39,6 +41,8 @@ from nadiki_registrar.controllers.identifiers import ServerId
 #http.client.HTTPConnection.debuglevel = 5
 
 BASE_URL_FOR_BOAVIZTA = "https://api.boavizta.org/v1/"
+
+MWH_PER_MJ = 0.2778
 
 #
 # urllib3
@@ -60,27 +64,37 @@ def create_server(server_create=None):  # noqa: E501
 
         rack_id = RackId.fromString(server_create.rack_id)
 
-        # get environmental impact assesment from Boavizta
-        boavizta = __get_boavizta_server_impact(
-            cpus                      = server_create.installed_cpus,
-            total_installed_memory_gb = server_create.total_installed_memory,
-            number_of_memory_units    = server_create.number_of_memory_units,
-            disks                     = server_create.storage_devices,
-            number_of_psus            = server_create.number_of_psus
-        )
+        if server_create.impact_assessment.climate_change == None \
+                or server_create.impact_assessment.abiotic_depletion_potential == None \
+                or server_create.impact_assessment.primary_energy_use == None:
+            # get environmental impact assesment from Boavizta
+            boavizta = __get_boavizta_server_impact(
+                cpus                      = server_create.installed_cpus,
+                total_installed_memory_gb = server_create.total_installed_memory,
+                number_of_memory_units    = server_create.number_of_memory_units,
+                disks                     = server_create.storage_devices,
+                number_of_psus            = server_create.number_of_psus
+            )
+            if server_create.impact_assessment.climate_change == None:
+                server_create.impact_assessment.climate_change = boavizta['impacts']['gwp']['embedded']['value']
+            if server_create.impact_assessment.abiotic_depletion_potential == None:
+                server_create.impact_assessment.abiotic_depletion_potential = boavizta['impacts']['adp']['embedded']['value']
+            if server_create.impact_assessment.primary_energy_use == None:
+                server_create.impact_assessment.primary_energy_use = boavizta['impacts']['pe']['embedded']['value'] * MWH_PER_MJ
+
 
         with engine.connect() as conn:
             conn.execute(insert(servers).values({
                 "s_r_id":                   rack_id.number,
                 "s_rated_power":            server_create.rated_power,
                 "s_total_cpu_sockets":      server_create.total_cpu_sockets,
+                "s_expected_lifetime":      server_create.expected_lifetime,
                 "s_number_of_psus":         server_create.number_of_psus,
                 "s_total_installed_memory": server_create.total_installed_memory,
                 "s_number_of_memory_units": server_create.number_of_memory_units,
                 "s_product_passport":       json.dumps(server_create.product_passport),
                 "s_cooling_type":           server_create.cooling_type,
                 "s_description":            server_create.description,
-                "s_boavizta_response":      json.dumps(boavizta),
                 "s_created_at":             func.now(),
                 "s_updated_at":             func.now(),
             }))
@@ -141,6 +155,12 @@ def create_server(server_create=None):  # noqa: E501
                     "sh_type": hd.type
                 }))
 
+            for field_name, value in server_create.impact_assessment.to_dict().items():
+                conn.execute(insert(servers_impact_assessment).values({
+                    "sia_s_id": id,
+                    "sia_field_name": field_name,
+                    "sia_value": value
+                }))
             conn.commit()
         
         return get_server(ServerId(server_create.rack_id, id).toString()), 201
@@ -186,25 +206,28 @@ def get_server(server_id):  # noqa: E501
         servers_gpus_result = conn.execute(select(servers_gpus).where(servers_gpus.c.sg_s_id == srvid.number))
         servers_fpgas_result = conn.execute(select(servers_fpgas).where(servers_fpgas.c.sf_s_id == srvid.number))
         servers_storage_devices_result = conn.execute(select(servers_storage_devices).where(servers_storage_devices.c.sh_s_id == srvid.number))
+        servers_impact_assessment_result = conn.execute(select(servers_impact_assessment).where(servers_impact_assessment.c.sia_s_id == srvid.number))
 
-        return _create_server_response(next(servers_result), servers_timeseries_configs_result, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result)
+        return _create_server_response(next(servers_result), servers_timeseries_configs_result, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result, servers_impact_assessment_result)
 
-def _create_server_response(row, servers_timeseries_configs, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result):
+def _create_server_response(row, servers_timeseries_configs, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result, servers_impact_assessment_result):
     server = ServerId(row.f_country_code, row.f_id, row.r_id, row.s_id)
+    impact_assessment_dict = {x.sia_field_name: x.sia_value for x in servers_impact_assessment_result}
     return ServerResponse(
         #id                      = ServerId(RackId(FacilityId(country_code=row.f_country_code, number=row.f_id).toString(), row.r_id).toString(), row.s_id).toString(),
         id                      = server.toString(),
         rack_id                 = server.rack.toString(),
+        impact_assessment       = ServerImpactAssessment(**impact_assessment_dict),
         facility_id             = server.rack.facility.toString(),
         rated_power             = row.s_rated_power,
         total_cpu_sockets       = row.s_total_cpu_sockets,
+        expected_lifetime       = row.s_expected_lifetime,
         number_of_psus          = row.s_number_of_psus,
         total_installed_memory  = row.s_total_installed_memory,
         number_of_memory_units  = row.s_number_of_memory_units,
         product_passport        = row.s_product_passport,
         cooling_type            = row.s_cooling_type,
         description             = row.s_description,
-        boavizta_response       = json.loads(row.s_boavizta_response or "{}"),
         time_series_config      = ServerTimeSeriesConfig(
             endpoint    = row.f_influxdb_endpoint,
             org         = row.f_influxdb_org,
@@ -261,7 +284,8 @@ def list_servers(limit=None, offset=None, facility_id=None, rack_id=None):  # no
             servers_gpus_result = conn.execute(select(servers_gpus).where(servers_gpus.c.sg_s_id == x.s_id))
             servers_fpgas_result = conn.execute(select(servers_fpgas).where(servers_fpgas.c.sf_s_id == x.s_id))
             servers_storage_devices_result = conn.execute(select(servers_storage_devices).where(servers_storage_devices.c.sh_s_id == x.s_id))
-            result.append(_create_server_response(x, servers_timeseries_configs_result, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result))
+            servers_impact_assessment_result = conn.execute(select(servers_impact_assessment).where(servers_impact_assessment.c.sia_s_id == x.s_id))
+            result.append(_create_server_response(x, servers_timeseries_configs_result, servers_cpus_result, servers_gpus_result, servers_fpgas_result, servers_storage_devices_result, servers_impact_assessment_result))
 
         return ListServers200Response(items=result, total=servers_result.rowcount, limit=limit, offset=offset)
 
@@ -289,6 +313,7 @@ def update_server(server_id, server_update=None):  # noqa: E501
                 "s_r_id":                   rack.number,
                 "s_rated_power":            server_update.rated_power,
                 "s_total_cpu_sockets":      server_update.total_cpu_sockets,
+                "s_expected_lifetime":      server_update.expected_lifetime,
                 "s_number_of_psus":         server_update.number_of_psus,
                 "s_total_installed_memory": server_update.total_installed_memory,
                 "s_number_of_memory_units": server_update.number_of_memory_units,
@@ -330,6 +355,13 @@ def update_server(server_id, server_update=None):  # noqa: E501
                     "sh_type": hd.type
                 }))
 
+            for field_name, value in servers.impact_assessment.items():
+                conn.execute(delete(servers_impact_assessment).where(servers_impact_assessment.c.sia_s_id == server.number and servers_impact_assessment.c.field_name == field_name))
+                conn.execute(insert(servers_impact_assessment).values({
+                    "sia_s_id": id,
+                    "sia_field_name": field_name,
+                    "sia_value": value
+                }))
             conn.commit()
 
         return get_server(server_id)

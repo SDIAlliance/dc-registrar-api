@@ -10,6 +10,7 @@ CREATE TABLE servers (
     s_r_id                      INT UNSIGNED NOT NULL,                    
     s_rated_power               DECIMAL(20,9),
     s_total_cpu_sockets         INT UNSIGNED DEFAULT 2,
+    s_expected_lifetime         INT UNSIGNED DEFAULT 3,
     s_number_of_psus            INT UNSIGNED DEFAULT 2,
     s_total_installed_memory    INT UNSIGNED,
     s_number_of_memory_units    INT UNSIGNED,
@@ -61,4 +62,11 @@ CREATE TABLE servers_timeseries_configs (
     stc_granularity_seconds             INT NOT NULL,
     stc_tags                            JSON,
     CONSTRAINT stc_fk FOREIGN KEY fk (stc_s_id) REFERENCES servers (s_id) ON DELETE CASCADE
+) WITH SYSTEM VERSIONING;
+
+CREATE TABLE servers_impact_assessment (
+    sia_s_id                            INT UNSIGNED NOT NULL,
+    sia_field_name                      ENUM('climate_change', 'primary_energy_use', 'ozone_depletion', 'human_toxicity', 'photochemical_oxidant_formation', 'particulate_matter_formation', 'ionizing_radiation', 'terrestrial_acidification', 'freshwater_eutrophication', 'marine_eutrophication', 'terrestrial_ecotoxicity', 'freshwater_ecotoxicity', 'marine_ecotoxicity', 'agricultural_land_occupation', 'urban_land_occupation', 'natural_land_transformation', 'abiotic_depletion_potential') NOT NULL,
+    sia_value                           DECIMAL(20, 9) DEFAULT NULL,
+    CONSTRAINT sia_fk FOREIGN KEY fk (sia_s_id) REFERENCES servers (s_id) ON DELETE CASCADE
 ) WITH SYSTEM VERSIONING;

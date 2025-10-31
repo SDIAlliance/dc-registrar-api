@@ -40,6 +40,11 @@ module "registrar" {
     {
       name  = "INFLUXDB_EXTERNAL_ENDPOINT_URL",
       value = "https://influxdb.${var.public_zone_name}:${var.influxdb_container_port}"
+    },
+    {
+      # This is where out InfluxDB tasks call back to the registrar
+      name  = "REGISTRAR_EXTERNAL_ENDPOINT_URL",
+      value = "http://registrar.${var.internal_domain_name}:${var.registrar_container_port}"
     }
   ]
   secrets = [
