@@ -151,21 +151,21 @@ def create_facility(facility_create=None):  # noqa: E501
                     body=body
                 )
 
-                # create a task which generates the embodied metrics for this facility and its servers
-                with open('embodied_task.flux', 'r') as f:
-                    task_template = f.read()
+                # create tasks which generates the embodied and operational metrics for this facility and its servers
+                for flux_file in ['embodied_task.flux', 'operational_task.flux']:
+                    with open(flux_file, 'r') as f:
+                        task_template = f.read()
 
-                task_flux = re.sub(r"%%FACILITY%%", facility.toString(), task_template)
+                    task_flux = re.sub(r"%%FACILITY%%", facility.toString(), task_template)
 
-                tasks_api = influxdb_client.tasks_api()
-                task = tasks_api.create_task(
-                    task_create_request = TaskCreateRequest(
-                        description = f"Task to populate embodied carbon metrics for facility ${facility.toString()}",
-                        flux        = task_flux,
-                        org         = INFLUXDB_ORG,
-                        status      = "active"
+                    tasks_api = influxdb_client.tasks_api()
+                    task = tasks_api.create_task(
+                        task_create_request = TaskCreateRequest(
+                            flux        = task_flux,
+                            org         = INFLUXDB_ORG,
+                            status      = "active"
+                        )
                     )
-                )
 
                 conn.execute(update(facilities).values({"f_influxdb_task_id": task.id}).where(facilities.c.f_id == id))
 
@@ -188,12 +188,23 @@ def create_facility(facility_create=None):  # noqa: E501
                             "facility_id": facility.toString()
                         })
                     }))
-                for field_name, value in facility_create.impact_assessment.to_dict().items():
-                    conn.execute(insert(facilities_impact_assessment).values({
-                        "fia_f_id": id,
-                        "fia_field_name": field_name,
-                        "fia_value": value
-                    }))
+                if len(facility_create.impact_assessment.keys()):
+                    # no impact assessment values given at all? Then use scaled defaults:
+                    for field_name, value in FACILITY_IMPACT_ASSESSMENT_DEFAULTS:
+                        conn.execute(insert(facilities_impact_assessment).values({
+                            "fia_f_id": id,
+                            "fia_field_name": field_name,
+                            "fia_value": value * facility_create.installed_capacity / 1000 # defaults are noralized to 1MW
+                        }))
+
+                else:
+                    for field_name, value in facility_create.impact_assessment.to_dict().items():
+                        conn.execute(insert(facilities_impact_assessment).values({
+                            "fia_f_id": id,
+                            "fia_field_name": field_name,
+                            "fia_value": value
+                        }))
+
                 conn.commit()
             except IntegrityError as e:
                 return Error(code=400, message="A facility with this location already exists."), 400

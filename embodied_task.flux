@@ -8,14 +8,15 @@ import "experimental/dynamic"
 import "array"
 
 option task = { 
-  name: "aggregate-embodied-%%FACILITY%%",
-  every: 5m,
+  name: "AGGREGATE-EMBODIED-%%FACILITY%%",
+  every: 15m,
 }
 
 facilityId = "%%FACILITY%%"
 
 HOURS_PER_YEAR = 365*24
 
+# this must be 60m/every for "every" being the value from the options block above
 JOBS_PER_HOUR = 4
 
 registrarUrl = secrets.get(key: "REGISTRAR_URL")
@@ -71,7 +72,7 @@ withAssessment = array.filter(arr: dynamic.asArray(v: j.items) |> array.concat(v
 withAssessment
 |> processJsonResponse(measurementName: "server_embodied")
 |> filter(fn: (r) => r.id != "dummy")
-|> to(bucket: "leitmotiv")
+|> to(bucket: "NADIKI-AGGREGATION")
 
 y = requests.get(
  url: registrarUrl+"/v1/facilities/"+facilityId,
@@ -83,4 +84,4 @@ k = dynamic.jsonParse(data: y.body)
 array.filter(arr: [k], fn: (x) => exists x.impactAssessment)
 |> processJsonResponse(measurementName: "facility_embodied")
 |> drop(columns: ["facility_id", "rack_id"])
-|> to(bucket: "leitmotiv")
+|> to(bucket: "NADIKI-AGGREGATION")
