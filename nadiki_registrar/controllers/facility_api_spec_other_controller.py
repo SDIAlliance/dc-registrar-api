@@ -188,15 +188,14 @@ def create_facility(facility_create=None):  # noqa: E501
                             "facility_id": facility.toString()
                         })
                     }))
-                if len(facility_create.impact_assessment.keys()):
+                if facility_create.impact_assessment == None:
                     # no impact assessment values given at all? Then use scaled defaults:
-                    for field_name, value in FACILITY_IMPACT_ASSESSMENT_DEFAULTS:
+                    for field_name, value in FACILITY_IMPACT_ASSESSMENT_DEFAULTS.items():
                         conn.execute(insert(facilities_impact_assessment).values({
                             "fia_f_id": id,
                             "fia_field_name": field_name,
                             "fia_value": value * facility_create.installed_capacity / 1000 # defaults are noralized to 1MW
                         }))
-
                 else:
                     for field_name, value in facility_create.impact_assessment.to_dict().items():
                         conn.execute(insert(facilities_impact_assessment).values({

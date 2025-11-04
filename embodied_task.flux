@@ -16,7 +16,7 @@ facilityId = "%%FACILITY%%"
 
 HOURS_PER_YEAR = 365*24
 
-# this must be 60m/every for "every" being the value from the options block above
+// this must be 60m/every for "every" being the value from the options block above
 JOBS_PER_HOUR = 4
 
 registrarUrl = secrets.get(key: "REGISTRAR_URL")

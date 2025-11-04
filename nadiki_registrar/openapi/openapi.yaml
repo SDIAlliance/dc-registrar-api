@@ -605,126 +605,108 @@ components:
         agricultural_land_occupation: 6.846853
       properties:
         climate_change:
-          default: 608571.43
           description: Climate change impact in kg CO2 eq. Default derived for a 1
             MW data center and scaled according to installedCapacity.
           format: float
           title: climate_change
           type: number
         ozone_depletion:
-          default: 4.94
           description: Ozone depletion impact in kg CFC-11 eq. Default derived for
             a 1 MW data center and scaled according to installedCapacity.
           format: float
           title: ozone_depletion
           type: number
         human_toxicity:
-          default: 2622857.14
           description: "Human toxicity impact in kg 1,4-DB eq. Default derived for\
             \ a 1 MW data center and scaled according to installedCapacity."
           format: float
           title: human_toxicity
           type: number
         photochemical_oxidant_formation:
-          default: 2194.29
           description: Photochemical oxidant formation impact in kg NMVOC. Default
             derived for a 1 MW data center and scaled according to installedCapacity.
           format: float
           title: photochemical_oxidant_formation
           type: number
         particulate_matter_formation:
-          default: 2302.86
           description: Particulate matter formation impact in kg PM10 eq. Default
             derived for a 1 MW data center and scaled according to installedCapacity.
           format: float
           title: particulate_matter_formation
           type: number
         ionizing_radiation:
-          default: 88000
           description: Ionizing radiation impact in kg U235 eq. Default derived for
             a 1 MW data center and scaled according to installedCapacity.
           format: float
           title: ionizing_radiation
           type: number
         terrestrial_acidification:
-          default: 4142.86
           description: Terrestrial acidification impact in kg SO2 eq. Default derived
             for a 1 MW data center and scaled according to installedCapacity.
           format: float
           title: terrestrial_acidification
           type: number
         freshwater_eutrophication:
-          default: 1257.14
           description: Freshwater eutrophication impact in kg P eq. Default derived
             for a 1 MW data center and scaled according to installedCapacity.
           format: float
           title: freshwater_eutrophication
           type: number
         marine_eutrophication:
-          default: 720
           description: Marine eutrophication impact in kg N eq. Default derived for
             a 1 MW data center and scaled according to installedCapacity.
           format: float
           title: marine_eutrophication
           type: number
         terrestrial_ecotoxicity:
-          default: 971.43
           description: "Terrestrial ecotoxicity impact in kg 1,4-DB eq. Default derived\
             \ for a 1 MW data center and scaled according to installedCapacity."
           format: float
           title: terrestrial_ecotoxicity
           type: number
         freshwater_ecotoxicity:
-          default: 29142.86
           description: "Freshwater ecotoxicity impact in kg 1,4-DB eq. Default derived\
             \ for a 1 MW data center and scaled according to installedCapacity."
           format: float
           title: freshwater_ecotoxicity
           type: number
         marine_ecotoxicity:
-          default: 33714.29
           description: "Marine ecotoxicity impact in kg 1,4-DB eq. Default derived\
             \ for a 1 MW data center and scaled according to installedCapacity."
           format: float
           title: marine_ecotoxicity
           type: number
         agricultural_land_occupation:
-          default: 70571.43
           description: Agricultural land occupation impact in m2a. Default derived
             for a 1 MW data center and scaled according to installedCapacity.
           format: float
           title: agricultural_land_occupation
           type: number
         urban_land_occupation:
-          default: 9000
           description: Urban land occupation impact in m2a. Default derived for a
             1 MW data center and scaled according to installedCapacity.
           format: float
           title: urban_land_occupation
           type: number
         natural_land_transformation:
-          default: 594.29
           description: Natural land transformation impact in m2. Default derived for
             a 1 MW data center and scaled according to installedCapacity.
           format: float
           title: natural_land_transformation
           type: number
         water_depletion:
-          default: 4485.71
           description: Water depletion impact in m3. Default derived for a 1 MW data
             center and scaled according to installedCapacity.
           format: float
           title: water_depletion
           type: number
         metal_depletion:
-          default: 734285.71
           description: Metal depletion impact in kg Fe eq. Default derived for a 1
             MW data center and scaled according to installedCapacity.
           format: float
           title: metal_depletion
           type: number
         fossil_depletion:
-          default: 1042857.1
           description: Fossil depletion impact in kg oil eq. Default derived for a
             1 MW data center and scaled according to installedCapacity.
           format: float
