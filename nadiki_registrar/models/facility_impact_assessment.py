@@ -15,7 +15,7 @@ class FacilityImpactAssessment(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, climate_change=608571.43, ozone_depletion=4.94, human_toxicity=2622857.14, photochemical_oxidant_formation=2194.29, particulate_matter_formation=2302.86, ionizing_radiation=88000, terrestrial_acidification=4142.86, freshwater_eutrophication=1257.14, marine_eutrophication=720, terrestrial_ecotoxicity=971.43, freshwater_ecotoxicity=29142.86, marine_ecotoxicity=33714.29, agricultural_land_occupation=70571.43, urban_land_occupation=9000, natural_land_transformation=594.29, water_depletion=4485.71, metal_depletion=734285.71, fossil_depletion=1042857.1):  # noqa: E501
+    def __init__(self, climate_change=None, ozone_depletion=None, human_toxicity=None, photochemical_oxidant_formation=None, particulate_matter_formation=None, ionizing_radiation=None, terrestrial_acidification=None, freshwater_eutrophication=None, marine_eutrophication=None, terrestrial_ecotoxicity=None, freshwater_ecotoxicity=None, marine_ecotoxicity=None, agricultural_land_occupation=None, urban_land_occupation=None, natural_land_transformation=None, water_depletion=None, metal_depletion=None, fossil_depletion=None):  # noqa: E501
         """FacilityImpactAssessment - a model defined in OpenAPI
 
         :param climate_change: The climate_change of this FacilityImpactAssessment.  # noqa: E501

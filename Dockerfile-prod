@@ -10,7 +10,7 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 # unfortunately we need to be root on ECS in order to bind to port 443
 #USER nadiki
 COPY nadiki_registrar nadiki_registrar/
-COPY embodied_task.flux ./
+COPY *.flux ./
 
 EXPOSE 443
 
