@@ -7,7 +7,7 @@ module "influxdb" {
   public_subnet_ids          = module.dynamic_subnets.public_subnet_ids
   private_subnet_ids         = module.dynamic_subnets.private_subnet_ids
   ecs_cluster_name           = module.ecs_cluster.name
-  capacity_provider_strategy = "FARGATE_SPOT"
+  capacity_provider_strategy = "FARGATE"
   deployment_maximum_percent = 100
   deployment_minimum_percent = 0
   execution_role_arn         = aws_iam_role.execution.arn
