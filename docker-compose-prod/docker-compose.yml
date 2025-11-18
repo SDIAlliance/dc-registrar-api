@@ -1,0 +1,119 @@
+networks:
+  nadiki:
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb:latest
+    volumes:
+      - type: bind
+        source: volumes/mariadb
+        target: /var/lib/mysql
+#    ports:
+#      - "33306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: toogood4u
+    networks:
+      - nadiki
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  influxdb:
+    container_name: influxdb
+    image: influxdb:2
+    volumes:
+      - type: bind
+        source: volumes/influxdb
+        target: /var/lib/influxdb2
+      - type: bind
+        source: volumes/letsencrypt
+        target: /etc/letsencrypt
+#    environment:
+#      INFLUXD_TLS_CERT: /etc/letsencrypt/live/influxdb.svc.nadiki.work/fullchain.pem
+#      INFLUXD_TLS_KEY: /etc/letsencrypt/live/influxdb.svc.nadiki.work/privkey.pem
+#      INFLUXD_HTTP_BIND_ADDRESS: ":8443"
+#    ports:
+#      - "8443:8443"
+    networks:
+      - nadiki
+    healthcheck:
+      test: ["CMD", "curl", "-k", "https://localhost:8086"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  registrar:
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    image: 591990815822.dkr.ecr.eu-central-1.amazonaws.com/nadiki/registrar:b26c9db
+#    command: --certfile /etc/letsencrypt/live/registrar.svc.nadiki.work/fullchain.pem --keyfile /etc/letsencrypt/live/registrar.svc.nadiki.work/privkey.pem 'nadiki_registrar.__main__:main()' -b 0.0.0.0:443
+    command: -b 0.0.0.0:80 'nadiki_registrar.__main__:main()' 
+    networks:
+      - nadiki
+    volumes:
+      - type: bind
+        source: volumes/letsencrypt
+        target: /etc/letsencrypt
+    environment:
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      INFLUXDB_ORG: ${INFLUXDB_ORG}
+      INFLUXDB_ENDPOINT_URL: ${INFLUXDB_ENDPOINT_URL}
+      INFLUXDB_EXTERNAL_ENDPOINT_URL: ${INFLUXDB_EXTERNAL_ENDPOINT_URL}
+      INFLUXDB_ADMIN_TOKEN: ${INFLUXDB_ADMIN_TOKEN}
+      AUTH_USER: ${AUTH_USER}
+      AUTH_PASSWORD: ${AUTH_PASSWORD}
+      REGISTRAR_EXTERNAL_ENDPOINT_URL: ${REGISTRAR_EXTERNAL_ENDPOINT_URL}
+#    ports:
+#      - "443:443"
+  jupyter:
+    image: 591990815822.dkr.ecr.eu-central-1.amazonaws.com/nadiki/jupyter-lab:main
+    networks:
+      - nadiki
+    volumes:
+      - type: bind
+        source: volumes/jupyter
+        target: /home/jupyterlab
+      - type: bind
+        source: volumes/letsencrypt
+        target: /etc/letsencrypt
+    environment:
+      JUPYTER_PORT: 8080
+#      TLS_CERTIFICATE_PATH: /etc/letsencrypt/live/jupyter.svc.nadiki.work/fullchain.pem
+#      TLS_KEY_PATH: /etc/letsencrypt/live/jupyter.svc.nadiki.work/privkey.pem
+  ui:
+    container_name: ui
+    networks:
+      - nadiki
+    image: 591990815822.dkr.ecr.eu-central-1.amazonaws.com/nadiki/ui:main
+    environment:
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      INFLUXDB_ORG: ${INFLUXDB_ORG}
+      INFLUXDB_ENDPOINT_URL: ${INFLUXDB_ENDPOINT_URL}
+      INFLUXDB_ADMIN_TOKEN: ${INFLUXDB_ADMIN_TOKEN}
+  nginx:
+    container_name: nginx
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    depends_on:
+      - influxdb
+      - registrar
+      - jupyter
+      - ui
+    ports:
+      - "443:443"
+      - "8443:8443"
+    volumes:
+      - type: bind
+        source: volumes/letsencrypt
+        target: /etc/letsencrypt
+        read_only: true
+    networks:
+      - nadiki
