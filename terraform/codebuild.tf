@@ -37,6 +37,18 @@ data "aws_iam_policy_document" "codebuild" {
 
     resources = ["*"]
   }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "secretsmanager:GetSecretValue"
+    ]
+
+    resources = [
+      "arn:aws:secretsmanager:eu-central-1:591990815822:secret:nadiki-docker-hub-credentials-R0RwGG"
+    ]
+  }
 }
 
 resource "aws_iam_role_policy" "codebuild" {
@@ -49,17 +61,26 @@ locals {
     "${var.name}" = {
       git_repo   = "https://github.com/SDIAlliance/nadiki-registrar.git"
       ecr_repo   = module.ecr.repository_url_map["${var.namespace}/registrar"]
+      docker_repo = "d5b10/nadiki-registrar"
       dockerfile = "Dockerfile-prod"
     }
     "ui" = {
       git_repo   = "https://github.com/SDIAlliance/nadiki-ui.git"
       ecr_repo   = module.ecr.repository_url_map["${var.namespace}/ui"]
+      docker_repo = "d5b10/nadiki-ui"
       dockerfile = "Dockerfile"
     },
     "jupyter-lab" = {
       git_repo   = "https://github.com/SDIAlliance/nadiki-jupyter-lab.git"
       ecr_repo   = module.ecr.repository_url_map["${var.namespace}/jupyter-lab"]
+      docker_repo = "d5b10/nadiki-jupyter-lab"
       dockerfile = "Dockerfile"
+    }
+    "telegraf-siec" = {
+      git_repo   = "https://github.com/SDIAlliance/nadiki-telegraf.git"
+      ecr_repo   = module.ecr.repository_url_map["${var.namespace}/telegraf-siec"]
+      docker_repo = "d5b10/nadiki-telegraf-siec"
+      dockerfile = "Dockerfile-telegraf-siec"
     }
   }
 }
@@ -93,7 +114,7 @@ resource "aws_codebuild_project" "default" {
     type            = "GITHUB"
     location        = local.codebuild_projects[each.key].git_repo
     git_clone_depth = 1
-    buildspec       = templatefile("buildspec.yaml", { repo_url = local.codebuild_projects[each.key].ecr_repo, account_id = data.aws_caller_identity.default.account_id, dockerfile = local.codebuild_projects[each.key].dockerfile })
+    buildspec       = templatefile("buildspec.yaml", { docker_hub_url = local.codebuild_projects[each.key].docker_repo, repo_url = local.codebuild_projects[each.key].ecr_repo, account_id = data.aws_caller_identity.default.account_id, dockerfile = local.codebuild_projects[each.key].dockerfile })
   }
 
   source_version = "main"

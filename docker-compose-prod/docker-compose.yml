@@ -97,6 +97,25 @@ services:
       INFLUXDB_ORG: ${INFLUXDB_ORG}
       INFLUXDB_ENDPOINT_URL: ${INFLUXDB_ENDPOINT_URL}
       INFLUXDB_ADMIN_TOKEN: ${INFLUXDB_ADMIN_TOKEN}
+  xion_crawler:
+    container_name: xion_crawler
+    volumes:
+      - type: bind
+        source: xion-server-mapping.json
+        target: /telegraf-pluging/xion-server-mapping.json
+    networks:
+      - nadiki
+    image: 591990815822.dkr.ecr.eu-central-1.amazonaws.com/nadiki/telegraf-siec:noaws
+    environment:
+      SOCKS_PROXY: socks5://192.168.2.120:4711
+      SERVER_ID_MAPPING_FILE: /telegraf-pluging/xion-server-mapping.json
+      OUTPUT_INFLUXDB_URL: ${INFLUXDB_ENDPOINT_URL}
+      OUTPUT_INFLUXDB_TOKEN: ${INFLUXDB_ADMIN_TOKEN}
+      OUTPUT_INFLUXDB_ORGANIZATION: ${INFLUXDB_ORG}
+      VM_TIMEZONE: UTC
+      TAG_FACILITY_ID: FACILITY-DEU-011
+      TAG_COUNTRY_CODE: DEU
+      TAG_RACK_ID: RACK-FACILITY-DEU-011-004
   nginx:
     container_name: nginx
     build:

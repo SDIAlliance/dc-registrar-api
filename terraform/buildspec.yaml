@@ -4,13 +4,19 @@ phases:
   pre_build:
     commands:
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.eu-central-1.amazonaws.com
-      - export REPO_URL_WITH_BRANCHNAME=${repo_url}:$CODEBUILD_SOURCE_VERSION
-      - export REPO_URL_WITH_COMMIT_ID=${repo_url}:$(git log --abbrev-commit -1 --pretty=format:%h)
+      - aws secretsmanager get-secret-value --secret-id nadiki-docker-hub-credentials | jq -r .SecretString > docker_hub_credentials
+      - jq -r .password docker_hub_credentials | docker login --username $(jq -r .username docker_hub_credentials) --password-stdin
+      - rm -f docker_hub_credentials 
   build:
     on-failure: ABORT
     commands: |
       cd $(dirname ${dockerfile})
-      docker build -t $REPO_URL_WITH_COMMIT_ID . -f $(basename ${dockerfile})
-      docker tag $REPO_URL_WITH_COMMIT_ID $REPO_URL_WITH_BRANCHNAME
-      docker push $REPO_URL_WITH_BRANCHNAME
-      docker push $REPO_URL_WITH_COMMIT_ID
+      docker build -t result . -f $(basename ${dockerfile})
+      for r in ${repo_url} ${docker_hub_url}; do
+        export REPO_URL_WITH_BRANCHNAME=$r:$CODEBUILD_SOURCE_VERSION
+        export REPO_URL_WITH_COMMIT_ID=$r:$(git log --abbrev-commit -1 --pretty=format:%h)
+        docker tag result $REPO_URL_WITH_BRANCHNAME
+        docker tag result $REPO_URL_WITH_COMMIT_ID
+        docker push $REPO_URL_WITH_BRANCHNAME
+        docker push $REPO_URL_WITH_COMMIT_ID
+      done
