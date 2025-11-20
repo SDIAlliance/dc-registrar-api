@@ -8,10 +8,6 @@ services:
       - type: bind
         source: volumes/mariadb
         target: /var/lib/mysql
-#    ports:
-#      - "33306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: toogood4u
     networks:
       - nadiki
     healthcheck:
@@ -30,12 +26,6 @@ services:
       - type: bind
         source: volumes/letsencrypt
         target: /etc/letsencrypt
-#    environment:
-#      INFLUXD_TLS_CERT: /etc/letsencrypt/live/influxdb.svc.nadiki.work/fullchain.pem
-#      INFLUXD_TLS_KEY: /etc/letsencrypt/live/influxdb.svc.nadiki.work/privkey.pem
-#      INFLUXD_HTTP_BIND_ADDRESS: ":8443"
-#    ports:
-#      - "8443:8443"
     networks:
       - nadiki
     healthcheck:
@@ -48,8 +38,7 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
-    image: 591990815822.dkr.ecr.eu-central-1.amazonaws.com/nadiki/registrar:b26c9db
-#    command: --certfile /etc/letsencrypt/live/registrar.svc.nadiki.work/fullchain.pem --keyfile /etc/letsencrypt/live/registrar.svc.nadiki.work/privkey.pem 'nadiki_registrar.__main__:main()' -b 0.0.0.0:443
+    image: d5b10/nadiki-registrar:ef7b428
     command: -b 0.0.0.0:80 'nadiki_registrar.__main__:main()' 
     networks:
       - nadiki
@@ -68,10 +57,8 @@ services:
       AUTH_USER: ${AUTH_USER}
       AUTH_PASSWORD: ${AUTH_PASSWORD}
       REGISTRAR_EXTERNAL_ENDPOINT_URL: ${REGISTRAR_EXTERNAL_ENDPOINT_URL}
-#    ports:
-#      - "443:443"
   jupyter:
-    image: 591990815822.dkr.ecr.eu-central-1.amazonaws.com/nadiki/jupyter-lab:main
+    image: d5b10/nadiki-jupyter-lab:b0c2a22
     networks:
       - nadiki
     volumes:
@@ -83,13 +70,11 @@ services:
         target: /etc/letsencrypt
     environment:
       JUPYTER_PORT: 8080
-#      TLS_CERTIFICATE_PATH: /etc/letsencrypt/live/jupyter.svc.nadiki.work/fullchain.pem
-#      TLS_KEY_PATH: /etc/letsencrypt/live/jupyter.svc.nadiki.work/privkey.pem
   ui:
     container_name: ui
     networks:
       - nadiki
-    image: 591990815822.dkr.ecr.eu-central-1.amazonaws.com/nadiki/ui:main
+    image: d5b10/nadiki-ui:9109573
     environment:
       DATABASE_HOST: ${DATABASE_HOST}
       DATABASE_USER: ${DATABASE_USER}
@@ -105,9 +90,9 @@ services:
         target: /telegraf-pluging/xion-server-mapping.json
     networks:
       - nadiki
-    image: 591990815822.dkr.ecr.eu-central-1.amazonaws.com/nadiki/telegraf-siec:noaws
+    image: d5b10/nadiki-telegraf-siec:2fc4621
     environment:
-      SOCKS_PROXY: socks5://192.168.2.120:4711
+      #SOCKS_PROXY: socks5://192.168.2.120:4711
       SERVER_ID_MAPPING_FILE: /telegraf-pluging/xion-server-mapping.json
       OUTPUT_INFLUXDB_URL: ${INFLUXDB_ENDPOINT_URL}
       OUTPUT_INFLUXDB_TOKEN: ${INFLUXDB_ADMIN_TOKEN}
