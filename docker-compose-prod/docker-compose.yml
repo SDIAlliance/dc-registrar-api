@@ -102,7 +102,7 @@ services:
       TAG_COUNTRY_CODE: DEU
       TAG_RACK_ID: RACK-FACILITY-DEU-011-004
   nginx:
-    container_name: nginx
+    container_name: nginx_proxy
     build:
       context: .
       dockerfile: Dockerfile.nginx
@@ -119,5 +119,8 @@ services:
         source: volumes/letsencrypt
         target: /etc/letsencrypt
         read_only: true
+      - type: bind
+        source: nginx.conf
+        target: /etc/nginx/nginx.conf
     networks:
       - nadiki
