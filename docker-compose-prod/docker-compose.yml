@@ -107,10 +107,22 @@ services:
       context: .
       dockerfile: Dockerfile.nginx
     depends_on:
-      - influxdb
-      - registrar
-      - jupyter
-      - ui
+      influxdb:
+        condition: service_started
+      registrar:
+        condition: service_started
+      jupyter:
+        condition: service_started
+      ui:
+        condition: service_started
+      certbot-influxdb:
+        condition: service_completed_successfully
+      certbot-jupyter:
+        condition: service_completed_successfully
+      certbot-app:
+        condition: service_completed_successfully
+      certbot-registrar:
+        condition: service_completed_successfully
     ports:
       - "443:443"
       - "8443:8443"
@@ -124,3 +136,23 @@ services:
         target: /etc/nginx/nginx.conf
     networks:
       - nadiki
+  certbot-influxdb: &certbot
+    image: certbot/dns-route53
+    entrypoint: /bin/sh -c
+    volumes:
+      - type: bind
+        source: volumes/letsencrypt
+        target: /etc/letsencrypt
+    environment:
+      AWS_ACCESS_KEY_ID: ${CERTBOT_AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${CERTBOT_AWS_SECRET_ACCESS_KEY}
+    command: ["/usr/bin/flock -x /etc/letsencrypt/exclusive.lck certbot certonly --dns-route53 -m daniel@daniel-boesswetter.de --agree-tos -n -d influxdb.svc.nadiki.work"]
+  certbot-registrar:
+    <<: *certbot
+    command: ["/usr/bin/flock -x /etc/letsencrypt/exclusive.lck certbot certonly --dns-route53 -m daniel@daniel-boesswetter.de --agree-tos -n -d registrar.svc.nadiki.work"]
+  certbot-app:
+    <<: *certbot
+    command: ["/usr/bin/flock -x /etc/letsencrypt/exclusive.lck certbot certonly --dns-route53 -m daniel@daniel-boesswetter.de --agree-tos -n -d app.svc.nadiki.work"]
+  certbot-jupyter:
+    <<: *certbot
+    command: ["/usr/bin/flock -x /etc/letsencrypt/exclusive.lck certbot certonly --dns-route53 -m daniel@daniel-boesswetter.de --agree-tos -n -d jupyter.svc.nadiki.work"]
